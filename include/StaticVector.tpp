@@ -10,78 +10,78 @@ public:
 
 	T at(unsigned n) const noexcept
 	{
-		return mdata[n];
+		return mData[n];
 	}
 
 	T& at(unsigned n) noexcept
 	{
-		return mdata[n];
+		return mData[n];
 	}
 
 	T operator[](unsigned n) const noexcept
 	{
-		return mdata[n];
+		return mData[n];
 	}
 
 	T& operator[](unsigned n) noexcept
 	{
-		return mdata[n];
+		return mData[n];
 	}
 
 	T front() const noexcept
 	{
-		return mdata[0];
+		return mData[0];
 	}
 
 	T& front() noexcept
 	{
-		return mdata[0];
+		return mData[0];
 	}
 
 	T back() const noexcept
 	{
-		return mdata[msize - 1];
+		return mData[mSize - 1];
 	}
 
 	T& back() noexcept
 	{
-		return mdata[msize - 1];
+		return mData[mSize - 1];
 	}
 
 	T* data() noexcept
 	{
-		return mdata;
+		return mData;
 	}
 
 	Iter<T> begin() noexcept
 	{
-		return Iter<T>{mdata};
+		return Iter<T>{mData};
 	}
 
 	Iter<T> end() noexcept
 	{
-		return Iter<T>{mdata + msize};
+		return Iter<T>{mData + mSize};
 	}
 
 	bool empty() const noexcept
 	{
-		return msize == 0;
+		return mSize == 0;
 	}
 
 	unsigned size() const noexcept
 	{
-		return msize;
+		return mSize;
 	}
 
 	void clear() noexcept
 	{
-		for (unsigned i{ 0 }; i < msize; ++i)
+		for (unsigned i{ 0 }; i < mSize; ++i)
 		{
-			mdata[i] = 0;
+			mData[i] = 0;
 		}
 	}
 
 private:
-	T mdata[N + 1]{ T() };
-	unsigned msize{ N };
+	T mData[N + 1]{ T() };
+	unsigned mSize{ N };
 };

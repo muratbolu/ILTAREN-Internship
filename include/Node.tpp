@@ -6,7 +6,7 @@ class Node
 public:
 	Node() noexcept {}
 private:
-	T* mdata;
-	Node* mnext;
-	Node* mprev;
+	T* mData;
+	Node* mNext;
+	Node* mPrev;
 };

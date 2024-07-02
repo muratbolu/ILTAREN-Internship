@@ -9,6 +9,7 @@ class LinkedList
 public:
 	LinkedList() noexcept {}
 private:
-	Node<T>* mhead;
-	unsigned msize{ N };
+	Node<T>* mHead;
+	ObjectPool<Node, N> mNodePool;
+	unsigned mSize{ N };
 };
