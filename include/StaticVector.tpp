@@ -6,74 +6,74 @@ template <typename T, unsigned N>
 class StaticVector
 {
 public:
-	StaticVector() noexcept {}
+	constexpr StaticVector() noexcept {}
 
-	T at(unsigned n) const noexcept
+	constexpr T at(unsigned n) const noexcept
 	{
 		return mData[n];
 	}
 
-	T& at(unsigned n) noexcept
+	constexpr T& at(unsigned n) noexcept
 	{
 		return mData[n];
 	}
 
-	T operator[](unsigned n) const noexcept
+	constexpr T operator[](unsigned n) const noexcept
 	{
 		return mData[n];
 	}
 
-	T& operator[](unsigned n) noexcept
+	constexpr T& operator[](unsigned n) noexcept
 	{
 		return mData[n];
 	}
 
-	T front() const noexcept
+	constexpr T front() const noexcept
 	{
 		return mData[0];
 	}
 
-	T& front() noexcept
+	constexpr T& front() noexcept
 	{
 		return mData[0];
 	}
 
-	T back() const noexcept
+	constexpr T back() const noexcept
 	{
 		return mData[mSize - 1];
 	}
 
-	T& back() noexcept
+	constexpr T& back() noexcept
 	{
 		return mData[mSize - 1];
 	}
 
-	T* data() noexcept
+	constexpr T* data() noexcept
 	{
 		return mData;
 	}
 
-	Iter<T> begin() noexcept
+	constexpr Iter<T> begin() noexcept
 	{
 		return Iter<T>{mData};
 	}
 
-	Iter<T> end() noexcept
+	constexpr Iter<T> end() noexcept
 	{
 		return Iter<T>{mData + mSize};
 	}
 
-	bool empty() const noexcept
+	constexpr bool empty() const noexcept
 	{
 		return mSize == 0;
 	}
 
-	unsigned size() const noexcept
+	constexpr unsigned size() const noexcept
 	{
 		return mSize;
 	}
 
-	void clear() noexcept
+	constexpr void clear() noexcept
 	{
 		for (unsigned i{ 0 }; i < mSize; ++i)
 		{
@@ -83,5 +83,5 @@ public:
 
 private:
 	T mData[N + 1]{ T() };
-	unsigned mSize{ N };
+	const unsigned mSize{ N };
 };

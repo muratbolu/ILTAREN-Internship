@@ -4,7 +4,7 @@ template<typename T>
 class Node
 {
 public:
-	Node() noexcept {}
+	constexpr Node() noexcept {}
 private:
 	T* mData;
 	Node* mNext;

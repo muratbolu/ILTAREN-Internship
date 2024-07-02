@@ -6,14 +6,14 @@ template<typename T, unsigned N>
 class ObjectPool
 {
 public:
-	ObjectPool() noexcept
+	constexpr ObjectPool() noexcept
 	{
 		for (bool& i : mVacant)
 		{
 			i = true;
 		}
 	}
-	T* allocate() noexcept
+	constexpr T* allocate() noexcept
 	{
 		for (unsigned i{ 0 }; i < N; ++i)
 		{
@@ -25,7 +25,7 @@ public:
 		}
 		return nullptr;
 	}
-	bool deallocate(T* ptr) noexcept
+	constexpr bool deallocate(T* ptr) noexcept
 	{
 		if (mPool.begin() <= ptr
 			&& ptr < mPool.end()

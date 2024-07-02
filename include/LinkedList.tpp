@@ -7,9 +7,9 @@ template<typename T, unsigned N>
 class LinkedList
 {
 public:
-	LinkedList() noexcept {}
+	constexpr LinkedList() noexcept {}
 private:
 	Node<T>* mHead;
 	ObjectPool<Node<T>, N> mNodePool;
-	unsigned mSize{ N };
+	const unsigned mSize{ N };
 };
