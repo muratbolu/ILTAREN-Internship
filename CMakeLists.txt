@@ -10,6 +10,7 @@ set(SOURCES
     src/main.cpp
     test/IterTest.cpp
     test/StaticVectorTest.cpp
+    test/ObjectPoolTest.cpp
 )
 
 # Statically link Google Test
