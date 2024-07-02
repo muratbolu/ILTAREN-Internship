@@ -3,10 +3,10 @@
 #include "Iter.tpp"
 
 template <typename T, unsigned N>
-class static_vector
+class StaticVector
 {
 public:
-	static_vector() noexcept {}
+	StaticVector() noexcept {}
 
 	T at(unsigned n) const noexcept
 	{
@@ -53,14 +53,14 @@ public:
 		return mdata;
 	}
 
-	iter<T> begin() noexcept
+	Iter<T> begin() noexcept
 	{
-		return iter<T>{mdata};
+		return Iter<T>{mdata};
 	}
 
-	iter<T> end() noexcept
+	Iter<T> end() noexcept
 	{
-		return iter<T>{mdata + msize};
+		return Iter<T>{mdata + msize};
 	}
 
 	bool empty() const noexcept

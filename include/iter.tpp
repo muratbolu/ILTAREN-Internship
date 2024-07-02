@@ -1,33 +1,33 @@
 #pragma once
 
 template<typename T>
-class iter
+class Iter
 {
 public:
-	iter(T* ptr) noexcept :ptr{ ptr } {}
+	Iter(T* ptr) noexcept :ptr{ ptr } {}
 
-	iter& operator++() noexcept
+	Iter& operator++() noexcept
 	{
 		++ptr;
 		return *this;
 	}
 
-	iter operator++(int) noexcept
+	Iter operator++(int) noexcept
 	{
-		iter old = *this;
+		Iter old = *this;
 		operator++();
 		return old;
 	}
 
-	iter& operator--() noexcept
+	Iter& operator--() noexcept
 	{
 		--ptr;
 		return *this;
 	}
 
-	iter operator--(int) noexcept
+	Iter operator--(int) noexcept
 	{
-		iter old = *this;
+		Iter old = *this;
 		operator--();
 		return old;
 	}
@@ -37,12 +37,12 @@ public:
 		return *ptr;
 	}
 
-	friend inline bool operator==(const iter& lhs, const iter& rhs) noexcept
+	friend inline bool operator==(const Iter& lhs, const Iter& rhs) noexcept
 	{
 		return lhs.ptr == rhs.ptr;
 	}
 
-	friend inline bool operator!=(const iter& lhs, const iter& rhs) noexcept
+	friend inline bool operator!=(const Iter& lhs, const Iter& rhs) noexcept
 	{
 		return !(lhs == rhs);
 	}

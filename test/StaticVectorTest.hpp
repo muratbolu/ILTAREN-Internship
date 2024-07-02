@@ -13,5 +13,5 @@ protected:
 		vec1[1] = 5;
 		vec1[2] = 7;
 	}
-	static_vector<int, 3> vec1;
+	StaticVector<int, 3> vec1;
 };
