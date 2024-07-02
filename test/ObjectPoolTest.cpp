@@ -64,3 +64,16 @@ TEST_F(ObjectPoolTest, AllocateAndDeallocate)
 	int* ptr3 = p1.allocate();
 	EXPECT_EQ(ptr1, ptr3);
 }
+
+TEST_F(ObjectPoolTest, AllocateAll)
+{
+	for (unsigned i{ 0 }; i < 100; ++i)
+	{
+		p2.allocate();
+	}
+}
+
+TEST_F(ObjectPoolTest, AllocateAndDeallocateImmediately)
+{
+	p1.deallocate(p1.allocate());
+}
