@@ -10,6 +10,7 @@ set(SOURCES
     src/main.cpp
 )
 
+# Fetch Google Test
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -19,11 +20,12 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Main executable
 add_executable (${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
+# Test executable
 enable_testing()
-
 add_executable(
   static_vector_test
   test/static_vector_test.cpp
@@ -32,8 +34,6 @@ target_link_libraries(
   static_vector_test
   GTest::gtest_main
 )
-
 target_include_directories(static_vector_test PRIVATE include)
-
 include(GoogleTest)
 gtest_discover_tests(static_vector_test)
