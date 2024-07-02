@@ -10,20 +10,14 @@ set(SOURCES
     src/main.cpp
 )
 
-# Fetch Google Test
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/34ad51b3dc4f922d8ab622491dd44fc2c39afee9.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+# Statically link Google Test
+enable_testing()
+add_subdirectory(googletest)
+include_directories(${CMAKE_SOURCE_DIR}/googletest/include)
 
 # Main executable
-enable_testing()
 add_executable (${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} GTest::gtest)
+target_link_libraries(${PROJECT_NAME} gtest)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE test)
 
