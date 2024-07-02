@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "IterTest.hpp"
+#include "LinkedListTest.hpp"
+#include "NodeTest.hpp"
 #include "ObjectPoolTest.hpp"
 #include "StaticVectorTest.hpp"
 

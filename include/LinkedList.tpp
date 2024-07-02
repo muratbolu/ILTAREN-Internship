@@ -10,6 +10,6 @@ public:
 	LinkedList() noexcept {}
 private:
 	Node<T>* mHead;
-	ObjectPool<Node, N> mNodePool;
+	ObjectPool<Node<T>, N> mNodePool;
 	unsigned mSize{ N };
 };

@@ -11,6 +11,8 @@ set(SOURCES
     test/IterTest.cpp
     test/StaticVectorTest.cpp
     test/ObjectPoolTest.cpp
+    test/NodeTest.cpp
+    test/LinkedListTest.cpp
 )
 
 # Statically link Google Test
