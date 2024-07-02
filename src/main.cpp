@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "IterTest.hpp"
 #include "StaticVectorTest.hpp"
 
 int main(int argc, char** argv) {

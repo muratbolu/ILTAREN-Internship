@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
+    test/IterTest.cpp
     test/StaticVectorTest.cpp
 )
 
