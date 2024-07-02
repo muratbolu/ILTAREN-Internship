@@ -13,4 +13,8 @@ protected:
 	}
 	int* p1{ new int };
 	Iter<int> it1{ p1 };
+	Iter<int> it2{ p1 };
+
+	int p2[4];
+	Iter<int> it3{ p2 };
 };
