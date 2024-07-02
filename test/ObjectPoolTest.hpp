@@ -7,9 +7,6 @@
 class ObjectPoolTest : public testing::Test
 {
 protected:
-	ObjectPoolTest()
-	{
-		p1.allocate(2);
-	}
-	ObjectPool<int, 4> p1;
+	ObjectPoolTest() {}
+	ObjectPool<int, 2> p1;
 };
