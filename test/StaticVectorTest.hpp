@@ -1,6 +1,8 @@
 #pragma once
 
-#include "static_vector.tpp"
+#include <gtest/gtest.h>
+
+#include "StaticVector.tpp"
 
 class StaticVectorTest : public testing::Test
 {

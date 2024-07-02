@@ -1,8 +1,3 @@
-#pragma once
-
-#include <gtest/gtest.h>
-
-#include "static_vector.tpp"
 #include "StaticVectorTest.hpp"
 
 TEST_F(StaticVectorTest, Initialization) {

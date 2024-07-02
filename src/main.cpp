@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "static_vector_test.hpp"
+#include "StaticVectorTest.hpp"
 
 int main(int argc, char** argv) {
 	testing::InitGoogleTest(&argc, argv);
