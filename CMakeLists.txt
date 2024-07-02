@@ -21,19 +21,11 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Main executable
-add_executable (${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE include)
-
-# Test executable
 enable_testing()
-add_executable(
-  static_vector_test
-  test/static_vector_test.cpp
-)
-target_link_libraries(
-  static_vector_test
-  GTest::gtest_main
-)
-target_include_directories(static_vector_test PRIVATE include)
+add_executable (${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} GTest::gtest)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE test)
+
 include(GoogleTest)
-gtest_discover_tests(static_vector_test)
+gtest_discover_tests(${PROJECT_NAME})
