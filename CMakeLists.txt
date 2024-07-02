@@ -26,3 +26,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE test)
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})
+
+# Address sanitizer causes the Google Test to not execute at all?
+# if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+#     add_compile_definitions(_DISABLE_VECTOR_ANNOTATION) # Apparently needed because of a bug?
+#     add_compile_definitions(_DISABLE_STRING_ANNOTATION) # Same reason as above
+#     target_compile_options(${PROJECT_NAME} PUBLIC /fsanitize=address)
+# endif()
