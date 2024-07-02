@@ -8,4 +8,5 @@ class LinkedListTest : public testing::Test
 {
 protected:
 	LinkedListTest() {}
+	LinkedList<int, 5> ll;
 };

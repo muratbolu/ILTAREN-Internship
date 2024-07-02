@@ -8,4 +8,7 @@ class NodeTest : public testing::Test
 {
 protected:
 	NodeTest() {}
+	Node<int> n1;
+	Node<int> n2;
+	Node<int> n3;
 };
