@@ -25,15 +25,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 enable_testing()
 
 add_executable(
-  test_static_vector
-  test/test_static_vector.cpp
+  static_vector_test
+  test/static_vector_test.cpp
 )
 target_link_libraries(
-  test_static_vector
+  static_vector_test
   GTest::gtest_main
 )
 
-target_include_directories(test_static_vector PRIVATE include)
+target_include_directories(static_vector_test PRIVATE include)
 
 include(GoogleTest)
-gtest_discover_tests(test_static_vector)
+gtest_discover_tests(static_vector_test)
