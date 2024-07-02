@@ -4,11 +4,11 @@ template<typename T>
 class Iter
 {
 public:
-	Iter(T* ptr) noexcept :ptr{ ptr } {}
+	Iter(T* ptr) noexcept :mptr{ ptr } {}
 
 	Iter& operator++() noexcept
 	{
-		++ptr;
+		++mptr;
 		return *this;
 	}
 
@@ -21,7 +21,7 @@ public:
 
 	Iter& operator--() noexcept
 	{
-		--ptr;
+		--mptr;
 		return *this;
 	}
 
@@ -34,12 +34,12 @@ public:
 
 	T& operator*() const noexcept
 	{
-		return *ptr;
+		return *mptr;
 	}
 
 	friend inline bool operator==(const Iter& lhs, const Iter& rhs) noexcept
 	{
-		return lhs.ptr == rhs.ptr;
+		return lhs.mptr == rhs.mptr;
 	}
 
 	friend inline bool operator!=(const Iter& lhs, const Iter& rhs) noexcept
@@ -48,5 +48,5 @@ public:
 	}
 
 private:
-	T* ptr;
+	T* mptr;
 };

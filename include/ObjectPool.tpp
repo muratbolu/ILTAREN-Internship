@@ -8,7 +8,7 @@ class ObjectPool
 public:
 	ObjectPool() noexcept
 	{
-		for (bool& i : vacancy)
+		for (bool& i : mvacancy)
 		{
 			i = true;
 		}
@@ -17,27 +17,27 @@ public:
 	{
 		for (unsigned i{ 0 }; i < N; ++i)
 		{
-			if (vacancy[i] == true)
+			if (mvacancy[i] == true)
 			{
-				vacancy[i] = false;
-				return &pool[i];
+				mvacancy[i] = false;
+				return &mpool[i];
 			}
 		}
 		return nullptr;
 	}
 	bool deallocate(T* ptr) noexcept
 	{
-		if (pool.data() <= ptr
-			&& ptr < (pool.data() + N)
-			&& vacancy[ptr - pool.data()] == false)
+		if (mpool.data() <= ptr
+			&& ptr < (mpool.data() + N)
+			&& mvacancy[ptr - mpool.data()] == false)
 		{
-			vacancy[ptr - pool.data()] = true;
+			mvacancy[ptr - mpool.data()] = true;
 			return true;
 		}
 		return false;
 	}
 
 private:
-	StaticVector<T, N> pool;
-	StaticVector<bool, N> vacancy;
+	StaticVector<T, N> mpool;
+	StaticVector<bool, N> mvacancy;
 };
