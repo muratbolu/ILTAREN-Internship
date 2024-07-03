@@ -1,7 +1,24 @@
-#include <iostream>
+#include <cstdio>
 
-int main()
+int main(int argc, char** argv)
 {
-	std::cout << "Hello, World!\n";
+	if (argc != 2)
+	{
+		int rc = std::fputs(
+			"Provide exactly one argument, which should be the input file.\n", stderr);
+		if (rc == EOF)
+		{
+			std::perror("Invalid argument number");
+		}
+		return 1; // EXIT_FAILURE
+	}
+
+	FILE* fp = std::fopen(argv[1], "r");
+	if (fp == nullptr)
+	{
+		std::perror("Could not open file");
+		return 1;
+	}
+
 	return 0;
 }
