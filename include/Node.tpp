@@ -4,17 +4,17 @@ template<typename T>
 class Node
 {
 public:
-	constexpr Node() noexcept : mData{ new T{} } {}
-	constexpr Node(T data) noexcept : mData{ new T{data} } {}
+	constexpr Node() noexcept : mData{ T{} } {}
+	constexpr Node(T data) noexcept : mData{ data } {}
 
-	constexpr ~Node() noexcept
+	constexpr T data() const noexcept
 	{
-		delete mData;
+		return mData;
 	}
 
-	constexpr T& data() const noexcept
+	constexpr T& data() noexcept
 	{
-		return *mData;
+		return mData;
 	}
 
 	constexpr Node* next() const noexcept
@@ -38,10 +38,7 @@ public:
 	}
 
 private:
-	/* Node "owns" its data field, which is never null,
-	 * and will delete it when its destructor is called.
-	 */
-	T* const mData;
+	T mData;
 	Node* mNext{ nullptr };
 	Node* mPrev{ nullptr };
 };

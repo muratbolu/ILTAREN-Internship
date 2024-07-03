@@ -2,7 +2,7 @@
 
 TEST_F(NodeTest, Initialization)
 {
-	EXPECT_EQ(n1.data(), 5);
+	EXPECT_EQ(n1.data(), 0);
 	EXPECT_EQ(n2.data(), 7);
 	EXPECT_EQ(n3.data(), 9);
 }

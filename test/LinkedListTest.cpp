@@ -15,6 +15,12 @@ TEST_F(LinkedListTest, Push)
 	EXPECT_FALSE(ll1.push(27));
 }
 
+TEST_F(LinkedListTest, PushLvalue)
+{
+	int i = 19;
+	EXPECT_TRUE(ll1.push(i));
+}
+
 TEST_F(LinkedListTest, Size)
 {
 	EXPECT_EQ(ll1.size(), 0);
