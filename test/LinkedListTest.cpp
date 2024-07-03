@@ -70,3 +70,28 @@ TEST_F(LinkedListTest, ExhaustPool)
 	ASSERT_EQ(ll1.pop(), 18);
 	EXPECT_TRUE(ll2.push(33));
 }
+
+TEST_F(LinkedListTest, BigPool)
+{
+	for (unsigned i{ 0 }; i < 1000; ++i)
+	{
+		EXPECT_TRUE(ll3.push(i));
+	}
+}
+
+TEST_F(LinkedListTest, DeallocateList)
+{
+	{
+		LinkedList<int> ll4{ pool };
+		ASSERT_TRUE(ll4.push(12));
+		ASSERT_TRUE(ll4.push(15));
+		ASSERT_TRUE(ll4.push(18));
+		ASSERT_TRUE(ll1.push(21));
+		ASSERT_TRUE(ll2.push(24));
+	}
+	EXPECT_TRUE(ll1.push(27));
+	EXPECT_TRUE(ll2.push(30));
+	EXPECT_TRUE(ll2.push(33));
+	EXPECT_EQ(ll1.size(), 2);
+	EXPECT_EQ(ll2.size(), 3);
+}

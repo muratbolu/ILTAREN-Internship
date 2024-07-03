@@ -8,11 +8,54 @@ class LinkedList
 {
 public:
 	constexpr LinkedList(IObjectPool<Node<T>>& pool) noexcept : mNodePool{ pool } {}
-	constexpr ~LinkedList() noexcept { /* TODO */ }
+	constexpr ~LinkedList() noexcept
+	{
+		deleteAll(mHead);
+	}
 
 	constexpr unsigned size() const noexcept
 	{
 		return mSize;
+	}
+
+	constexpr T at(unsigned n) const noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T& at(unsigned n) noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T operator[](unsigned n) const noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T& operator[](unsigned n) noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T front() const noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T& front() noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T back() const noexcept
+	{
+		/* TODO */
+	}
+
+	constexpr T& back() noexcept
+	{
+		/* TODO */
 	}
 
 	constexpr bool push(const T& data) noexcept
@@ -76,4 +119,19 @@ private:
 	Node<T>* mHead{ nullptr };
 	IObjectPool<Node<T>>& mNodePool;
 	unsigned mSize{ 0 };
+
+	/* Deletes all nodes following the argument and the
+	 * argument itself.
+	 */
+	constexpr void deleteAll(Node<T>* const node) noexcept
+	{
+		if (node == nullptr)
+		{
+			return;
+		}
+		Node<T>* next{ node->next() };
+		mNodePool.deallocate(node);
+		// tail recursive, suitable for optimization
+		deleteAll(next);
+	}
 };
