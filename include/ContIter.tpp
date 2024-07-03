@@ -3,15 +3,20 @@
 #include "IIter.tpp"
 
 template<typename T>
-class ContIter : IIter<T>
+class ContIter : public IIter<T>
 {
 public:
 	constexpr ContIter(T* ptr) noexcept :mPtr{ ptr } {}
 
-	constexpr ContIter& operator++() noexcept
+	constexpr ContIter& next() noexcept override
 	{
 		++mPtr;
 		return *this;
+	}
+
+	constexpr ContIter& operator++() noexcept
+	{
+		return next();
 	}
 
 	constexpr ContIter operator++(int) noexcept
@@ -21,10 +26,15 @@ public:
 		return old;
 	}
 
-	constexpr ContIter& operator--() noexcept
+	constexpr ContIter& prev() noexcept override
 	{
 		--mPtr;
 		return *this;
+	}
+
+	constexpr ContIter& operator--() noexcept
+	{
+		return prev();
 	}
 
 	constexpr ContIter operator--(int) noexcept
@@ -34,9 +44,14 @@ public:
 		return old;
 	}
 
-	constexpr T& operator*() const noexcept
+	constexpr T& data() const noexcept override
 	{
 		return *mPtr;
+	}
+
+	constexpr T& operator*() const noexcept
+	{
+		return data();
 	}
 
 	// operator!= is automatically generated
