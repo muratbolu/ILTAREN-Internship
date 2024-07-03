@@ -20,42 +20,66 @@ public:
 
 	constexpr T at(unsigned n) const noexcept
 	{
-		/* TODO */
-	}
-
-	constexpr T& at(unsigned n) noexcept
-	{
-		/* TODO */
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			if (n == 0)
+			{
+				return curr->data();
+			}
+			n--;
+		}
+		// TODO: create a Maybe type for nonexistent value
+		return T{};
 	}
 
 	constexpr T operator[](unsigned n) const noexcept
 	{
-		/* TODO */
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			if (n == 0)
+			{
+				return curr->data();
+			}
+			n--;
+		}
+		// TODO: create a Maybe type for nonexistent value
+		return T{};
 	}
 
-	constexpr T& operator[](unsigned n) noexcept
+	constexpr bool write(unsigned n, T value) const noexcept
 	{
-		/* TODO */
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			if (n == 0)
+			{
+				curr->data() = value;
+				return true;
+			}
+			n--;
+		}
+		return false;
 	}
 
 	constexpr T front() const noexcept
 	{
-		/* TODO */
-	}
-
-	constexpr T& front() noexcept
-	{
-		/* TODO */
+		if (mHead != nullptr)
+		{
+			return mHead->data();
+		}
+		return T{};
 	}
 
 	constexpr T back() const noexcept
 	{
-		/* TODO */
-	}
-
-	constexpr T& back() noexcept
-	{
-		/* TODO */
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			if (curr->next() == nullptr)
+			{
+				return curr->data();
+			}
+		}
+		// TODO: create a Maybe type for nonexistent value
+		return T{};
 	}
 
 	constexpr bool push(const T& data) noexcept
