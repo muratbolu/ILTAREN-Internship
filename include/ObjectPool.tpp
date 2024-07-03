@@ -1,9 +1,10 @@
 #pragma once
 
+#include "IObjectPool.tpp"
 #include "StaticVector.tpp"
 
 template<typename T, unsigned N>
-class ObjectPool
+class ObjectPool : public IObjectPool<T>
 {
 public:
 	constexpr ObjectPool() noexcept
@@ -13,7 +14,7 @@ public:
 			i = true;
 		}
 	}
-	constexpr T* allocate() noexcept
+	constexpr T* allocate() noexcept override
 	{
 		for (unsigned i{ 0 }; i < N; ++i)
 		{
@@ -25,7 +26,7 @@ public:
 		}
 		return nullptr;
 	}
-	constexpr bool deallocate(T* ptr) noexcept
+	constexpr bool deallocate(T* ptr) noexcept override
 	{
 		if (ptr != nullptr
 			&& mPool.begin() <= ptr

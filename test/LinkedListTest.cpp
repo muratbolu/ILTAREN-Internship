@@ -19,6 +19,7 @@ TEST_F(LinkedListTest, PushLvalue)
 {
 	int i = 19;
 	EXPECT_TRUE(ll1.push(i));
+	EXPECT_EQ(ll1.pop(), i);
 }
 
 TEST_F(LinkedListTest, Size)
@@ -55,4 +56,17 @@ TEST_F(LinkedListTest, MultiplePop)
 TEST_F(LinkedListTest, EmptyPop)
 {
 	EXPECT_EQ(ll1.pop(), 0);
+}
+
+TEST_F(LinkedListTest, ExhaustPool)
+{
+	ASSERT_TRUE(ll1.push(12));
+	ASSERT_TRUE(ll1.push(15));
+	ASSERT_TRUE(ll1.push(18));
+	ASSERT_TRUE(ll2.push(21));
+	ASSERT_TRUE(ll2.push(24));
+	EXPECT_FALSE(ll1.push(27));
+	EXPECT_FALSE(ll2.push(30));
+	ASSERT_EQ(ll1.pop(), 18);
+	EXPECT_TRUE(ll2.push(33));
 }

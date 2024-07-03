@@ -8,6 +8,7 @@ class LinkedListTest : public testing::Test
 {
 protected:
 	LinkedListTest() {}
-	LinkedList<int, 5> ll1;
-	LinkedList<int, 10> ll2;
+	ObjectPool<Node<int>, 5> pool;
+	LinkedList<int> ll1{ pool };
+	LinkedList<int> ll2{ pool };
 };

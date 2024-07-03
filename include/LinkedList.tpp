@@ -3,11 +3,11 @@
 #include "Node.tpp"
 #include "ObjectPool.tpp"
 
-template<typename T, unsigned N>
+template<typename T>
 class LinkedList
 {
 public:
-	constexpr LinkedList() noexcept {}
+	constexpr LinkedList(IObjectPool<Node<T>>& pool) noexcept : mNodePool{ pool } {}
 	constexpr ~LinkedList() noexcept { /* TODO */ }
 
 	constexpr unsigned size() const noexcept
@@ -74,23 +74,6 @@ public:
 
 private:
 	Node<T>* mHead{ nullptr };
-	ObjectPool<Node<T>, N> mNodePool;
+	IObjectPool<Node<T>>& mNodePool;
 	unsigned mSize{ 0 };
-
-	/*
-	constexpr Node<T>* construct(unsigned n) noexcept
-	{
-		if (n == 0)
-		{
-			return nullptr;
-		}
-		Node<T>* ptr = mNodePool.allocate();
-		ptr->next() = construct(n - 1);
-		if (ptr->next() != nullptr)
-		{
-			ptr->next()->prev() = ptr;
-		}
-		return ptr;
-	}
-	*/
 };
