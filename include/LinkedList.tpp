@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Node.tpp"
+#include "NodeIter.tpp"
 #include "ObjectPool.tpp"
 
 template<typename T>
@@ -80,6 +81,16 @@ public:
 		}
 		// TODO: create a Maybe type for nonexistent value
 		return T{};
+	}
+
+	constexpr NodeIter<T> begin() noexcept
+	{
+		return NodeIter<T>{mHead};
+	}
+
+	constexpr NodeIter<T> end() noexcept
+	{
+		return NodeIter<T>{nullptr};
 	}
 
 	constexpr bool push(const T& data) noexcept
