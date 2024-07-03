@@ -3,7 +3,7 @@
 #include "IIter.tpp"
 
 template<typename T>
-class LinkedIter : public IIter<T>
+class NodeIter : public IIter<T>
 {
 public:
 private:

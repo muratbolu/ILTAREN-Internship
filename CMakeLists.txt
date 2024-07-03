@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SOURCES
     src/main.cpp
     test/ContIterTest.cpp
-    test/LinkedIterTest.cpp
+    test/NodeIterTest.cpp
     test/StaticVectorTest.cpp
     test/ObjectPoolTest.cpp
     test/NodeTest.cpp
