@@ -20,5 +20,8 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	// TODO: get chars
+
+	std::fclose(fp);
 	return 0;
 }
