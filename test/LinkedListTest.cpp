@@ -31,3 +31,22 @@ TEST_F(LinkedListTest, Size)
 	ll1.push(27);
 	EXPECT_EQ(ll1.size(), 5);
 }
+
+TEST_F(LinkedListTest, Pop)
+{
+	ASSERT_TRUE(ll1.push(12));
+	EXPECT_EQ(ll1.pop(), 12);
+}
+
+TEST_F(LinkedListTest, MultiplePop)
+{
+	ASSERT_TRUE(ll1.push(12));
+	ASSERT_TRUE(ll1.push(15));
+	EXPECT_EQ(ll1.pop(), 15);
+	EXPECT_EQ(ll1.pop(), 12);
+}
+
+TEST_F(LinkedListTest, EmptyPop)
+{
+	EXPECT_EQ(ll1.pop(), 0);
+}

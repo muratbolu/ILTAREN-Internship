@@ -10,17 +10,7 @@ public:
 	constexpr LinkedList() noexcept {}
 	constexpr ~LinkedList() noexcept { /* TODO */ }
 
-	constexpr Node<T>* head() const noexcept
-	{
-		return mHead;
-	}
-
-	constexpr Node<T>*& head() noexcept
-	{
-		return mHead;
-	}
-
-	constexpr unsigned size() noexcept
+	constexpr unsigned size() const noexcept
 	{
 		return mSize;
 	}
@@ -51,10 +41,35 @@ public:
 		return true;
 	}
 
-	constexpr T* pop() noexcept
+	constexpr T pop() noexcept
 	{
-		/* TODO */
-		return nullptr;
+		if (mHead == nullptr)
+		{
+			// invalid pop
+			// TODO: create a Maybe type for nonexistent value
+			return T{};
+		}
+		if (mHead->next() == nullptr)
+		{
+			// pop head
+			T result = mHead->data();
+			mNodePool.deallocate(mHead);
+			mHead = nullptr;
+			mSize--;
+			return result;
+		}
+
+		// pop the last node
+		Node<T>* curr = mHead;
+		while (curr->next() != nullptr)
+		{
+			curr = curr->next();
+		}
+		curr->prev()->next() = nullptr;
+		T result = curr->data();
+		mNodePool.deallocate(curr);
+		mSize--;
+		return result;
 	}
 
 private:

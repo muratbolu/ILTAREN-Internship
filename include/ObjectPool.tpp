@@ -27,7 +27,8 @@ public:
 	}
 	constexpr bool deallocate(T* ptr) noexcept
 	{
-		if (mPool.begin() <= ptr
+		if (ptr != nullptr
+			&& mPool.begin() <= ptr
 			&& ptr < mPool.end()
 			&& mVacant[ptr - mPool.data()] == false)
 		{
