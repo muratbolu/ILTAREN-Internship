@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Iter.tpp"
+#include "ContIter.tpp"
 
-template <typename T, unsigned N>
+template<typename T, unsigned N>
 class StaticVector
 {
 public:
@@ -53,14 +53,14 @@ public:
 		return mData;
 	}
 
-	constexpr Iter<T> begin() noexcept
+	constexpr ContIter<T> begin() noexcept
 	{
-		return Iter<T>{mData};
+		return ContIter<T>{mData};
 	}
 
-	constexpr Iter<T> end() noexcept
+	constexpr ContIter<T> end() noexcept
 	{
-		return Iter<T>{mData + mSize};
+		return ContIter<T>{mData + mSize};
 	}
 
 	constexpr bool empty() const noexcept

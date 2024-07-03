@@ -1,54 +1,54 @@
-#include "IterTest.hpp"
+#include "ContIterTest.hpp"
 
-TEST_F(IterTest, Initialization)
+TEST_F(ContIterTest, Initialization)
 {
 	EXPECT_EQ(it1, it2);
 	EXPECT_EQ(*it1, *it2);
 	EXPECT_EQ(*it1, 5);
 }
 
-TEST_F(IterTest, Assignment)
+TEST_F(ContIterTest, Assignment)
 {
 	*it1 = 6;
 	EXPECT_EQ(*it1, 6);
 	EXPECT_EQ(*it2, 6); // due to same pointer
 }
 
-TEST_F(IterTest, PreIncrement)
+TEST_F(ContIterTest, PreIncrement)
 {
-	Iter<int> it{ p2 };
+	ContIter<int> it{ p2 };
 	EXPECT_EQ(it, it3);
 	++it3;
 	EXPECT_FALSE(it == it3);
 }
 
-TEST_F(IterTest, PostIncrement)
+TEST_F(ContIterTest, PostIncrement)
 {
-	Iter<int> it{ p2 };
+	ContIter<int> it{ p2 };
 	EXPECT_EQ(it, it3);
 	it3++;
 	EXPECT_FALSE(it == it3);
 }
 
-TEST_F(IterTest, PreDecrement)
+TEST_F(ContIterTest, PreDecrement)
 {
-	Iter<int> it{ p2 + 1 };
+	ContIter<int> it{ p2 + 1 };
 	EXPECT_FALSE(it == it3);
 	--it;
 	EXPECT_EQ(it, it3);
 }
 
-TEST_F(IterTest, PostDecrement)
+TEST_F(ContIterTest, PostDecrement)
 {
-	Iter<int> it{ p2 + 1 };
+	ContIter<int> it{ p2 + 1 };
 	EXPECT_FALSE(it == it3);
 	it--;
 	EXPECT_EQ(it, it3);
 }
 
-TEST_F(IterTest, Iterate)
+TEST_F(ContIterTest, Iterate)
 {
-	Iter<int> it{ p2 };
+	ContIter<int> it{ p2 };
 	for (unsigned i{ 0 }; i < 4; ++i, ++it3)
 	{
 		*it3 = i;
@@ -59,7 +59,7 @@ TEST_F(IterTest, Iterate)
 	}
 }
 
-TEST_F(IterTest, Comparison)
+TEST_F(ContIterTest, Comparison)
 {
 	EXPECT_TRUE(it1 == it2);
 	*it1 = 6;

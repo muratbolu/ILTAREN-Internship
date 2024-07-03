@@ -8,7 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
-    test/IterTest.cpp
+    test/ContIterTest.cpp
+    test/LinkedIterTest.cpp
     test/StaticVectorTest.cpp
     test/ObjectPoolTest.cpp
     test/NodeTest.cpp

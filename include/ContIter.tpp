@@ -1,33 +1,35 @@
 #pragma once
 
+#include "IIter.tpp"
+
 template<typename T>
-class Iter
+class ContIter : IIter<T>
 {
 public:
-	constexpr Iter(T* ptr) noexcept :mPtr{ ptr } {}
+	constexpr ContIter(T* ptr) noexcept :mPtr{ ptr } {}
 
-	constexpr Iter& operator++() noexcept
+	constexpr ContIter& operator++() noexcept
 	{
 		++mPtr;
 		return *this;
 	}
 
-	constexpr Iter operator++(int) noexcept
+	constexpr ContIter operator++(int) noexcept
 	{
-		Iter old = *this;
+		ContIter old = *this;
 		operator++();
 		return old;
 	}
 
-	constexpr Iter& operator--() noexcept
+	constexpr ContIter& operator--() noexcept
 	{
 		--mPtr;
 		return *this;
 	}
 
-	constexpr Iter operator--(int) noexcept
+	constexpr ContIter operator--(int) noexcept
 	{
-		Iter old = *this;
+		ContIter old = *this;
 		operator--();
 		return old;
 	}
@@ -38,7 +40,7 @@ public:
 	}
 
 	// operator!= is automatically generated
-	constexpr friend inline bool operator==(const Iter& lhs, const Iter& rhs) noexcept
+	constexpr friend inline bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
 	{
 		return lhs.mPtr == rhs.mPtr;
 	}
@@ -49,7 +51,7 @@ public:
 	}
 
 	// operators <, <=, >, >=  are automatically generated
-	constexpr friend inline auto operator<=>(const Iter& lhs, const Iter& rhs) noexcept
+	constexpr friend inline auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
 	{
 		return lhs.mPtr <=> rhs.mPtr;
 	}
