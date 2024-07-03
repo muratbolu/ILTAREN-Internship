@@ -19,68 +19,51 @@ public:
 		return mSize;
 	}
 
-	constexpr T at(unsigned n) const noexcept
+	constexpr T* at(unsigned n) const noexcept
 	{
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
 			if (n == 0)
 			{
-				return curr->data();
+				return &curr->data();
 			}
 			n--;
 		}
-		// TODO: create a Maybe type for nonexistent value
-		return T{};
+		return nullptr;
 	}
 
-	constexpr T operator[](unsigned n) const noexcept
+	constexpr T* operator[](unsigned n) const noexcept
 	{
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
 			if (n == 0)
 			{
-				return curr->data();
+				return &curr->data();
 			}
 			n--;
 		}
-		// TODO: create a Maybe type for nonexistent value
-		return T{};
+		return nullptr;
 	}
 
-	constexpr bool write(unsigned n, T value) const noexcept
-	{
-		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
-		{
-			if (n == 0)
-			{
-				curr->data() = value;
-				return true;
-			}
-			n--;
-		}
-		return false;
-	}
-
-	constexpr T front() const noexcept
+	constexpr T* front() const noexcept
 	{
 		if (mHead != nullptr)
 		{
-			return mHead->data();
+			return &mHead->data();
 		}
-		return T{};
+		return nullptr;
 	}
 
-	constexpr T back() const noexcept
+	constexpr T* back() const noexcept
 	{
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
 			if (curr->next() == nullptr)
 			{
-				return curr->data();
+				return &curr->data();
 			}
 		}
-		// TODO: create a Maybe type for nonexistent value
-		return T{};
+		return nullptr;
 	}
 
 	constexpr NodeIter<T> begin() noexcept
@@ -119,18 +102,17 @@ public:
 		return true;
 	}
 
-	constexpr T pop() noexcept
+	constexpr T* pop() noexcept
 	{
 		if (mHead == nullptr)
 		{
 			// invalid pop
-			// TODO: create a Maybe type for nonexistent value
-			return T{};
+			return nullptr;
 		}
 		if (mHead->next() == nullptr)
 		{
 			// pop head
-			T result = mHead->data();
+			T* result = &mHead->data();
 			mNodePool.deallocate(mHead);
 			mHead = nullptr;
 			mSize--;
@@ -144,7 +126,7 @@ public:
 			curr = curr->next();
 		}
 		curr->prev()->next() = nullptr;
-		T result = curr->data();
+		T* result = &curr->data();
 		mNodePool.deallocate(curr);
 		mSize--;
 		return result;

@@ -19,7 +19,7 @@ TEST_F(LinkedListTest, PushLvalue)
 {
 	int i = 19;
 	EXPECT_TRUE(ll1.push(i));
-	EXPECT_EQ(ll1.pop(), i);
+	EXPECT_EQ(*ll1.pop(), i);
 }
 
 TEST_F(LinkedListTest, Size)
@@ -42,20 +42,20 @@ TEST_F(LinkedListTest, Size)
 TEST_F(LinkedListTest, Pop)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_EQ(ll1.pop(), 12);
+	EXPECT_EQ(*ll1.pop(), 12);
 }
 
 TEST_F(LinkedListTest, MultiplePop)
 {
 	ASSERT_TRUE(ll1.push(12));
 	ASSERT_TRUE(ll1.push(15));
-	EXPECT_EQ(ll1.pop(), 15);
-	EXPECT_EQ(ll1.pop(), 12);
+	EXPECT_EQ(*ll1.pop(), 15);
+	EXPECT_EQ(*ll1.pop(), 12);
 }
 
 TEST_F(LinkedListTest, EmptyPop)
 {
-	EXPECT_EQ(ll1.pop(), 0);
+	EXPECT_EQ(ll1.pop(), nullptr);
 }
 
 TEST_F(LinkedListTest, ExhaustPool)
@@ -67,7 +67,7 @@ TEST_F(LinkedListTest, ExhaustPool)
 	ASSERT_TRUE(ll2.push(24));
 	EXPECT_FALSE(ll1.push(27));
 	EXPECT_FALSE(ll2.push(30));
-	ASSERT_EQ(ll1.pop(), 18);
+	ASSERT_EQ(*ll1.pop(), 18);
 	EXPECT_TRUE(ll2.push(33));
 }
 
@@ -99,7 +99,7 @@ TEST_F(LinkedListTest, DeallocateList)
 TEST_F(LinkedListTest, At1)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_EQ(ll1.at(0), 12);
+	EXPECT_EQ(*ll1.at(0), 12);
 }
 
 TEST_F(LinkedListTest, At2)
@@ -107,15 +107,21 @@ TEST_F(LinkedListTest, At2)
 	ASSERT_TRUE(ll1.push(12));
 	ASSERT_TRUE(ll1.push(15));
 	ASSERT_TRUE(ll1.push(18));
-	EXPECT_EQ(ll1.at(0), 12);
-	EXPECT_EQ(ll1.at(1), 15);
-	EXPECT_EQ(ll1.at(2), 18);
+	EXPECT_EQ(*ll1.at(0), 12);
+	EXPECT_EQ(*ll1.at(1), 15);
+	EXPECT_EQ(*ll1.at(2), 18);
+}
+
+TEST_F(LinkedListTest, At3)
+{
+	ASSERT_TRUE(ll1.push(12));
+	EXPECT_EQ(ll1.at(1), nullptr);
 }
 
 TEST_F(LinkedListTest, Bracket1)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_EQ(ll1[0], 12);
+	EXPECT_EQ(*ll1[0], 12);
 }
 
 TEST_F(LinkedListTest, Bracket2)
@@ -123,30 +129,36 @@ TEST_F(LinkedListTest, Bracket2)
 	ASSERT_TRUE(ll1.push(12));
 	ASSERT_TRUE(ll1.push(15));
 	ASSERT_TRUE(ll1.push(18));
-	EXPECT_EQ(ll1[0], 12);
-	EXPECT_EQ(ll1[1], 15);
-	EXPECT_EQ(ll1[2], 18);
+	EXPECT_EQ(*ll1[0], 12);
+	EXPECT_EQ(*ll1[1], 15);
+	EXPECT_EQ(*ll1[2], 18);
+}
+
+TEST_F(LinkedListTest, Bracket3)
+{
+	ASSERT_TRUE(ll1.push(12));
+	EXPECT_EQ(ll1[1], nullptr);
 }
 
 TEST_F(LinkedListTest, Write)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_TRUE(ll1.write(0, 15));
-	EXPECT_EQ(ll1[0], 15);
+	*ll1[0] = 15;
+	EXPECT_EQ(*ll1[0], 15);
 }
 
 TEST_F(LinkedListTest, InvalidWrite)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_FALSE(ll1.write(1, 15));
-	EXPECT_EQ(ll1[0], 12);
-	EXPECT_EQ(ll1[1], int{});
+	*ll1[1] = 15;
+	EXPECT_EQ(*ll1[0], 12);
+	EXPECT_EQ(*ll1[1], int{});
 }
 
 TEST_F(LinkedListTest, Front)
 {
 	ASSERT_TRUE(ll1.push(12));
-	EXPECT_EQ(ll1.front(), 12);
+	EXPECT_EQ(*ll1.front(), 12);
 }
 
 TEST_F(LinkedListTest, Back)
@@ -154,5 +166,5 @@ TEST_F(LinkedListTest, Back)
 	ASSERT_TRUE(ll1.push(12));
 	ASSERT_TRUE(ll1.push(15));
 	ASSERT_TRUE(ll1.push(18));
-	EXPECT_EQ(ll1.back(), 18);
+	EXPECT_EQ(*ll1.back(), 18);
 }
