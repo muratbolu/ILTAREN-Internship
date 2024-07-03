@@ -5,13 +5,29 @@ TEST_F(LinkedListTest, Initialization)
 	;
 }
 
-TEST_F(LinkedListTest, Traversal)
+TEST_F(LinkedListTest, Push)
 {
-	Node<int>* curr = ll.head();
-	ASSERT_TRUE(curr != nullptr);
-	for (unsigned i{ 0 }; i < 5; ++i)
-	{
-		curr = curr->next();
-		ASSERT_TRUE(curr != nullptr);
-	}
+	EXPECT_TRUE(ll1.push(12));
+	EXPECT_TRUE(ll1.push(15));
+	EXPECT_TRUE(ll1.push(18));
+	EXPECT_TRUE(ll1.push(21));
+	EXPECT_TRUE(ll1.push(24));
+	EXPECT_FALSE(ll1.push(27));
+}
+
+TEST_F(LinkedListTest, Size)
+{
+	EXPECT_EQ(ll1.size(), 0);
+	ll1.push(12);
+	EXPECT_EQ(ll1.size(), 1);
+	ll1.push(15);
+	EXPECT_EQ(ll1.size(), 2);
+	ll1.push(18);
+	EXPECT_EQ(ll1.size(), 3);
+	ll1.push(21);
+	EXPECT_EQ(ll1.size(), 4);
+	ll1.push(24);
+	EXPECT_EQ(ll1.size(), 5);
+	ll1.push(27);
+	EXPECT_EQ(ll1.size(), 5);
 }

@@ -7,10 +7,8 @@ template<typename T, unsigned N>
 class LinkedList
 {
 public:
-	constexpr LinkedList() noexcept
-	{
-		mHead = construct(mSize);
-	}
+	constexpr LinkedList() noexcept {}
+	constexpr ~LinkedList() noexcept { /* TODO */ }
 
 	constexpr Node<T>* head() const noexcept
 	{
@@ -22,11 +20,49 @@ public:
 		return mHead;
 	}
 
-private:
-	Node<T>* mHead;
-	ObjectPool<Node<T>, N> mNodePool;
-	const unsigned mSize{ N };
+	constexpr unsigned size() noexcept
+	{
+		return mSize;
+	}
 
+	constexpr bool push(const T& data) noexcept
+	{
+		Node<T>* node = mNodePool.allocate();
+		if (node == nullptr)
+		{
+			return false;
+		}
+		node->data() = data;
+
+		if (mHead == nullptr)
+		{
+			mHead = node;
+			mSize++;
+			return true;
+		}
+		Node<T>* curr = mHead;
+		while (curr->next() != nullptr)
+		{
+			curr = curr->next();
+		}
+		curr->next() = node;
+		curr->next()->prev() = curr;
+		mSize++;
+		return true;
+	}
+
+	constexpr T* pop() noexcept
+	{
+		/* TODO */
+		return nullptr;
+	}
+
+private:
+	Node<T>* mHead{ nullptr };
+	ObjectPool<Node<T>, N> mNodePool;
+	unsigned mSize{ 0 };
+
+	/*
 	constexpr Node<T>* construct(unsigned n) noexcept
 	{
 		if (n == 0)
@@ -41,4 +77,5 @@ private:
 		}
 		return ptr;
 	}
+	*/
 };
