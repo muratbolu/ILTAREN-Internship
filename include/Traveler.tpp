@@ -9,6 +9,9 @@
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
+// Separator is semicolon for our file
+#define SEP ';'
+
 // 2^16 char size buffer
 #define BUF_SIZE (1024 * 64)
 
@@ -93,7 +96,7 @@ public:
 			{
 			case SKIP_CODE:
 			{
-				if (c == ';')
+				if (c == SEP)
 				{
 					++sc;
 					i = 0;
@@ -103,7 +106,7 @@ public:
 			}
 			case GET_NAME:
 			{
-				if (c == ';')
+				if (c == SEP)
 				{
 					cityNames[line][i++] = '\0';
 					++sc;
@@ -117,7 +120,7 @@ public:
 			}
 			case CALC_NUM:
 			{
-				if (c == ';')
+				if (c == SEP)
 				{
 					++sc;
 					adjacencyMatrix[line][sc - 3] = number;
@@ -158,21 +161,16 @@ public:
 	{
 		for (int i{ 0 }; auto & l : adjacencyMatrix)
 		{
-			if (i < 9)
-			{
-				fprintf(stdout, "%d", 0);
-			}
-			// TODO: print the name of the city in between ;;
-			fprintf(stdout, "%d;", ++i);
-			fprintf(stdout, "%s;", cityNames[i - 1].data());
+			fprintf(stdout, "%02d", ++i);
+			fputc(SEP, stdout);
+			fprintf(stdout, "%s", cityNames[i - 1].data());
+			fputc(SEP, stdout);
 			for (int j{ 0 }; auto & n : l)
 			{
-				if (++j == 81)
+				fprintf(stdout, "%d", n);
+				if (++j != 81)
 				{
-					fprintf(stdout, "%d", n);
-				}
-				else {
-					fprintf(stdout, "%d;", n);
+					fputc(SEP, stdout);
 				}
 			}
 			fprintf(stdout, "\n");
