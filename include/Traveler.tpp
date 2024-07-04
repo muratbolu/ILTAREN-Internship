@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 #include <cstdio>
 
 #include "StaticVector.tpp"
@@ -116,7 +117,7 @@ public:
 
 	constexpr void printAdjacencyMatrix() noexcept
 	{
-		for (int i{ 0 }; auto l : adjacencyMatrix)
+		for (int i{ 0 }; auto & l : adjacencyMatrix)
 		{
 			if (i < 9)
 			{
@@ -124,7 +125,7 @@ public:
 			}
 			// TODO: print the name of the city in between ;;
 			fprintf(stdout, "%d;;", ++i);
-			for (int j{ 0 }; auto n : l)
+			for (int j{ 0 }; auto & n : l)
 			{
 				if (++j == 81)
 				{
@@ -135,6 +136,20 @@ public:
 				}
 			}
 			fprintf(stdout, "\n");
+		}
+	}
+
+	constexpr void filterByRange(unsigned min, unsigned max) noexcept
+	{
+		for (auto& l : adjacencyMatrix)
+		{
+			for (auto& n : l)
+			{
+				if (n < min || n > max)
+				{
+					n = UINT_MAX;
+				}
+			}
 		}
 	}
 

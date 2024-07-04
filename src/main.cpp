@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
 		return 1; // EXIT_FAILURE
 	}
 	t.parseInput();
+	t.filterByRange(150, 250);
 	t.printAdjacencyMatrix();
 
 	return 0;
