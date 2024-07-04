@@ -182,13 +182,13 @@ public:
 		cities.push(53);
 	}
 
-	constexpr void printRoute() const noexcept
+	constexpr void printRoute(FILE* stream) const noexcept
 	{
 		// allocate a pool for city names
 		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
 
 		// map and print city names
-		cities.map(toNames, pool).printStrs(stdout);
+		cities.map(toNames, pool).printStrs(stream);
 	}
 
 	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept

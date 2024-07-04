@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	t.filterByRange();
 	// t.printAdjacencyMatrix();
 	t.travel();
-	t.printRoute();
+	t.printRoute(stdout);
 
 	return 0;
 }
