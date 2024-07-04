@@ -170,7 +170,13 @@ public:
 
 	constexpr void travel() noexcept
 	{
-		cities.push(6);
+		cities.push(06);
+		cities.push(26);
+	}
+
+	constexpr void printRoute() noexcept
+	{
+		cities.print(stdout);
 	}
 
 private:

@@ -132,6 +132,20 @@ public:
 		return result;
 	}
 
+	constexpr void print(FILE* stream) noexcept
+	{
+		fputs("[", stream);
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			fprintf(stream, "%d", curr->data());
+			if (curr->next() != nullptr)
+			{
+				fputs(", ", stream);
+			}
+		}
+		fputs("]", stream);
+	}
+
 private:
 	Node<T>* mHead{ nullptr };
 	IObjectPool<Node<T>>& mNodePool;
