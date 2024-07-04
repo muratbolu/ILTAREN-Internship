@@ -70,12 +70,12 @@ public:
 		return nullptr;
 	}
 
-	constexpr NodeIter<T> begin() noexcept
+	constexpr NodeIter<T> begin() const noexcept
 	{
 		return NodeIter<T>{mHead};
 	}
 
-	constexpr NodeIter<T> end() noexcept
+	constexpr NodeIter<T> end() const noexcept
 	{
 		return NodeIter<T>{nullptr};
 	}
@@ -152,8 +152,20 @@ public:
 		return result;
 	}
 
+	constexpr bool contains(const T& obj) const noexcept
+	{
+		for (auto&& o : *this)
+		{
+			if (obj == o)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// Only use it with NULL-terminated strings
-	constexpr void printStrs(FILE* stream) noexcept
+	constexpr void printStrs(FILE* stream) const noexcept
 	{
 		fputs("[", stream);
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
@@ -168,7 +180,7 @@ public:
 	}
 
 	// Prints the numbers as int (%d)
-	constexpr void printNums(FILE* stream) noexcept
+	constexpr void printNums(FILE* stream) const noexcept
 	{
 		fputs("[", stream);
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())

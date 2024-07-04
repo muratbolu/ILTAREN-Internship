@@ -192,22 +192,49 @@ public:
 	}
 
 	// Zero-indexing for cities, 0 => ADANA, etc.
-	constexpr void travel() noexcept
+	void travel() noexcept
 	{
-		cities.push(startCity);
-		cities.push(25);
-		cities.push(0);
-		cities.push(2);
-		cities.push(53);
+		ObjectPool<Node<unsigned>, 500> stackPool;
+		LinkedList<unsigned> citiesStack{ stackPool };
+
+		citiesStack.push(startCity);
+
+		while (cities.size() < 81)
+		{
+			unsigned nextCity{ *citiesStack.pop() };
+			if (cities.contains(nextCity))
+			{
+				continue;
+			}
+			cities.push(nextCity);
+			for (int i{ 0 }; unsigned c : adjacencyMatrix[*cities.back()])
+			{
+				if (c < UINT_MAX && !cities.contains(c))
+				{
+					// Maybe buggy: pushes cities multiple times
+					citiesStack.push(i);
+				}
+				++i;
+			}
+		}
+
+		// TODO: These are for debugging. Remove
+		/*
+		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
+		citiesStack.map(&toNames, pool).printStrs(stdout);
+		fputc('\n', stdout);
+		*/
+
 	}
 
-	constexpr void printRoute(FILE* stream) const noexcept
+	void printRoute(FILE* stream) const noexcept
 	{
 		// allocate a pool for city names
 		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
 
 		// map and print city names
 		cities.map(&toNames, pool).printStrs(stream);
+		fputc('\n', stream);
 	}
 
 	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
