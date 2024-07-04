@@ -171,12 +171,14 @@ public:
 		}
 	}
 
+	// Zero-indexing for cities, 0 => ADANA, etc.
 	constexpr void travel() noexcept
 	{
 		cities.push(startCity);
+		cities.push(0);
 	}
 
-	constexpr void printRoute() noexcept
+	constexpr void printRoute() const noexcept
 	{
 		// allocate a pool for city names
 		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
@@ -188,13 +190,11 @@ public:
 	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
 	{
 		StaticVector<char, MAX_NAME_SIZE> result;
-		result[0] = 'A';
-		result[1] = 'N';
-		result[2] = 'K';
-		result[3] = 'A';
-		result[4] = 'R';
-		result[5] = 'A';
-		result[6] = '\0';
+		const char* cityName = citiesName[n];
+		for (int i{ 0 }; i < sizeof(cityName); ++i)
+		{
+			result[i] = cityName[i];
+		}
 		return result;
 	}
 
@@ -207,4 +207,13 @@ private:
 
 	ObjectPool<Node<unsigned>, 81> pool;
 	LinkedList<unsigned> cities{ pool };
+
+	constexpr static char const* const citiesName[81] = {
+		"ADANA",
+		"ADIYAMAN",
+		"AFYONKARAHISAR",
+		"AGRI",
+		"AMASYA",
+		"ANKARA",
+	};
 };

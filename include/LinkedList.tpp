@@ -136,9 +136,11 @@ public:
 		return result;
 	}
 
-	// Needs a pool to allocate from
+	/* Needs a pool to allocate from. Does not manipulate the LinkedList,
+	 * creates a new LinkedList with the provided pool.
+	 */
 	template<typename U>
-	constexpr LinkedList<U> map(U(*func)(T), IObjectPool<Node<U>>& pool) noexcept
+	constexpr LinkedList<U> map(U(*func)(T), IObjectPool<Node<U>>& pool) const noexcept
 	{
 		LinkedList<U> result{ pool };
 
@@ -156,7 +158,7 @@ public:
 		fputs("[", stream);
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
-			fprintf(stream, "%s", curr->data());
+			fprintf(stream, "%s", static_cast<char*>(curr->data().data()));
 			if (curr->next() != nullptr)
 			{
 				fputs(", ", stream);
