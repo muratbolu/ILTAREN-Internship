@@ -57,19 +57,9 @@ public:
 
 	}
 
-	bool parseInput() noexcept
+	// Assumes that the input is well-formed.
+	constexpr void parseInput() noexcept
 	{
-		/*
-		for (char c : buffer)
-		{
-			putc(c, stdout);
-			if (c == '\0')
-			{
-				break;
-			}
-		}
-		*/
-
 		// sc keeps tracks of how many semicolons are encountered
 		int sc{ 0 };
 		// line keeps track of the line number
@@ -122,13 +112,17 @@ public:
 			}
 			}
 		}
+	}
 
+	constexpr void printAdjacencyMatrix() noexcept
+	{
 		for (int i{ 0 }; auto l : adjacencyMatrix)
 		{
 			if (i < 9)
 			{
 				fprintf(stdout, "%d", 0);
 			}
+			// TODO: print the name of the city in between ;;
 			fprintf(stdout, "%d;;", ++i);
 			for (int j{ 0 }; auto n : l)
 			{
@@ -142,8 +136,6 @@ public:
 			}
 			fprintf(stdout, "\n");
 		}
-
-		return true;
 	}
 
 private:

@@ -20,10 +20,8 @@ int main(int argc, char* argv[])
 	{
 		return 1; // EXIT_FAILURE
 	}
-	if (!t.parseInput())
-	{
-		return 1; // EXIT_FAILURE
-	}
+	t.parseInput();
+	t.printAdjacencyMatrix();
 
 	return 0;
 }
