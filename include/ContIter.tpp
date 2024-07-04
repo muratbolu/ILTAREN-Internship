@@ -44,12 +44,22 @@ public:
 		return old;
 	}
 
-	constexpr T& data() const noexcept override
+	constexpr T& data() noexcept override
 	{
 		return *mPtr;
 	}
 
-	constexpr T& operator*() const noexcept
+	constexpr T data() const noexcept override
+	{
+		return *mPtr;
+	}
+
+	constexpr T& operator*() noexcept
+	{
+		return data();
+	}
+
+	constexpr T operator*() const noexcept
 	{
 		return data();
 	}
