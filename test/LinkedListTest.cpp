@@ -168,3 +168,11 @@ TEST_F(LinkedListTest, Back)
 	ASSERT_TRUE(ll1.push(18));
 	EXPECT_EQ(*ll1.back(), 18);
 }
+
+TEST_F(LinkedListTest, Print)
+{
+	ASSERT_TRUE(ll1.push(12));
+	ASSERT_TRUE(ll1.push(15));
+	ASSERT_TRUE(ll1.push(18));
+	// TODO: figure out a way to test print
+}
