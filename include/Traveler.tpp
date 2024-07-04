@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "LinkedList.tpp"
 #include "StaticVector.tpp"
 
 // 2^16 char size buffer
@@ -116,6 +117,11 @@ public:
 		}
 	}
 
+	void getStartCity(const char* arg) noexcept
+	{
+		startCity = atoi(arg) - 1;
+	}
+
 	void getRange(const char* arg1, const char* arg2) noexcept
 	{
 		X = atoi(arg1);
@@ -160,8 +166,18 @@ public:
 		}
 	}
 
+	constexpr void travel() noexcept
+	{
+		// cities.push(6);
+	}
+
 private:
 	StaticVector<char, BUF_SIZE> buffer;
 	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
-	unsigned X{ 0 }, Y{ 0 };
+
+	// startCity = 5, Ankara by default
+	unsigned startCity{ 5 }, X{ 200 }, Y{ 50 };
+
+	// ObjectPool<Node<unsigned>, 81> pool;
+	// LinkedList<unsigned> cities{ pool };
 };

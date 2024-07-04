@@ -4,10 +4,10 @@
 
 int main(int argc, char* argv[])
 {
-	if (argc != 4)
+	if (argc != 5)
 	{
 		int rc = fputs(
-			"Provide exactly three arguments: input file, X, and Y.\n", stderr);
+			"Provide exactly four arguments: input file, start city code, X, and Y.\n", stderr);
 		if (rc == EOF)
 		{
 			perror("Invalid argument number");
@@ -21,9 +21,10 @@ int main(int argc, char* argv[])
 		return 1; // EXIT_FAILURE
 	}
 	t.parseInput();
-	t.getRange(argv[2], argv[3]);
+	t.getStartCity(argv[2]);
+	t.getRange(argv[3], argv[4]);
 	t.filterByRange();
-	t.printAdjacencyMatrix();
+	// t.printAdjacencyMatrix();
 
 	return 0;
 }
