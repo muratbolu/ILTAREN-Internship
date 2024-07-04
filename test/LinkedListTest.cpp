@@ -1,5 +1,7 @@
 #include "LinkedListTest.hpp"
 
+#include <sstream>
+
 TEST_F(LinkedListTest, Initialization)
 {
 	;

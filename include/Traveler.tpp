@@ -72,15 +72,18 @@ public:
 		int sc{ 0 };
 		// line keeps track of the line number
 		int line{ 0 };
+		// i keeps track of the character index in city names
+		int i{ 0 };
 		// number calculates the number for each semicolon separated
 		// value
 		int number{ 0 };
 
 		enum parseStates
 		{
-			SKIP_INIT,
+			SKIP_CODE,
+			GET_NAME,
 			CALC_NUM,
-		} state{ SKIP_INIT };
+		} state{ SKIP_CODE };
 
 		for (char c : buffer)
 		{
@@ -88,10 +91,28 @@ public:
 
 			switch (state)
 			{
-			case SKIP_INIT:
+			case SKIP_CODE:
 			{
-				if (c == ';') ++sc;
-				if (sc == 2) state = CALC_NUM;
+				if (c == ';')
+				{
+					++sc;
+					i = 0;
+					state = GET_NAME;
+				}
+				break;
+			}
+			case GET_NAME:
+			{
+				if (c == ';')
+				{
+					cityNames[line][i++] = '\0';
+					++sc;
+					state = CALC_NUM;
+				}
+				else
+				{
+					cityNames[line][i++] = c;
+				}
 				break;
 			}
 			case CALC_NUM:
@@ -109,7 +130,7 @@ public:
 					sc = 0;
 					number = 0;
 					++line;
-					state = SKIP_INIT;
+					state = SKIP_CODE;
 				}
 				else
 				{
@@ -143,7 +164,7 @@ public:
 			}
 			// TODO: print the name of the city in between ;;
 			fprintf(stdout, "%d;", ++i);
-			fprintf(stdout, "%s;", citiesName[i - 1]);
+			fprintf(stdout, "%s;", cityNames[i - 1].data());
 			for (int j{ 0 }; auto & n : l)
 			{
 				if (++j == 81)
@@ -188,13 +209,13 @@ public:
 		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
 
 		// map and print city names
-		cities.map(toNames, pool).printStrs(stream);
+		cities.map(&toNames, pool).printStrs(stream);
 	}
 
 	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
 	{
 		StaticVector<char, MAX_NAME_SIZE> result;
-		const char* cityName = citiesName[n];
+		StaticVector<char, MAX_NAME_SIZE> cityName = cityNames[n];
 		int i{ 0 };
 		for (; cityName[i] != '\0'; ++i)
 		{
@@ -206,6 +227,7 @@ public:
 
 private:
 	StaticVector<char, BUF_SIZE> buffer;
+	static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
 	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
 
 	// startCity = 5, Ankara by default
@@ -213,88 +235,4 @@ private:
 
 	ObjectPool<Node<unsigned>, 81> pool;
 	LinkedList<unsigned> cities{ pool };
-
-	constexpr static char const* const citiesName[81] = {
-		"ADANA",
-		"ADIYAMAN",
-		"AFYONKARAHISAR",
-		"AGRI",
-		"AMASYA",
-		"ANKARA",
-		"ANTALYA",
-		"ARTVIN",
-		"AYDIN",
-		"BALIKESIR",
-		"BILECIK",
-		"BINGOL",
-		"BITLIS",
-		"BOLU",
-		"BURDUR",
-		"BURSA",
-		"CANAKKALE",
-		"CANKIRI",
-		"CORUM",
-		"DENIZLI",
-		"DIYARBAKIR",
-		"EDIRNE",
-		"ELAZIG",
-		"ERZINCAN",
-		"ERZURUM",
-		"ESKISEHIR",
-		"GAZIANTEP",
-		"GIRESUN",
-		"GUMUSHANE",
-		"HAKKARI",
-		"HATAY",
-		"ISPARTA",
-		"MERSIN",
-		"ISTANBUL",
-		"IZMIR",
-		"KARS",
-		"KASTAMONU",
-		"KAYSERI",
-		"KIRKLARELI",
-		"KIRSEHIR",
-		"KOCAELI (IZMIT)",
-		"KONYA",
-		"KUTAHYA",
-		"MALATYA",
-		"MANISA",
-		"KAHRAMANMARAS",
-		"MARDIN",
-		"MUGLA",
-		"MUS",
-		"NEVSEHIR",
-		"NIGDE",
-		"ORDU",
-		"RIZE",
-		"SAKARYA (ADAPAZARI)",
-		"SAMSUN",
-		"SIIRT",
-		"SINOP",
-		"SIVAS",
-		"TEKIRDAG",
-		"TOKAT",
-		"TRABZON",
-		"TUNCELI",
-		"SANLIURFA",
-		"USAK",
-		"VAN",
-		"YOZGAT",
-		"ZONGULDAK",
-		"AKSARAY",
-		"BAYBURT",
-		"KARAMAN",
-		"KIRIKKALE",
-		"BATMAN",
-		"SIRNAK",
-		"BARTIN",
-		"ARDAHAN",
-		"IGDIR",
-		"YALOVA",
-		"KARABUK",
-		"KILIS",
-		"OSMANIYE",
-		"DUZCE",
-	};
 };
