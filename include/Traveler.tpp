@@ -1,10 +1,12 @@
 #pragma once
 
 #include <climits>
+#include <compare> // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
 
 #include "LinkedList.tpp"
+#include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
 // 2^16 char size buffer
@@ -168,7 +170,7 @@ public:
 
 	constexpr void travel() noexcept
 	{
-		// cities.push(6);
+		cities.push(6);
 	}
 
 private:
@@ -178,6 +180,6 @@ private:
 	// startCity = 5, Ankara by default
 	unsigned startCity{ 5 }, X{ 200 }, Y{ 50 };
 
-	// ObjectPool<Node<unsigned>, 81> pool;
-	// LinkedList<unsigned> cities{ pool };
+	ObjectPool<Node<unsigned>, 81> pool;
+	LinkedList<unsigned> cities{ pool };
 };
