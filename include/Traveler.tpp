@@ -176,7 +176,10 @@ public:
 	constexpr void travel() noexcept
 	{
 		cities.push(startCity);
+		cities.push(25);
 		cities.push(0);
+		cities.push(2);
+		cities.push(53);
 	}
 
 	constexpr void printRoute() const noexcept
@@ -192,10 +195,12 @@ public:
 	{
 		StaticVector<char, MAX_NAME_SIZE> result;
 		const char* cityName = citiesName[n];
-		for (int i{ 0 }; i < sizeof(cityName); ++i)
+		int i{ 0 };
+		for (; cityName[i] != '\0'; ++i)
 		{
 			result[i] = cityName[i];
 		}
+		result[i] = '\0';
 		return result;
 	}
 
