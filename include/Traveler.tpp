@@ -142,7 +142,8 @@ public:
 				fprintf(stdout, "%d", 0);
 			}
 			// TODO: print the name of the city in between ;;
-			fprintf(stdout, "%d;;", ++i);
+			fprintf(stdout, "%d;", ++i);
+			fprintf(stdout, "%s;", citiesName[i - 1]);
 			for (int j{ 0 }; auto & n : l)
 			{
 				if (++j == 81)
