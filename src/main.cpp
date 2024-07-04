@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	t.getStartCity(argv[2]);
 	t.getRange(argv[3], argv[4]);
 	t.filterByRange();
-	// t.printAdjacencyMatrix();
+	t.printAdjacencyMatrix();
 	t.travel();
 	t.printRoute(stdout);
 

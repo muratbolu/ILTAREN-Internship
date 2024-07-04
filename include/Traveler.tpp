@@ -199,7 +199,7 @@ public:
 
 		citiesStack.push(startCity);
 
-		while (cities.size() < 81 && citiesStack.size() > 0)
+		while (cities.size() < 60 && citiesStack.size() > 0)
 		{
 			unsigned nextCity{ *citiesStack.pop() };
 			if (cities.contains(nextCity))
