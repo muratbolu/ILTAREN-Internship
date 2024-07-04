@@ -15,6 +15,9 @@
 // 2^10 line size buffer
 #define LINE_SIZE (1024)
 
+// max 32 characters for city names
+#define MAX_NAME_SIZE (32)
+
 class Traveler
 {
 public:
@@ -170,13 +173,29 @@ public:
 
 	constexpr void travel() noexcept
 	{
-		cities.push(06);
-		cities.push(26);
+		cities.push(startCity);
 	}
 
 	constexpr void printRoute() noexcept
 	{
-		cities.print(stdout);
+		// allocate a pool for city names
+		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
+
+		// map and print city names
+		cities.map(toNames, pool).printStrs(stdout);
+	}
+
+	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
+	{
+		StaticVector<char, MAX_NAME_SIZE> result;
+		result[0] = 'A';
+		result[1] = 'N';
+		result[2] = 'K';
+		result[3] = 'A';
+		result[4] = 'R';
+		result[5] = 'A';
+		result[6] = '\0';
+		return result;
 	}
 
 private:

@@ -6,7 +6,12 @@ template<typename T, unsigned N>
 class StaticVector
 {
 public:
-	constexpr StaticVector() noexcept {}
+	constexpr StaticVector() noexcept = default;
+	constexpr ~StaticVector() noexcept = default;
+	constexpr StaticVector(const StaticVector&) noexcept = default;
+	constexpr StaticVector(StaticVector&&) noexcept = default;
+	constexpr StaticVector& operator=(const StaticVector& obj) noexcept = default;
+	constexpr StaticVector& operator=(StaticVector&&) noexcept = default;
 
 	constexpr T at(unsigned n) const noexcept
 	{
@@ -83,5 +88,5 @@ public:
 
 private:
 	T mData[N + 1]{ T() };
-	const unsigned mSize{ N };
+	unsigned mSize{ N };
 };

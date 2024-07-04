@@ -13,6 +13,10 @@ public:
 	{
 		deleteAll(mHead);
 	}
+	constexpr LinkedList(const LinkedList&) noexcept = default;
+	constexpr LinkedList(LinkedList&&) noexcept = default;
+	constexpr LinkedList& operator=(const LinkedList&) noexcept = default;
+	constexpr LinkedList& operator=(LinkedList&&) noexcept = default;
 
 	constexpr unsigned size() const noexcept
 	{
@@ -132,7 +136,37 @@ public:
 		return result;
 	}
 
-	constexpr void print(FILE* stream) noexcept
+	// Needs a pool to allocate from
+	template<typename U>
+	constexpr LinkedList<U> map(U(*func)(T), IObjectPool<Node<U>>& pool) noexcept
+	{
+		LinkedList<U> result{ pool };
+
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			result.push(func(curr->data()));
+		}
+
+		return result;
+	}
+
+	// Only use it with NULL-terminated strings
+	constexpr void printStrs(FILE* stream) noexcept
+	{
+		fputs("[", stream);
+		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+		{
+			fprintf(stream, "%s", curr->data());
+			if (curr->next() != nullptr)
+			{
+				fputs(", ", stream);
+			}
+		}
+		fputs("]", stream);
+	}
+
+	// Prints the numbers as int (%d)
+	constexpr void printNums(FILE* stream) noexcept
 	{
 		fputs("[", stream);
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
