@@ -199,7 +199,7 @@ public:
 
 		citiesStack.push(startCity);
 
-		while (cities.size() < 81)
+		while (cities.size() < 81 && citiesStack.size() > 0)
 		{
 			unsigned nextCity{ *citiesStack.pop() };
 			if (cities.contains(nextCity))
@@ -217,6 +217,8 @@ public:
 				++i;
 			}
 		}
+
+		fprintf(stdout, "%d\n", cities.size());
 
 		// TODO: These are for debugging. Remove
 		/*
