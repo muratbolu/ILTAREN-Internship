@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cstdio>
+#include <cstdlib>
 
 #include "StaticVector.tpp"
 
@@ -115,6 +116,12 @@ public:
 		}
 	}
 
+	void getRange(const char* arg1, const char* arg2) noexcept
+	{
+		X = atoi(arg1);
+		Y = atoi(arg2);
+	}
+
 	constexpr void printAdjacencyMatrix() noexcept
 	{
 		for (int i{ 0 }; auto & l : adjacencyMatrix)
@@ -139,13 +146,13 @@ public:
 		}
 	}
 
-	constexpr void filterByRange(unsigned min, unsigned max) noexcept
+	constexpr void filterByRange() noexcept
 	{
 		for (auto& l : adjacencyMatrix)
 		{
 			for (auto& n : l)
 			{
-				if (n < min || n > max)
+				if ((n < (X - Y)) || (n > (X + Y)))
 				{
 					n = UINT_MAX;
 				}
@@ -156,4 +163,5 @@ public:
 private:
 	StaticVector<char, BUF_SIZE> buffer;
 	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
+	unsigned X{ 0 }, Y{ 0 };
 };

@@ -4,10 +4,10 @@
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2)
+	if (argc != 4)
 	{
 		int rc = fputs(
-			"Provide exactly one argument, which should be the input file.\n", stderr);
+			"Provide exactly three arguments: input file, X, and Y.\n", stderr);
 		if (rc == EOF)
 		{
 			perror("Invalid argument number");
@@ -21,7 +21,8 @@ int main(int argc, char* argv[])
 		return 1; // EXIT_FAILURE
 	}
 	t.parseInput();
-	t.filterByRange(150, 250);
+	t.getRange(argv[2], argv[3]);
+	t.filterByRange();
 	t.printAdjacencyMatrix();
 
 	return 0;
