@@ -1,6 +1,8 @@
 #include <cstdio>
 
-int main(int argc, char** argv)
+#include "Traveler.tpp"
+
+int main(int argc, char* argv[])
 {
 	if (argc != 2)
 	{
@@ -13,15 +15,15 @@ int main(int argc, char** argv)
 		return 1; // EXIT_FAILURE
 	}
 
-	FILE* fp = fopen(argv[1], "r");
-	if (fp == nullptr)
+	Traveler t;
+	if (!t.getInput(argv[1]))
 	{
-		perror("Could not open file");
-		return 1;
+		return 1; // EXIT_FAILURE
+	}
+	if (!t.parseInput())
+	{
+		return 1; // EXIT_FAILURE
 	}
 
-	// TODO: get chars
-
-	fclose(fp);
 	return 0;
 }
