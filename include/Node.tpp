@@ -5,7 +5,14 @@ class Node
 {
 public:
 	constexpr Node() noexcept : mData{ T{} } {}
-	constexpr Node(T data) noexcept : mData{ data } {}
+	constexpr ~Node() noexcept = default;
+	constexpr Node(const Node&) noexcept = default;
+	constexpr Node(Node&&) noexcept = default;
+	constexpr Node& operator=(const Node&) noexcept = default;
+	constexpr Node& operator=(Node&&) noexcept = default;
+
+	constexpr Node(const T& data) noexcept : mData{ data } {}
+	constexpr Node(T&& data) noexcept : mData{ data } {}
 
 	constexpr T data() const noexcept
 	{

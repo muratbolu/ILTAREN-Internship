@@ -26,7 +26,7 @@ TEST_F(NodeIterTest, Traversal1)
 {
 	ASSERT_TRUE(ll.push(1));
 	ASSERT_TRUE(ll.push(1));
-	for (auto&& i : ll)
+	for (int i : ll)
 	{
 		EXPECT_EQ(i, 1);
 	}

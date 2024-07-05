@@ -14,6 +14,12 @@ public:
 			i = true;
 		}
 	}
+	constexpr ~ObjectPool() noexcept override = default;
+	constexpr ObjectPool(const ObjectPool&) noexcept = default;
+	constexpr ObjectPool(ObjectPool&&) noexcept = default;
+	constexpr ObjectPool& operator=(const ObjectPool&) noexcept = default;
+	constexpr ObjectPool& operator=(ObjectPool&&) noexcept = default;
+
 	constexpr T* allocate() noexcept override
 	{
 		for (unsigned i{ 0 }; i < N; ++i)
@@ -26,6 +32,7 @@ public:
 		}
 		return nullptr;
 	}
+
 	constexpr bool deallocate(T* ptr) noexcept override
 	{
 		if (ptr != nullptr

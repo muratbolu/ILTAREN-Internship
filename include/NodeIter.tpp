@@ -8,6 +8,11 @@ class NodeIter : public IIter<T>
 {
 public:
 	constexpr NodeIter(Node<T>* ptr) noexcept :mPtr{ ptr } {}
+	constexpr ~NodeIter() noexcept override = default;
+	constexpr NodeIter(const NodeIter&) noexcept = default;
+	constexpr NodeIter(NodeIter&&) noexcept = default;
+	constexpr NodeIter& operator=(const NodeIter&) noexcept = default;
+	constexpr NodeIter& operator=(NodeIter&&) noexcept = default;
 
 	constexpr NodeIter& next() noexcept override
 	{
@@ -66,23 +71,23 @@ public:
 	}
 
 	// operator!= is automatically generated
-	constexpr friend inline bool operator==(const NodeIter& lhs, const NodeIter& rhs) noexcept
+	constexpr friend inline static bool operator==(const NodeIter& lhs, const NodeIter& rhs) noexcept
 	{
 		return lhs.mPtr == rhs.mPtr;
 	}
 
-	constexpr inline bool operator==(const T* rhs) noexcept
+	constexpr inline bool operator==(const T* rhs) const noexcept
 	{
 		return mPtr == rhs;
 	}
 
 	// operators <, <=, >, >=  are automatically generated
-	constexpr friend inline auto operator<=>(const NodeIter& lhs, const NodeIter& rhs) noexcept
+	constexpr friend inline static auto operator<=>(const NodeIter& lhs, const NodeIter& rhs) noexcept
 	{
 		return lhs.mPtr <=> rhs.mPtr;
 	}
 
-	constexpr inline auto operator<=>(const T* rhs) noexcept
+	constexpr inline auto operator<=>(const T* rhs) const noexcept
 	{
 		return mPtr <=> rhs;
 	}

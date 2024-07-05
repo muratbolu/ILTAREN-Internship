@@ -1,10 +1,65 @@
 #include "LinkedListTest.hpp"
 
-#include <sstream>
+#include <utility>
 
 TEST_F(LinkedListTest, Initialization)
 {
 	;
+}
+
+TEST_F(LinkedListTest, CopyConstructor)
+{
+	ASSERT_TRUE(ll1.push(5));
+	ASSERT_TRUE(ll1.push(7));
+	LinkedList<int> ll{ ll1 };
+	EXPECT_EQ(*ll[0], 5);
+	EXPECT_EQ(*ll[1], 7);
+	for (unsigned i{ 0 }; i < ll.size(); ++i)
+	{
+		EXPECT_EQ(*ll[i], *ll1[i]);
+		EXPECT_FALSE(ll[i] == ll1[i]);
+	}
+}
+
+TEST_F(LinkedListTest, MoveConstructor)
+{
+	ASSERT_TRUE(ll1.push(5));
+	ASSERT_TRUE(ll1.push(7));
+	int* ptr0 = ll1[0];
+	int* ptr1 = ll1[1];
+	LinkedList<int> ll{ std::move(ll1) };
+	EXPECT_EQ(*ll[0], 5);
+	EXPECT_EQ(*ll[1], 7);
+	EXPECT_EQ(ll[0], ptr0);
+	EXPECT_EQ(ll[1], ptr1);
+}
+
+TEST_F(LinkedListTest, CopyAssignment)
+{
+	ASSERT_TRUE(ll1.push(5));
+	ASSERT_TRUE(ll1.push(7));
+	ASSERT_TRUE(ll2.push(9));
+	ASSERT_TRUE(ll2.push(11));
+	ll1 = ll2;
+	EXPECT_EQ(*ll1[0], 9);
+	EXPECT_EQ(*ll1[1], 11);
+	EXPECT_FALSE(ll1[0] == ll2[0]);
+	EXPECT_FALSE(ll1[1] == ll2[1]);
+}
+
+TEST_F(LinkedListTest, MoveAssignment)
+{
+	ASSERT_TRUE(ll1.push(5));
+	ASSERT_TRUE(ll1.push(7));
+	ASSERT_TRUE(ll2.push(9));
+	ASSERT_TRUE(ll2.push(11));
+	int* ptr0{ ll2[0] };
+	int* ptr1{ ll2[1] };
+	ll1 = std::move(ll2);
+	EXPECT_EQ(*ll1[0], 9);
+	EXPECT_EQ(*ll1[1], 11);
+	EXPECT_EQ(ll1[0], ptr0);
+	EXPECT_EQ(ll1[1], ptr1);
 }
 
 TEST_F(LinkedListTest, Push)

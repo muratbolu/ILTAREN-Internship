@@ -13,10 +13,42 @@ public:
 	{
 		deleteAll(mHead);
 	}
-	constexpr LinkedList(const LinkedList&) noexcept = default;
-	constexpr LinkedList(LinkedList&&) noexcept = default;
-	constexpr LinkedList& operator=(const LinkedList&) noexcept = default;
-	constexpr LinkedList& operator=(LinkedList&&) noexcept = default;
+	constexpr LinkedList(const LinkedList& obj) noexcept
+		: mHead{ nullptr }
+		, mNodePool{ obj.mNodePool }
+		, mSize{ 0 }
+	{
+		for (T i : obj)
+		{
+			push(i);
+		}
+	}
+	constexpr LinkedList(LinkedList&& obj) noexcept
+		: mHead{ obj.mHead }
+		, mNodePool{ obj.mNodePool }
+		, mSize{ obj.mSize }
+	{
+	}
+	constexpr LinkedList& operator=(const LinkedList& obj) noexcept
+	{
+		deleteAll(mHead);
+		mHead = nullptr;
+		mNodePool = obj.mNodePool;
+		mSize = obj.mSize;
+		for (T i : obj)
+		{
+			push(i);
+		}
+		return *this;
+	}
+	constexpr LinkedList& operator=(LinkedList&& obj) noexcept
+	{
+		deleteAll(mHead);
+		mHead = obj.mHead;
+		mNodePool = obj.mNodePool;
+		mSize = obj.mSize;
+		return *this;
+	}
 
 	constexpr unsigned size() const noexcept
 	{

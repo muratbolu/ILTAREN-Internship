@@ -229,6 +229,14 @@ public:
 
 	}
 
+	LinkedList<unsigned> visitableCities(unsigned start, LinkedList<unsigned> visited) const noexcept
+	{
+		for (unsigned i{ 0 }; i < 81; ++i)
+		{
+
+		}
+	}
+
 	void printRoute(FILE* stream) const noexcept
 	{
 		// allocate a pool for city names
