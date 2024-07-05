@@ -194,7 +194,7 @@ public:
 	// Zero-indexing for cities, 0 => ADANA, etc.
 	void travel() noexcept
 	{
-		ObjectPool<Node<unsigned>, 4500> stackPool;
+		ObjectPool<Node<unsigned>, 10000> stackPool;
 		LinkedList<unsigned> visited{ stackPool };
 		visited.push(startCity);
 		cities = visitableCities(visited);
@@ -225,7 +225,7 @@ public:
 				}
 				// pass-by-value, so visited is intact
 				LinkedList<unsigned> temp{ visitableCities(myVisited) };
-				if (temp.size() > 60)
+				if (temp.size() > 74)
 				{
 					return temp;
 				}
