@@ -114,13 +114,15 @@ public:
 
 	constexpr bool push(const T& data) noexcept
 	{
-		// BUG: node pointer might be dirty!
 		Node<T>* node = mNodePool.allocate();
 		if (node == nullptr)
 		{
 			return false;
 		}
+		// Node might be dirty!
 		node->data() = data;
+		node->next() = nullptr;
+		node->prev() = nullptr;
 
 		if (mHead == nullptr)
 		{

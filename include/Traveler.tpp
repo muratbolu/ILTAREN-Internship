@@ -177,15 +177,38 @@ public:
 		}
 	}
 
+	constexpr void printFilteredAdjacencyMatrix() noexcept
+	{
+		for (int i{ 0 }; auto & l : filteredAdjacencyMatrix)
+		{
+			fprintf(stdout, "%02d", ++i);
+			fputc(SEP, stdout);
+			fprintf(stdout, "%s", cityNames[i - 1].data());
+			fputc(SEP, stdout);
+			for (int j{ 0 }; auto & n : l)
+			{
+				fprintf(stdout, "%d", n);
+				if (++j != 81)
+				{
+					fputc(SEP, stdout);
+				}
+			}
+			fprintf(stdout, "\n");
+		}
+	}
+
 	constexpr void filterByRange() noexcept
 	{
-		for (auto& l : adjacencyMatrix)
+		for (unsigned i{ 0 }; i < 81; ++i)
 		{
-			for (auto& n : l)
+			for (unsigned j{ 0 }; j < 81; ++j)
 			{
-				if ((n < (X - Y)) || (n > (X + Y)))
+				if ((adjacencyMatrix[i][j] < (X - Y)) || (adjacencyMatrix[i][j] > (X + Y)))
 				{
-					n = UINT_MAX;
+					filteredAdjacencyMatrix[i][j] = UINT_MAX;
+				}
+				else {
+					filteredAdjacencyMatrix[i][j] = adjacencyMatrix[i][j];
 				}
 			}
 		}
@@ -200,10 +223,12 @@ public:
 		cities = visitableCities(visited);
 	}
 
-	/* Returns the longest path of cities visitable from a start city, not
-	 * visiting the previously-visited cities. `start` is the index of the
-	 * starting city, and visited is the stack of previously-visited cities.
-	 * Returns a LinkedList of the longest full route, appending to visited.
+	// TODO: eliminate stack allocations.
+	// TODO: eliminate recursive methods.
+
+	/* Returns the longest path of cities visitable, not visiting the
+	 * previously-visited cities. Exists early if a sufficiently long
+	 * route is found.
 	 */
 	LinkedList<unsigned> visitableCities(const LinkedList<unsigned>& visited) noexcept
 	{
@@ -214,7 +239,7 @@ public:
 		// Iterates through all neighbors
 		for (unsigned i{ 0 }; i < 81; ++i)
 		{
-			unsigned dist{ adjacencyMatrix[*myVisited.back()][i] };
+			unsigned dist{ filteredAdjacencyMatrix[*myVisited.back()][i] };
 			// if distance is valid and the city is not visited before
 			if (dist < UINT_MAX && !myVisited.contains(i))
 			{
@@ -238,6 +263,28 @@ public:
 		return best;
 	}
 
+	constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
+	{
+		for (unsigned i{ 0 }; (i + 1) < cs.size(); ++i)
+		{
+			if (filteredAdjacencyMatrix[*cs[i]][*cs[i + 1]] == UINT_MAX)
+			{
+				return false;
+			}
+		}
+		for (unsigned i{ 0 }; i < cs.size(); ++i)
+		{
+			for (unsigned j{ i + 1 }; j < cs.size(); ++j)
+			{
+				if (*cs[i] == *cs[j])
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	void printRoute(FILE* stream) const noexcept
 	{
 		// allocate a pool for city names
@@ -251,25 +298,19 @@ public:
 
 	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
 	{
-		StaticVector<char, MAX_NAME_SIZE> result;
-		StaticVector<char, MAX_NAME_SIZE> cityName = cityNames[n];
-		int i{ 0 };
-		for (; cityName[i] != '\0'; ++i)
-		{
-			result[i] = cityName[i];
-		}
-		result[i] = '\0';
-		return result;
+		return cityNames[n];
 	}
 
 private:
 	StaticVector<char, BUF_SIZE> buffer;
 	static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
 	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
-
-	// startCity = 5, Ankara by default
-	unsigned startCity{ 5 }, X{ 200 }, Y{ 50 };
-
+	StaticVector<StaticVector<unsigned, 81>, 81> filteredAdjacencyMatrix;
+	unsigned startCity, X, Y;
 	ObjectPool<Node<unsigned>, 81> pool;
+public:
+	/* LinkedList needs to be below ObjectPool because the objects in
+	 * the class are destructed from below to top!!!
+	 */
 	LinkedList<unsigned> cities{ pool };
 };

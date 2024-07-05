@@ -14,7 +14,6 @@ int main(int argc, char* argv[])
 		}
 		return 1; // EXIT_FAILURE
 	}
-
 	Traveler t;
 	if (!t.getInput(argv[1]))
 	{
@@ -25,8 +24,16 @@ int main(int argc, char* argv[])
 	t.getRange(argv[3], argv[4]);
 	t.filterByRange();
 	// t.printAdjacencyMatrix();
+	// t.printFilteredAdjacencyMatrix();
 	t.travel();
-	t.printRoute(stdout);
-
+	if (t.validator(t.cities))
+	{
+		puts("Valid route");
+		t.printRoute(stdout);
+	}
+	else
+	{
+		puts("Invalid route");
+	}
 	return 0;
 }

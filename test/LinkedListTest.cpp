@@ -204,12 +204,21 @@ TEST_F(LinkedListTest, Write)
 	EXPECT_EQ(*ll1[0], 15);
 }
 
-TEST_F(LinkedListTest, InvalidWrite)
+TEST_F(LinkedListTest, InvalidAccess1)
 {
 	ASSERT_TRUE(ll1.push(12));
-	*ll1[1] = 15;
-	EXPECT_EQ(*ll1[0], 12);
-	EXPECT_EQ(*ll1[1], int{});
+	EXPECT_EQ(ll1[1], nullptr);
+}
+
+TEST_F(LinkedListTest, InvalidAccess2)
+{
+	EXPECT_EQ(ll1[0], nullptr);
+}
+
+TEST_F(LinkedListTest, InvalidAccess3)
+{
+	ASSERT_TRUE(ll1.push(12));
+	EXPECT_EQ(ll1[-1], nullptr);
 }
 
 TEST_F(LinkedListTest, Front)

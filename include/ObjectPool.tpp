@@ -27,8 +27,6 @@ public:
 			if (mVacant[i] == true)
 			{
 				mVacant[i] = false;
-				// Clean the memory area
-				mPool[i] = T{};
 				return &mPool[i];
 			}
 		}
