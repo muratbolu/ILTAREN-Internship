@@ -23,3 +23,11 @@ TEST_F(NodeTest, Linkage)
 	n1.next()->prev() = &n1;
 	EXPECT_EQ(n1.next()->prev(), &n1);
 }
+
+TEST_F(NodeTest, CopyConstructor)
+{
+	Node<int> n4{ n2 };
+	EXPECT_EQ(n4.data(), n2.data());
+	EXPECT_EQ(n4.next(), n2.next());
+	EXPECT_EQ(n4.prev(), n2.prev());
+}

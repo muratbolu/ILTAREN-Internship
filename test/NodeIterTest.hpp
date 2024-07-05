@@ -11,5 +11,5 @@ class NodeIterTest : public testing::Test
 protected:
 	NodeIterTest() {}
 	ObjectPool<Node<int>, 4> pool;
-	LinkedList<int> ll{ pool };
+	LinkedList<int> ll{ &pool };
 };

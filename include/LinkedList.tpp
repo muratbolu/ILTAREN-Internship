@@ -8,7 +8,8 @@ template<typename T>
 class LinkedList
 {
 public:
-	constexpr LinkedList(IObjectPool<Node<T>>& pool) noexcept : mNodePool{ pool } {}
+	constexpr LinkedList() noexcept = default;
+	constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept : mNodePool{ pool } {}
 	constexpr ~LinkedList() noexcept
 	{
 		deleteAll(mHead);
@@ -114,7 +115,7 @@ public:
 
 	constexpr bool push(const T& data) noexcept
 	{
-		Node<T>* node = mNodePool.allocate();
+		Node<T>* node = mNodePool->allocate();
 		if (node == nullptr)
 		{
 			return false;
@@ -152,7 +153,7 @@ public:
 		{
 			// pop head
 			T* result = &mHead->data();
-			mNodePool.deallocate(mHead);
+			mNodePool->deallocate(mHead);
 			mHead = nullptr;
 			mSize--;
 			return result;
@@ -166,7 +167,7 @@ public:
 		}
 		curr->prev()->next() = nullptr;
 		T* result = &curr->data();
-		mNodePool.deallocate(curr);
+		mNodePool->deallocate(curr);
 		mSize--;
 		return result;
 	}
@@ -177,7 +178,8 @@ public:
 	template<typename U>
 	constexpr LinkedList<U> map(U(*func)(T), IObjectPool<Node<U>>& pool) const noexcept
 	{
-		LinkedList<U> result{ pool };
+		// TODO: remove stack allocation
+		LinkedList<U> result{ &pool };
 
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
@@ -234,7 +236,10 @@ public:
 
 private:
 	Node<T>* mHead{ nullptr };
-	IObjectPool<Node<T>>& mNodePool;
+	/* Changed mNodePool from a reference to a pointer
+	 * in order to have a default constructor.
+	 */
+	IObjectPool<Node<T>>* mNodePool;
 	unsigned mSize{ 0 };
 
 	/* Deletes all nodes following the argument and the
@@ -247,7 +252,7 @@ private:
 			return;
 		}
 		Node<T>* next{ node->next() };
-		mNodePool.deallocate(node);
+		mNodePool->deallocate(node);
 		// tail recursive, suitable for optimization
 		deleteAll(next);
 	}

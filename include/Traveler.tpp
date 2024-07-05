@@ -196,9 +196,11 @@ public:
 	// Zero-indexing for cities, 0 => ADANA, etc.
 	void travel() noexcept
 	{
-		LinkedList<unsigned> visited{ cityStackPool };
-		visited.push(startCity);
-		cities = visitableCities(visited);
+		LinkedList<unsigned>& visitedPtr{ *linkedListPool.allocate() };
+		visitedPtr = LinkedList<unsigned>{ &cityStackPool };
+		visitedPtr.push(startCity);
+		cities = visitableCities(visitedPtr);
+		linkedListPool.deallocate(&visitedPtr);
 	}
 
 	// TODO: eliminate stack allocations.
@@ -208,37 +210,43 @@ public:
 	 * previously-visited cities. Exists early if a sufficiently long
 	 * route is found.
 	 */
-	LinkedList<unsigned> visitableCities(const LinkedList<unsigned>& visited) noexcept
+	LinkedList<unsigned>& visitableCities(LinkedList<unsigned>& visitedPtr) noexcept
 	{
-		// keep a local copy
-		LinkedList<unsigned> myVisited{ visited };
 		// remembers the best route seen so far
-		LinkedList<unsigned> best{ myVisited };
+		LinkedList<unsigned>& bestPtr{ *linkedListPool.allocate() };
+		bestPtr = visitedPtr;
+
 		// Iterates through all neighbors
 		for (unsigned i{ 0 }; i < 81; ++i)
 		{
-			unsigned dist{ filteredAdjacencyMatrix[*myVisited.back()][i] };
+			unsigned dist{ filteredAdjacencyMatrix[*visitedPtr.back()][i] };
 			// if distance is valid and the city is not visited before
-			if (dist < UINT_MAX && !myVisited.contains(i))
+			if (dist < UINT_MAX && !visitedPtr.contains(i))
 			{
-				if (!myVisited.push(i))
+				if (!visitedPtr.push(i))
 				{
-					return best;
+					printf("out of memory");
+					return bestPtr;
 				}
-				// pass-by-value, so visited is intact
-				LinkedList<unsigned> temp{ visitableCities(myVisited) };
-				if (temp.size() > 65)
+				LinkedList<unsigned>& tempPtr{ *linkedListPool.allocate() };
+				tempPtr = visitableCities(visitedPtr);
+				if (tempPtr.size() > 65)
 				{
-					return temp;
+					// bestPtr.~LinkedList();
+					linkedListPool.deallocate(&bestPtr);
+					return tempPtr;
 				}
-				if (temp.size() > best.size())
+				if (tempPtr.size() > bestPtr.size())
 				{
-					best = temp;
+					bestPtr = tempPtr;
 				}
-				myVisited.pop();
+				// tempPtr.~LinkedList();
+				linkedListPool.deallocate(&tempPtr);
+				visitedPtr.pop();
 			}
 		}
-		return best;
+
+		return bestPtr;
 	}
 
 	constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
@@ -297,9 +305,10 @@ private:
 
 	ObjectPool<Node<unsigned>, 81> pool;
 	ObjectPool<Node<unsigned>, 10000> cityStackPool;
+	ObjectPool<LinkedList<unsigned>, 10000> linkedListPool;
 public:
 	/* LinkedList needs to be below ObjectPool because the objects in
 	 * the class are destructed from below to top!!!
 	 */
-	LinkedList<unsigned> cities{ pool };
+	LinkedList<unsigned> cities{ &pool };
 };
