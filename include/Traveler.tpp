@@ -218,14 +218,13 @@ public:
 			// if distance is valid and the city is not visited before
 			if (dist < UINT_MAX && !myVisited.contains(i))
 			{
-				// recursively calls itself
 				if (!myVisited.push(i))
 				{
 					return best;
 				}
 				// pass-by-value, so visited is intact
 				LinkedList<unsigned> temp{ visitableCities(myVisited) };
-				if (temp.size() > 74)
+				if (temp.size() > 65)
 				{
 					return temp;
 				}
@@ -244,6 +243,7 @@ public:
 		// allocate a pool for city names
 		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
 
+		fprintf(stream, "Length: %d\n", cities.size());
 		// map and print city names
 		cities.map(&toNames, pool).printStrs(stream);
 		fputc('\n', stream);
