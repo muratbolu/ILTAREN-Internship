@@ -194,47 +194,49 @@ public:
 	// Zero-indexing for cities, 0 => ADANA, etc.
 	void travel() noexcept
 	{
-		ObjectPool<Node<unsigned>, 500> stackPool;
-		LinkedList<unsigned> citiesStack{ stackPool };
-
-		citiesStack.push(startCity);
-
-		while (cities.size() < 60 && citiesStack.size() > 0)
-		{
-			unsigned nextCity{ *citiesStack.pop() };
-			if (cities.contains(nextCity))
-			{
-				continue;
-			}
-			cities.push(nextCity);
-			for (int i{ 0 }; unsigned c : adjacencyMatrix[*cities.back()])
-			{
-				if (c < UINT_MAX && !cities.contains(c))
-				{
-					// Maybe buggy: pushes cities multiple times
-					citiesStack.push(i);
-				}
-				++i;
-			}
-		}
-
-		fprintf(stdout, "%d\n", cities.size());
-
-		// TODO: These are for debugging. Remove
-		/*
-		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
-		citiesStack.map(&toNames, pool).printStrs(stdout);
-		fputc('\n', stdout);
-		*/
-
+		ObjectPool<Node<unsigned>, 4500> stackPool;
+		LinkedList<unsigned> visited{ stackPool };
+		visited.push(startCity);
+		cities = visitableCities(visited);
 	}
 
-	LinkedList<unsigned> visitableCities(unsigned start, LinkedList<unsigned> visited) const noexcept
+	/* Returns the longest path of cities visitable from a start city, not
+	 * visiting the previously-visited cities. `start` is the index of the
+	 * starting city, and visited is the stack of previously-visited cities.
+	 * Returns a LinkedList of the longest full route, appending to visited.
+	 */
+	LinkedList<unsigned> visitableCities(const LinkedList<unsigned>& visited) noexcept
 	{
+		// keep a local copy
+		LinkedList<unsigned> myVisited{ visited };
+		// remembers the best route seen so far
+		LinkedList<unsigned> best{ myVisited };
+		// Iterates through all neighbors
 		for (unsigned i{ 0 }; i < 81; ++i)
 		{
-
+			unsigned dist{ adjacencyMatrix[*myVisited.back()][i] };
+			// if distance is valid and the city is not visited before
+			if (dist < UINT_MAX && !myVisited.contains(i))
+			{
+				// recursively calls itself
+				if (!myVisited.push(i))
+				{
+					return best;
+				}
+				// pass-by-value, so visited is intact
+				LinkedList<unsigned> temp{ visitableCities(myVisited) };
+				if (temp.size() > 60)
+				{
+					return temp;
+				}
+				if (temp.size() > best.size())
+				{
+					best = temp;
+				}
+				myVisited.pop();
+			}
 		}
+		return best;
 	}
 
 	void printRoute(FILE* stream) const noexcept

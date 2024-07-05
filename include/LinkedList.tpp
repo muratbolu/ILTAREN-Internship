@@ -18,9 +18,9 @@ public:
 		, mNodePool{ obj.mNodePool }
 		, mSize{ 0 }
 	{
-		for (T i : obj)
+		for (unsigned i{ 0 }; i < obj.size(); ++i)
 		{
-			push(i);
+			push(*obj[i]);
 		}
 	}
 	constexpr LinkedList(LinkedList&& obj) noexcept
@@ -34,10 +34,10 @@ public:
 		deleteAll(mHead);
 		mHead = nullptr;
 		mNodePool = obj.mNodePool;
-		mSize = obj.mSize;
-		for (T i : obj)
+		mSize = 0;
+		for (unsigned i{ 0 }; i < obj.size(); ++i)
 		{
-			push(i);
+			push(*obj[i]);
 		}
 		return *this;
 	}
@@ -114,6 +114,7 @@ public:
 
 	constexpr bool push(const T& data) noexcept
 	{
+		// BUG: node pointer might be dirty!
 		Node<T>* node = mNodePool.allocate();
 		if (node == nullptr)
 		{
@@ -178,7 +179,10 @@ public:
 
 		for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
 		{
-			result.push(func(curr->data()));
+			if (!result.push(func(curr->data())))
+			{
+				printf("failed to push");
+			}
 		}
 
 		return result;
