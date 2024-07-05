@@ -24,8 +24,16 @@
 class Traveler
 {
 public:
-	constexpr Traveler() noexcept = default;
+	Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
+		: startCity{ static_cast<unsigned>(atoi(arg2) - 1) }
+		, X{ static_cast<unsigned>(atoi(arg3)) }
+		, Y{ static_cast<unsigned>(atoi(arg4)) }
+	{
+		getInput(arg1);
+		parseInput();
+	}
 
+	// returns false if something goes wrong but we don't use it
 	bool getInput(char arg[]) noexcept
 	{
 		FILE* fp = fopen(arg, "r");
@@ -108,13 +116,13 @@ public:
 			{
 				if (c == SEP)
 				{
-					cityNames[line][i++] = '\0';
+					Traveler::cityNames[line][i++] = '\0';
 					++sc;
 					state = CALC_NUM;
 				}
 				else
 				{
-					cityNames[line][i++] = c;
+					Traveler::cityNames[line][i++] = c;
 				}
 				break;
 			}
@@ -146,69 +154,40 @@ public:
 		}
 	}
 
-	void getStartCity(const char* arg) noexcept
+	constexpr void printMatrix(FILE* stream,
+		const StaticVector<StaticVector<unsigned, 81>, 81>& mat) const noexcept
 	{
-		startCity = atoi(arg) - 1;
-	}
-
-	void getRange(const char* arg1, const char* arg2) noexcept
-	{
-		X = atoi(arg1);
-		Y = atoi(arg2);
-	}
-
-	constexpr void printAdjacencyMatrix() noexcept
-	{
-		for (int i{ 0 }; auto & l : adjacencyMatrix)
+		for (unsigned i{ 0 }; i < 81; ++i)
 		{
-			fprintf(stdout, "%02d", ++i);
-			fputc(SEP, stdout);
-			fprintf(stdout, "%s", cityNames[i - 1].data());
-			fputc(SEP, stdout);
-			for (int j{ 0 }; auto & n : l)
+			fprintf(stream, "%02d", i + 1);
+			fputc(SEP, stream);
+			fprintf(stream, "%s", Traveler::cityNames[i].data());
+			fputc(SEP, stream);
+			for (unsigned j{ 0 }; j < 81; ++j)
 			{
-				fprintf(stdout, "%d", n);
-				if (++j != 81)
+				fprintf(stream, "%d", mat[i][j]);
+				if (j != 80)
 				{
-					fputc(SEP, stdout);
+					fputc(SEP, stream);
 				}
 			}
-			fprintf(stdout, "\n");
+			fprintf(stream, "\n");
 		}
 	}
 
-	constexpr void printFilteredAdjacencyMatrix() noexcept
-	{
-		for (int i{ 0 }; auto & l : filteredAdjacencyMatrix)
-		{
-			fprintf(stdout, "%02d", ++i);
-			fputc(SEP, stdout);
-			fprintf(stdout, "%s", cityNames[i - 1].data());
-			fputc(SEP, stdout);
-			for (int j{ 0 }; auto & n : l)
-			{
-				fprintf(stdout, "%d", n);
-				if (++j != 81)
-				{
-					fputc(SEP, stdout);
-				}
-			}
-			fprintf(stdout, "\n");
-		}
-	}
-
-	constexpr void filterByRange() noexcept
+	constexpr void filterByRange(StaticVector<StaticVector<unsigned, 81>, 81>& dst,
+		const StaticVector<StaticVector<unsigned, 81>, 81>& src) const noexcept
 	{
 		for (unsigned i{ 0 }; i < 81; ++i)
 		{
 			for (unsigned j{ 0 }; j < 81; ++j)
 			{
-				if ((adjacencyMatrix[i][j] < (X - Y)) || (adjacencyMatrix[i][j] > (X + Y)))
+				if ((src[i][j] < (X - Y)) || (src[i][j] > (X + Y)))
 				{
-					filteredAdjacencyMatrix[i][j] = UINT_MAX;
+					dst[i][j] = UINT_MAX;
 				}
 				else {
-					filteredAdjacencyMatrix[i][j] = adjacencyMatrix[i][j];
+					dst[i][j] = src[i][j];
 				}
 			}
 		}
@@ -217,8 +196,7 @@ public:
 	// Zero-indexing for cities, 0 => ADANA, etc.
 	void travel() noexcept
 	{
-		ObjectPool<Node<unsigned>, 10000> stackPool;
-		LinkedList<unsigned> visited{ stackPool };
+		LinkedList<unsigned> visited{ cityStackPool };
 		visited.push(startCity);
 		cities = visitableCities(visited);
 	}
@@ -287,27 +265,38 @@ public:
 
 	void printRoute(FILE* stream) const noexcept
 	{
-		// allocate a pool for city names
-		ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> pool;
-
 		fprintf(stream, "Length: %d\n", cities.size());
-		// map and print city names
-		cities.map(&toNames, pool).printStrs(stream);
+		cities.map(&Traveler::toNames, Traveler::cityNamesPool).printStrs(stream);
 		fputc('\n', stream);
 	}
 
-	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
-	{
-		return cityNames[n];
-	}
+	// Filled in by parseInput()
+	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
+	// Filled in by filterByRange()
+	StaticVector<StaticVector<unsigned, 81>, 81> filteredAdjacencyMatrix;
 
 private:
-	StaticVector<char, BUF_SIZE> buffer;
-	static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
-	StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
-	StaticVector<StaticVector<unsigned, 81>, 81> filteredAdjacencyMatrix;
+	// Used by printRoute. Must be called after parseInput()
+	constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
+	{
+		return Traveler::cityNames[n];
+	}
+
+	// Filled in by constructor
 	unsigned startCity, X, Y;
+
+	// Used by parseInput()
+	StaticVector<char, BUF_SIZE> buffer;
+
+	// Filled in by parseInput()
+	static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
+
+
+	// Used by printRoute()
+	static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
+
 	ObjectPool<Node<unsigned>, 81> pool;
+	ObjectPool<Node<unsigned>, 10000> cityStackPool;
 public:
 	/* LinkedList needs to be below ObjectPool because the objects in
 	 * the class are destructed from below to top!!!

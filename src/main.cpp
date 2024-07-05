@@ -14,17 +14,10 @@ int main(int argc, char* argv[])
 		}
 		return 1; // EXIT_FAILURE
 	}
-	Traveler t;
-	if (!t.getInput(argv[1]))
-	{
-		return 1; // EXIT_FAILURE
-	}
-	t.parseInput();
-	t.getStartCity(argv[2]);
-	t.getRange(argv[3], argv[4]);
-	t.filterByRange();
-	// t.printAdjacencyMatrix();
-	// t.printFilteredAdjacencyMatrix();
+	Traveler t{ argv[1], argv[2], argv[3], argv[4] };
+	t.filterByRange(t.filteredAdjacencyMatrix, t.adjacencyMatrix);
+	t.printMatrix(stdout, t.adjacencyMatrix);
+	t.printMatrix(stdout, t.filteredAdjacencyMatrix);
 	t.travel();
 	if (t.validator(t.cities))
 	{
