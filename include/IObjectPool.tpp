@@ -4,7 +4,13 @@ template<typename T>
 class IObjectPool
 {
 public:
-	virtual constexpr inline ~IObjectPool() noexcept {};
-	virtual constexpr T* allocate() noexcept = 0;
-	virtual constexpr bool deallocate(T* ptr) noexcept = 0;
+    constexpr IObjectPool() noexcept = default;
+    virtual constexpr inline ~IObjectPool() noexcept = default;
+    constexpr IObjectPool(const IObjectPool&) noexcept = default;
+    constexpr IObjectPool(IObjectPool&&) noexcept = default;
+    constexpr IObjectPool& operator=(const IObjectPool&) noexcept = default;
+    constexpr IObjectPool& operator=(IObjectPool&&) noexcept = default;
+
+    virtual constexpr T* allocate() noexcept = 0;
+    virtual constexpr bool deallocate(T* ptr) noexcept = 0;
 };
