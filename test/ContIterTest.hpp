@@ -7,14 +7,14 @@
 class ContIterTest : public testing::Test
 {
 protected:
-	ContIterTest()
-	{
-		*it1 = 5;
-	}
-	int p1;
-	ContIter<int> it1{ &p1 };
-	ContIter<int> it2{ &p1 };
+    ContIterTest()
+    {
+        *it1 = 5;
+    }
+    int p1;
+    ContIter<int> it1{ &p1 };
+    ContIter<int> it2{ &p1 };
 
-	int p2[4];
-	ContIter<int> it3{ p2 };
+    int p2[4];
+    ContIter<int> it3{ p2 };
 };
