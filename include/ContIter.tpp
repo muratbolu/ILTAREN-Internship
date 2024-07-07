@@ -70,7 +70,7 @@ public:
 	}
 
 	// operator!= is automatically generated
-	constexpr friend inline static bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
+	constexpr friend inline bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
 	{
 		return lhs.mPtr == rhs.mPtr;
 	}
@@ -81,7 +81,7 @@ public:
 	}
 
 	// operators <, <=, >, >=  are automatically generated
-	constexpr friend inline static auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
+	constexpr friend inline auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
 	{
 		return lhs.mPtr <=> rhs.mPtr;
 	}
