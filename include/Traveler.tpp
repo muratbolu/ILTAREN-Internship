@@ -30,7 +30,8 @@ public:
         X { static_cast<unsigned>(atoi(arg3)) },
         Y { static_cast<unsigned>(atoi(arg4)) }
     {
-        cities.pool() = &pool;
+        cities.pool() = &nodePool;
+        citiesStack.pool() = &llPool;
 
         getInput(arg1);
         parseInput();
@@ -196,8 +197,10 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        cities.push_back(5);
-        cities.push_back(25);
+        citiesStack.push_back(LinkedList<unsigned> {});
+        citiesStack.back()->pool() = &nodePool;
+        citiesStack.back()->push_back(startCity);
+        cities = *visitableCities(citiesStack.back());
     }
 
     // TODO: eliminate stack allocations.
@@ -207,46 +210,14 @@ public:
      * previously-visited cities. Exists early if a sufficiently long
      * route is found.
      */
-    /*
-    LinkedList<unsigned>& visitableCities(LinkedList<unsigned>& visitedPtr) noexcept
+
+    const LinkedList<unsigned>* visitableCities(const LinkedList<unsigned>* visited) noexcept
     {
-        // remembers the best route seen so far
-        LinkedList<unsigned>& bestPtr { *linkedListPool.allocate() };
-        bestPtr = visitedPtr;
-
-        // Iterates through all neighbors
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            unsigned dist { filteredAdjacencyMatrix[*visitedPtr.back()][i] };
-            // if distance is valid and the city is not visited before
-            if (dist < UINT_MAX && !visitedPtr.contains(i))
-            {
-                if (!visitedPtr.push(i))
-                {
-                    puts("out of memory");
-                    return bestPtr;
-                }
-                LinkedList<unsigned>& tempPtr { *linkedListPool.allocate() };
-                tempPtr = visitableCities(visitedPtr);
-                if (tempPtr.size() > 65)
-                {
-                    // bestPtr.~LinkedList();
-                    linkedListPool.deallocate(&bestPtr);
-                    return tempPtr;
-                }
-                if (tempPtr.size() > bestPtr.size())
-                {
-                    bestPtr = tempPtr;
-                }
-                // tempPtr.~LinkedList();
-                linkedListPool.deallocate(&tempPtr);
-                visitedPtr.pop();
-            }
-        }
-
-        return bestPtr;
+        citiesStack.push_back(LinkedList<unsigned> {});
+        citiesStack.back()->pool() = &nodePool;
+        citiesStack.back()->push_back(25);
+        return citiesStack.back();
     }
-    */
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
@@ -300,10 +271,12 @@ private:
     // Used by printRoute()
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
-    static inline ObjectPool<Node<unsigned>, 81> pool;
+    static inline ObjectPool<Node<unsigned>, 1000> nodePool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 1000> llPool;
+    static inline LinkedList<LinkedList<unsigned>> citiesStack;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
      */
-    LinkedList<unsigned> cities;
+    static inline LinkedList<unsigned> cities;
 };
