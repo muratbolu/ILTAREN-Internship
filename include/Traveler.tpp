@@ -206,7 +206,6 @@ public:
         citiesStack.pop_front();
     }
 
-    // TODO: eliminate stack allocations.
     // TODO: eliminate recursive methods.
 
     /* Returns the longest path of cities visitable, not visiting the
