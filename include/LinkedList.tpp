@@ -20,17 +20,21 @@ public:
     constexpr LinkedList(const LinkedList& obj) noexcept :
         mNodePool { obj.mNodePool }
     {
-        for (unsigned i { 0 }; i < obj.size(); ++i)
+        for (const T& o : obj)
         {
-            push(*obj[i]);
+            push(o);
         }
     }
 
+    // Manual std::exchange
     constexpr LinkedList(LinkedList&& obj) noexcept :
         mHead { obj.mHead },
         mNodePool { obj.mNodePool },
         mSize { obj.mSize }
     {
+        obj.mHead = nullptr;
+        obj.mNodePool = nullptr;
+        obj.mSize = 0;
     }
 
     constexpr LinkedList& operator=(const LinkedList& obj) noexcept
@@ -43,9 +47,9 @@ public:
         mHead = nullptr;
         mNodePool = obj.mNodePool;
         mSize = 0;
-        for (unsigned i { 0 }; i < obj.size(); ++i)
+        for (const T& o : obj)
         {
-            push(*obj[i]);
+            push(o);
         }
         return *this;
     }
@@ -56,6 +60,9 @@ public:
         mHead = obj.mHead;
         mNodePool = obj.mNodePool;
         mSize = obj.mSize;
+        obj.mHead = nullptr;
+        obj.mNodePool = nullptr;
+        obj.mSize = 0;
         return *this;
     }
 
@@ -200,12 +207,9 @@ public:
         LinkedList<U> result;
         result.pool() = pool;
 
-        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
+        for (const T& o : *this)
         {
-            if (!result.push(func(curr->data())))
-            {
-                puts("failed to push");
-            }
+            result.push(func(o));
         }
 
         return result;
@@ -213,7 +217,7 @@ public:
 
     constexpr bool contains(const T& obj) const noexcept
     {
-        for (T o : *this)
+        for (const T& o : *this)
         {
             if (obj == o)
             {
@@ -223,6 +227,7 @@ public:
         return false;
     }
 
+    // TODO: export print methods into friend methods in a separate file
     // Only use it with NULL-terminated strings
     constexpr void printStrs(FILE* stream) const noexcept
     {

@@ -30,6 +30,8 @@ public:
         X { static_cast<unsigned>(atoi(arg3)) },
         Y { static_cast<unsigned>(atoi(arg4)) }
     {
+        cities.pool() = &pool;
+
         getInput(arg1);
         parseInput();
     }
@@ -194,11 +196,8 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        LinkedList<unsigned>& visitedPtr { *linkedListPool.allocate() };
-        visitedPtr = LinkedList<unsigned> {};
-        visitedPtr.push(startCity);
-        cities = visitableCities(visitedPtr);
-        linkedListPool.deallocate(&visitedPtr);
+        cities.push(5);
+        cities.push(25);
     }
 
     // TODO: eliminate stack allocations.
@@ -208,6 +207,7 @@ public:
      * previously-visited cities. Exists early if a sufficiently long
      * route is found.
      */
+    /*
     LinkedList<unsigned>& visitableCities(LinkedList<unsigned>& visitedPtr) noexcept
     {
         // remembers the best route seen so far
@@ -246,6 +246,7 @@ public:
 
         return bestPtr;
     }
+    */
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
@@ -299,9 +300,7 @@ private:
     // Used by printRoute()
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
-    ObjectPool<Node<unsigned>, 81> pool;
-    ObjectPool<Node<unsigned>, 10000> cityStackPool;
-    ObjectPool<LinkedList<unsigned>, 10000> linkedListPool;
+    static inline ObjectPool<Node<unsigned>, 81> pool;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!

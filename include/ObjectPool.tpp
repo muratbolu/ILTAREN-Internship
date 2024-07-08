@@ -9,10 +9,7 @@ class ObjectPool : public IObjectPool<T>
 public:
     constexpr ObjectPool() noexcept
     {
-        for (bool& i : mVacant)
-        {
-            i = true;
-        }
+        mOccupied.clear();
     }
 
     constexpr ~ObjectPool() noexcept override = default;
@@ -23,11 +20,12 @@ public:
 
     constexpr T* allocate() noexcept override
     {
+        // TODO: implement a red-black tree for search
         for (unsigned i { 0 }; i < N; ++i)
         {
-            if (mVacant[i] == true)
+            if (!mOccupied[i])
             {
-                mVacant[i] = false;
+                mOccupied[i] = true;
                 return &mPool[i];
             }
         }
@@ -36,14 +34,14 @@ public:
 
     constexpr bool deallocate(T* ptr) noexcept override
     {
-        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() && mVacant[ptr - mPool.data()] == false)
+        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() && !mOccupied[ptr - mPool.data()] == false)
         {
-            mVacant[ptr - mPool.data()] = true;
+            mOccupied[ptr - mPool.data()] = false;
             return true;
         }
         return false;
     }
 private:
     StaticVector<T, N> mPool;
-    StaticVector<bool, N> mVacant;
+    StaticVector<bool, N> mOccupied;
 };

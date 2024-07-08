@@ -86,6 +86,6 @@ public:
         }
     }
 private:
-    T mData[N + 1];
+    T mData[N] { T {} };
     unsigned mSize { N };
 };
