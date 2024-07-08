@@ -196,8 +196,8 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        cities.push(5);
-        cities.push(25);
+        cities.push_back(5);
+        cities.push_back(25);
     }
 
     // TODO: eliminate stack allocations.

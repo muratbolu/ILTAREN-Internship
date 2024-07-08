@@ -22,17 +22,19 @@ public:
     {
         for (const T& o : obj)
         {
-            push(o);
+            push_back(o);
         }
     }
 
     // Manual std::exchange
     constexpr LinkedList(LinkedList&& obj) noexcept :
         mHead { obj.mHead },
+        mTail { obj.mTail },
         mNodePool { obj.mNodePool },
         mSize { obj.mSize }
     {
         obj.mHead = nullptr;
+        obj.mTail = nullptr;
         obj.mNodePool = nullptr;
         obj.mSize = 0;
     }
@@ -45,11 +47,12 @@ public:
         }
         deleteAll(mHead);
         mHead = nullptr;
+        mTail = nullptr;
         mNodePool = obj.mNodePool;
         mSize = 0;
         for (const T& o : obj)
         {
-            push(o);
+            push_back(o);
         }
         return *this;
     }
@@ -58,9 +61,11 @@ public:
     {
         deleteAll(mHead);
         mHead = obj.mHead;
+        mTail = obj.mTail;
         mNodePool = obj.mNodePool;
         mSize = obj.mSize;
         obj.mHead = nullptr;
+        obj.mTail = nullptr;
         obj.mNodePool = nullptr;
         obj.mSize = 0;
         return *this;
@@ -118,12 +123,9 @@ public:
 
     constexpr T* back() const noexcept
     {
-        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
+        if (mTail != nullptr)
         {
-            if (curr->next() == nullptr)
-            {
-                return &curr->data();
-            }
+            return &mTail->data();
         }
         return nullptr;
     }
@@ -138,7 +140,19 @@ public:
         return NodeIter<T> { nullptr };
     }
 
-    constexpr bool push(const T& data) noexcept
+    constexpr bool contains(const T& obj) const noexcept
+    {
+        for (const T& o : *this)
+        {
+            if (obj == o)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    constexpr bool push_front(const T& data) noexcept
     {
         Node<T>* node = mNodePool->allocate();
         if (node == nullptr)
@@ -152,22 +166,43 @@ public:
 
         if (mHead == nullptr)
         {
-            mHead = node;
+            mHead = mTail = node;
             mSize++;
             return true;
         }
-        Node<T>* curr = mHead;
-        while (curr->next() != nullptr)
-        {
-            curr = curr->next();
-        }
-        curr->next() = node;
-        curr->next()->prev() = curr;
+        node->next() = mHead;
+        node->next()->prev() = node;
+        mHead = node;
         mSize++;
         return true;
     }
 
-    constexpr T* pop() noexcept
+    constexpr bool push_back(const T& data) noexcept
+    {
+        Node<T>* node = mNodePool->allocate();
+        if (node == nullptr)
+        {
+            return false;
+        }
+        // Node might be dirty!
+        node->data() = data;
+        node->next() = nullptr;
+        node->prev() = nullptr;
+
+        if (mHead == nullptr)
+        {
+            mHead = mTail = node;
+            mSize++;
+            return true;
+        }
+        node->prev() = mTail;
+        node->prev()->next() = node;
+        mTail = node;
+        mSize++;
+        return true;
+    }
+
+    constexpr T* pop_front() noexcept
     {
         if (mHead == nullptr)
         {
@@ -180,18 +215,44 @@ public:
             T* result = &mHead->data();
             mNodePool->deallocate(mHead);
             mHead = nullptr;
+            mTail = nullptr;
+            mSize--;
+            return result;
+        }
+
+        // pop the first node
+        T* result = &mHead->data();
+        Node<T>* curr = mHead;
+        mHead = mHead->next();
+        mHead->prev() = nullptr;
+        mNodePool->deallocate(curr);
+        mSize--;
+        return result;
+    }
+
+    constexpr T* pop_back() noexcept
+    {
+        if (mHead == nullptr)
+        {
+            // invalid pop
+            return nullptr;
+        }
+        if (mHead->next() == nullptr)
+        {
+            // pop head
+            T* result = &mHead->data();
+            mNodePool->deallocate(mHead);
+            mHead = nullptr;
+            mTail = nullptr;
             mSize--;
             return result;
         }
 
         // pop the last node
-        Node<T>* curr = mHead;
-        while (curr->next() != nullptr)
-        {
-            curr = curr->next();
-        }
-        curr->prev()->next() = nullptr;
-        T* result = &curr->data();
+        T* result = &mTail->data();
+        Node<T>* curr = mTail;
+        mTail = mTail->prev();
+        mTail->next() = nullptr;
         mNodePool->deallocate(curr);
         mSize--;
         return result;
@@ -209,22 +270,10 @@ public:
 
         for (const T& o : *this)
         {
-            result.push(func(o));
+            result.push_back(func(o));
         }
 
         return result;
-    }
-
-    constexpr bool contains(const T& obj) const noexcept
-    {
-        for (const T& o : *this)
-        {
-            if (obj == o)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     // TODO: export print methods into friend methods in a separate file
@@ -259,6 +308,7 @@ public:
     }
 private:
     Node<T>* mHead { nullptr };
+    Node<T>* mTail { nullptr };
     /* Changed mNodePool from a reference to a pointer
      * in order to have a default constructor.
      */
@@ -274,6 +324,7 @@ private:
         {
             return;
         }
+        // pointer allocation in runtime is okay
         Node<T>* next { node->next() };
         mNodePool->deallocate(node);
         // tail recursive, suitable for optimization
