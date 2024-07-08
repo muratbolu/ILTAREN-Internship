@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.27..3.29)
-project(static_vector
+cmake_minimum_required (VERSION 3.27..3.30)
+project(ILTAREN-Internship
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
