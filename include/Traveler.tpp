@@ -195,7 +195,7 @@ public:
     void travel() noexcept
     {
         LinkedList<unsigned>& visitedPtr { *linkedListPool.allocate() };
-        visitedPtr = LinkedList<unsigned> { &cityStackPool };
+        visitedPtr = LinkedList<unsigned> {};
         visitedPtr.push(startCity);
         cities = visitableCities(visitedPtr);
         linkedListPool.deallocate(&visitedPtr);
@@ -272,7 +272,7 @@ public:
     void printRoute(FILE* stream) const noexcept
     {
         fprintf(stream, "Length: %d\n", cities.size());
-        cities.map(&Traveler::toNames, Traveler::cityNamesPool).printStrs(stream);
+        cities.map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stream);
         fputc('\n', stream);
     }
 
@@ -306,5 +306,5 @@ public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
      */
-    LinkedList<unsigned> cities { &pool };
+    LinkedList<unsigned> cities;
 };

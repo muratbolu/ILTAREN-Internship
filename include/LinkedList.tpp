@@ -12,11 +12,6 @@ class LinkedList
 public:
     constexpr LinkedList() noexcept = default;
 
-    constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept :
-        mNodePool { pool }
-    {
-    }
-
     constexpr ~LinkedList() noexcept
     {
         deleteAll(mHead);
@@ -62,6 +57,16 @@ public:
         mNodePool = obj.mNodePool;
         mSize = obj.mSize;
         return *this;
+    }
+
+    constexpr IObjectPool<Node<T>>* pool() const noexcept
+    {
+        return mNodePool;
+    }
+
+    constexpr IObjectPool<Node<T>>*& pool() noexcept
+    {
+        return mNodePool;
     }
 
     constexpr unsigned size() const noexcept
@@ -189,10 +194,11 @@ public:
      * creates a new LinkedList with the provided pool.
      */
     template<typename U>
-    constexpr LinkedList<U> map(U (*func)(T), IObjectPool<Node<U>>& pool) const noexcept
+    constexpr LinkedList<U> map(U (*func)(T), IObjectPool<Node<U>>* pool) const noexcept
     {
         // TODO: remove stack allocation
-        LinkedList<U> result { &pool };
+        LinkedList<U> result;
+        result.pool() = pool;
 
         for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
@@ -207,7 +213,7 @@ public:
 
     constexpr bool contains(const T& obj) const noexcept
     {
-        for (auto&& o : *this)
+        for (T o : *this)
         {
             if (obj == o)
             {
@@ -251,7 +257,7 @@ private:
     /* Changed mNodePool from a reference to a pointer
      * in order to have a default constructor.
      */
-    IObjectPool<Node<T>>* mNodePool;
+    IObjectPool<Node<T>>* mNodePool { nullptr };
     unsigned mSize { 0 };
 
     /* Deletes all nodes following the argument and the

@@ -9,7 +9,11 @@
 class NodeIterTest : public testing::Test
 {
 protected:
-    NodeIterTest() = default;
+    NodeIterTest() noexcept
+    {
+        ll.pool() = &pool;
+    }
+
     ObjectPool<Node<int>, 4> pool;
-    LinkedList<int> ll { &pool };
+    LinkedList<int> ll;
 };

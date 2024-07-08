@@ -86,7 +86,6 @@ public:
         }
     }
 private:
-    // TODO: Remove default initialization
-    T mData[N + 1] { T() };
+    T mData[N + 1];
     unsigned mSize { N };
 };
