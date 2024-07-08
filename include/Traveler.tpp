@@ -9,6 +9,7 @@
 #include <compare>   // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -31,6 +32,7 @@ public:
         Y { static_cast<unsigned>(atoi(arg4)) }
     {
         citiesStack.pool() = &llPool;
+        // distances.pool() = &distancesPool;
 
         getInput(arg1);
         parseInput();
@@ -200,6 +202,10 @@ public:
         // citiesStack.back()->push_back(startCity);
         // cities = visitableCitiesDAG(citiesStack.back());
         cities = kahnsAlgorithm();
+        // shortestPath(cities);
+        // printf("Length: %d\n", distances.size());
+        // distances.printNums(stdout);
+        // putc('\n', stdout);
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
          * return value of visitableCities.
@@ -378,6 +384,44 @@ public:
         return result;
     }
 
+    /*
+    // writes the result to distances
+    void shortestPath(const LinkedList<unsigned>* ts) noexcept
+    {
+        for(unsigned i{0}; i < 81; ++i)
+        {
+            distances.push_back(INT_MAX);
+        }
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* visited = citiesStack.back();
+        
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* topSort = citiesStack.back();
+        *topSort = *ts;
+
+        *distances.at(*topSort->front()) = 0;
+
+        while(topSort->size() > 0)
+        {
+            visited->push_back(*topSort->pop_front());
+            assert(*distances.at(*visited->back()) <= 0);
+            for(unsigned i{0}; i < 81; ++i)
+            {
+                unsigned dist { filteredAdjacencyMatrix[*visited->back()][i] };
+                if (dist < UINT_MAX
+                // && !visited->contains(i)
+                && *distances.at(*visited->back()) <= *distances.at(i))
+                {
+                    *distances.at(i) = *distances.at(*visited->back()) - 1;
+                }
+            }
+        }
+
+        citiesStack.pop_back();
+        citiesStack.pop_back();
+    }
+    */
+
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
         for (unsigned i { 0 }; (i + 1) < cs.size(); ++i)
@@ -433,6 +477,9 @@ private:
     static inline ObjectPool<Node<unsigned>, 5000> nodePool;
     static inline ObjectPool<Node<LinkedList<unsigned>>, 5000> llPool;
     static inline LinkedList<LinkedList<unsigned>> citiesStack;
+
+    // static inline ObjectPool<Node<int>, 81> distancesPool;
+    // static inline LinkedList<int> distances;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
