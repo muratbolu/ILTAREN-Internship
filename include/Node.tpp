@@ -7,22 +7,24 @@ template<typename T>
 class Node
 {
 public:
-    constexpr Node() noexcept
-        : mData{ T{} }
+    constexpr Node() noexcept :
+        mData { T {} }
     {
     }
+
     constexpr ~Node() noexcept = default;
     constexpr Node(const Node&) noexcept = default;
     constexpr Node(Node&&) noexcept = default;
     constexpr Node& operator=(const Node&) noexcept = default;
     constexpr Node& operator=(Node&&) noexcept = default;
 
-    constexpr Node(const T& data) noexcept
-        : mData{ data }
+    constexpr Node(const T& data) noexcept :
+        mData { data }
     {
     }
-    constexpr Node(T&& data) noexcept
-        : mData{ std::move(data) }
+
+    constexpr Node(T&& data) noexcept :
+        mData { std::move(data) }
     {
     }
 
@@ -55,9 +57,8 @@ public:
     {
         return mPrev;
     }
-
 private:
     T mData;
-    Node* mNext{ nullptr };
-    Node* mPrev{ nullptr };
+    Node* mNext { nullptr };
+    Node* mPrev { nullptr };
 };

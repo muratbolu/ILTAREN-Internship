@@ -1,38 +1,43 @@
 #pragma once
 
-#include <cstdio>
-
 #include "IObjectPool.tpp"
 #include "Node.tpp"
 #include "NodeIter.tpp"
+
+#include <cstdio>
 
 template<typename T>
 class LinkedList
 {
 public:
     constexpr LinkedList() noexcept = default;
-    constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept
-        : mNodePool{ pool }
+
+    constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept :
+        mNodePool { pool }
     {
     }
+
     constexpr ~LinkedList() noexcept
     {
         deleteAll(mHead);
     }
-    constexpr LinkedList(const LinkedList& obj) noexcept
-        : mNodePool{ obj.mNodePool }
+
+    constexpr LinkedList(const LinkedList& obj) noexcept :
+        mNodePool { obj.mNodePool }
     {
-        for (unsigned i{ 0 }; i < obj.size(); ++i)
+        for (unsigned i { 0 }; i < obj.size(); ++i)
         {
             push(*obj[i]);
         }
     }
-    constexpr LinkedList(LinkedList&& obj) noexcept
-        : mHead{ obj.mHead }
-        , mNodePool{ obj.mNodePool }
-        , mSize{ obj.mSize }
+
+    constexpr LinkedList(LinkedList&& obj) noexcept :
+        mHead { obj.mHead },
+        mNodePool { obj.mNodePool },
+        mSize { obj.mSize }
     {
     }
+
     constexpr LinkedList& operator=(const LinkedList& obj) noexcept
     {
         if (this == &obj)
@@ -43,12 +48,13 @@ public:
         mHead = nullptr;
         mNodePool = obj.mNodePool;
         mSize = 0;
-        for (unsigned i{ 0 }; i < obj.size(); ++i)
+        for (unsigned i { 0 }; i < obj.size(); ++i)
         {
             push(*obj[i]);
         }
         return *this;
     }
+
     constexpr LinkedList& operator=(LinkedList&& obj) noexcept
     {
         deleteAll(mHead);
@@ -65,7 +71,7 @@ public:
 
     constexpr T* at(unsigned n) const noexcept
     {
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             if (n == 0)
             {
@@ -78,7 +84,7 @@ public:
 
     constexpr T* operator[](unsigned n) const noexcept
     {
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             if (n == 0)
             {
@@ -100,7 +106,7 @@ public:
 
     constexpr T* back() const noexcept
     {
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             if (curr->next() == nullptr)
             {
@@ -112,12 +118,12 @@ public:
 
     constexpr NodeIter<T> begin() const noexcept
     {
-        return NodeIter<T>{ mHead };
+        return NodeIter<T> { mHead };
     }
 
     constexpr NodeIter<T> end() const noexcept
     {
-        return NodeIter<T>{ nullptr };
+        return NodeIter<T> { nullptr };
     }
 
     constexpr bool push(const T& data) noexcept
@@ -183,13 +189,12 @@ public:
      * creates a new LinkedList with the provided pool.
      */
     template<typename U>
-    constexpr LinkedList<U> map(U (*func)(T),
-                                IObjectPool<Node<U>>& pool) const noexcept
+    constexpr LinkedList<U> map(U (*func)(T), IObjectPool<Node<U>>& pool) const noexcept
     {
         // TODO: remove stack allocation
-        LinkedList<U> result{ &pool };
+        LinkedList<U> result { &pool };
 
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             if (!result.push(func(curr->data())))
             {
@@ -216,7 +221,7 @@ public:
     constexpr void printStrs(FILE* stream) const noexcept
     {
         fputs("[", stream);
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             fprintf(stream, "%s", static_cast<char*>(curr->data().data()));
             if (curr->next() != nullptr)
@@ -231,7 +236,7 @@ public:
     constexpr void printNums(FILE* stream) const noexcept
     {
         fputs("[", stream);
-        for (Node<T>* curr{ mHead }; curr != nullptr; curr = curr->next())
+        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
         {
             fprintf(stream, "%d", curr->data());
             if (curr->next() != nullptr)
@@ -241,14 +246,13 @@ public:
         }
         fputs("]", stream);
     }
-
 private:
-    Node<T>* mHead{ nullptr };
+    Node<T>* mHead { nullptr };
     /* Changed mNodePool from a reference to a pointer
      * in order to have a default constructor.
      */
     IObjectPool<Node<T>>* mNodePool;
-    unsigned mSize{ 0 };
+    unsigned mSize { 0 };
 
     /* Deletes all nodes following the argument and the
      * argument itself.
@@ -259,7 +263,7 @@ private:
         {
             return;
         }
-        Node<T>* next{ node->next() };
+        Node<T>* next { node->next() };
         mNodePool->deallocate(node);
         // tail recursive, suitable for optimization
         deleteAll(next);

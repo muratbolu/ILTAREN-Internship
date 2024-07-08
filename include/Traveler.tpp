@@ -1,14 +1,14 @@
 #pragma once
 
-#include <climits>
-#include <compare> // Needed because of a bug in MSVC
-#include <cstdio>
-#include <cstdlib>
-
 #include "LinkedList.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
+
+#include <climits>
+#include <compare>   // Needed because of a bug in MSVC
+#include <cstdio>
+#include <cstdlib>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -25,10 +25,10 @@
 class Traveler
 {
 public:
-    Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
-        : startCity{ static_cast<unsigned>(atoi(arg2) - 1) }
-        , X{ static_cast<unsigned>(atoi(arg3)) }
-        , Y{ static_cast<unsigned>(atoi(arg4)) }
+    Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept :
+        startCity { static_cast<unsigned>(atoi(arg2) - 1) },
+        X { static_cast<unsigned>(atoi(arg3)) },
+        Y { static_cast<unsigned>(atoi(arg4)) }
     {
         getInput(arg1);
         parseInput();
@@ -44,7 +44,7 @@ public:
             return false;
         }
 
-        for (int c{ EOF }; char& i : buffer)
+        for (int c { EOF }; char& i : buffer)
         {
             c = fgetc(fp);
             if (c == EOF)
@@ -78,21 +78,21 @@ public:
     constexpr void parseInput() noexcept
     {
         // sc keeps tracks of how many semicolons are encountered
-        unsigned sc{ 0 };
+        unsigned sc { 0 };
         // line keeps track of the line number
-        unsigned line{ 0 };
+        unsigned line { 0 };
         // i keeps track of the character index in city names
-        unsigned i{ 0 };
+        unsigned i { 0 };
         // number calculates the number for each semicolon separated
         // value
-        unsigned number{ 0 };
+        unsigned number { 0 };
 
         enum parseStates
         {
             SKIP_CODE,
             GET_NAME,
             CALC_NUM,
-        } state{ SKIP_CODE };
+        } state { SKIP_CODE };
 
         for (char c : buffer)
         {
@@ -103,69 +103,64 @@ public:
 
             switch (state)
             {
-                case SKIP_CODE:
+            case SKIP_CODE : {
+                if (c == SEP)
                 {
-                    if (c == SEP)
-                    {
-                        ++sc;
-                        i = 0;
-                        state = GET_NAME;
-                    }
-                    break;
+                    ++sc;
+                    i = 0;
+                    state = GET_NAME;
                 }
-                case GET_NAME:
+                break;
+            }
+            case GET_NAME : {
+                if (c == SEP)
                 {
-                    if (c == SEP)
-                    {
-                        Traveler::cityNames[line][i++] = '\0';
-                        ++sc;
-                        state = CALC_NUM;
-                    }
-                    else
-                    {
-                        Traveler::cityNames[line][i++] = c;
-                    }
-                    break;
+                    Traveler::cityNames[line][i++] = '\0';
+                    ++sc;
+                    state = CALC_NUM;
                 }
-                case CALC_NUM:
+                else
                 {
-                    if (c == SEP)
-                    {
-                        ++sc;
-                        adjacencyMatrix[line][sc - 3] = number;
-                        number = 0;
-                    }
-                    else if (c == '\n')
-                    {
-                        ++sc;
-                        adjacencyMatrix[line][sc - 3] = number;
-                        sc = 0;
-                        number = 0;
-                        ++line;
-                        state = SKIP_CODE;
-                    }
-                    else
-                    {
-                        number *= 10;
-                        number += static_cast<unsigned>(c - '0');
-                    }
-                    break;
+                    Traveler::cityNames[line][i++] = c;
                 }
+                break;
+            }
+            case CALC_NUM : {
+                if (c == SEP)
+                {
+                    ++sc;
+                    adjacencyMatrix[line][sc - 3] = number;
+                    number = 0;
+                }
+                else if (c == '\n')
+                {
+                    ++sc;
+                    adjacencyMatrix[line][sc - 3] = number;
+                    sc = 0;
+                    number = 0;
+                    ++line;
+                    state = SKIP_CODE;
+                }
+                else
+                {
+                    number *= 10;
+                    number += static_cast<unsigned>(c - '0');
+                }
+                break;
+            }
             }
         }
     }
 
-    constexpr static void printMatrix(
-      FILE* stream,
-      const StaticVector<StaticVector<unsigned, 81>, 81>& mat) noexcept
+    constexpr static void printMatrix(FILE* stream, const StaticVector<StaticVector<unsigned, 81>, 81>& mat) noexcept
     {
-        for (unsigned i{ 0 }; i < 81; ++i)
+        for (unsigned i { 0 }; i < 81; ++i)
         {
             fprintf(stream, "%02d", i + 1);
             fputc(SEP, stream);
             fprintf(stream, "%s", Traveler::cityNames[i].data());
             fputc(SEP, stream);
-            for (unsigned j{ 0 }; j < 81; ++j)
+            for (unsigned j { 0 }; j < 81; ++j)
             {
                 fprintf(stream, "%d", mat[i][j]);
                 if (j != 80)
@@ -177,13 +172,12 @@ public:
         }
     }
 
-    constexpr void filterByRange(
-      StaticVector<StaticVector<unsigned, 81>, 81>& dst,
-      const StaticVector<StaticVector<unsigned, 81>, 81>& src) const noexcept
+    constexpr void filterByRange(StaticVector<StaticVector<unsigned, 81>, 81>& dst,
+                                 const StaticVector<StaticVector<unsigned, 81>, 81>& src) const noexcept
     {
-        for (unsigned i{ 0 }; i < 81; ++i)
+        for (unsigned i { 0 }; i < 81; ++i)
         {
-            for (unsigned j{ 0 }; j < 81; ++j)
+            for (unsigned j { 0 }; j < 81; ++j)
             {
                 if ((src[i][j] < (X - Y)) || (src[i][j] > (X + Y)))
                 {
@@ -200,8 +194,8 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        LinkedList<unsigned>& visitedPtr{ *linkedListPool.allocate() };
-        visitedPtr = LinkedList<unsigned>{ &cityStackPool };
+        LinkedList<unsigned>& visitedPtr { *linkedListPool.allocate() };
+        visitedPtr = LinkedList<unsigned> { &cityStackPool };
         visitedPtr.push(startCity);
         cities = visitableCities(visitedPtr);
         linkedListPool.deallocate(&visitedPtr);
@@ -214,17 +208,16 @@ public:
      * previously-visited cities. Exists early if a sufficiently long
      * route is found.
      */
-    LinkedList<unsigned>& visitableCities(
-      LinkedList<unsigned>& visitedPtr) noexcept
+    LinkedList<unsigned>& visitableCities(LinkedList<unsigned>& visitedPtr) noexcept
     {
         // remembers the best route seen so far
-        LinkedList<unsigned>& bestPtr{ *linkedListPool.allocate() };
+        LinkedList<unsigned>& bestPtr { *linkedListPool.allocate() };
         bestPtr = visitedPtr;
 
         // Iterates through all neighbors
-        for (unsigned i{ 0 }; i < 81; ++i)
+        for (unsigned i { 0 }; i < 81; ++i)
         {
-            unsigned dist{ filteredAdjacencyMatrix[*visitedPtr.back()][i] };
+            unsigned dist { filteredAdjacencyMatrix[*visitedPtr.back()][i] };
             // if distance is valid and the city is not visited before
             if (dist < UINT_MAX && !visitedPtr.contains(i))
             {
@@ -233,7 +226,7 @@ public:
                     puts("out of memory");
                     return bestPtr;
                 }
-                LinkedList<unsigned>& tempPtr{ *linkedListPool.allocate() };
+                LinkedList<unsigned>& tempPtr { *linkedListPool.allocate() };
                 tempPtr = visitableCities(visitedPtr);
                 if (tempPtr.size() > 65)
                 {
@@ -254,19 +247,18 @@ public:
         return bestPtr;
     }
 
-    [[nodiscard]] constexpr bool validator(
-      const LinkedList<unsigned>& cs) const noexcept
+    [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
-        for (unsigned i{ 0 }; (i + 1) < cs.size(); ++i)
+        for (unsigned i { 0 }; (i + 1) < cs.size(); ++i)
         {
             if (filteredAdjacencyMatrix[*cs[i]][*cs[i + 1]] == UINT_MAX)
             {
                 return false;
             }
         }
-        for (unsigned i{ 0 }; i < cs.size(); ++i)
+        for (unsigned i { 0 }; i < cs.size(); ++i)
         {
-            for (unsigned j{ i + 1 }; j < cs.size(); ++j)
+            for (unsigned j { i + 1 }; j < cs.size(); ++j)
             {
                 if (*cs[i] == *cs[j])
                 {
@@ -280,8 +272,7 @@ public:
     void printRoute(FILE* stream) const noexcept
     {
         fprintf(stream, "Length: %d\n", cities.size());
-        cities.map(&Traveler::toNames, Traveler::cityNamesPool)
-          .printStrs(stream);
+        cities.map(&Traveler::toNames, Traveler::cityNamesPool).printStrs(stream);
         fputc('\n', stream);
     }
 
@@ -289,11 +280,9 @@ public:
     StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
     // Filled in by filterByRange()
     StaticVector<StaticVector<unsigned, 81>, 81> filteredAdjacencyMatrix;
-
 private:
     // Used by printRoute. Must be called after parseInput()
-    constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(
-      unsigned n) noexcept
+    constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
     {
         return Traveler::cityNames[n];
     }
@@ -308,16 +297,14 @@ private:
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
 
     // Used by printRoute()
-    static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81>
-      cityNamesPool;
+    static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
     ObjectPool<Node<unsigned>, 81> pool;
     ObjectPool<Node<unsigned>, 10000> cityStackPool;
     ObjectPool<LinkedList<unsigned>, 10000> linkedListPool;
-
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
      */
-    LinkedList<unsigned> cities{ &pool };
+    LinkedList<unsigned> cities { &pool };
 };

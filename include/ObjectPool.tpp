@@ -14,6 +14,7 @@ public:
             i = true;
         }
     }
+
     constexpr ~ObjectPool() noexcept override = default;
     constexpr ObjectPool(const ObjectPool&) noexcept = default;
     constexpr ObjectPool(ObjectPool&&) noexcept = default;
@@ -22,7 +23,7 @@ public:
 
     constexpr T* allocate() noexcept override
     {
-        for (unsigned i{ 0 }; i < N; ++i)
+        for (unsigned i { 0 }; i < N; ++i)
         {
             if (mVacant[i] == true)
             {
@@ -35,15 +36,13 @@ public:
 
     constexpr bool deallocate(T* ptr) noexcept override
     {
-        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() &&
-            mVacant[ptr - mPool.data()] == false)
+        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() && mVacant[ptr - mPool.data()] == false)
         {
             mVacant[ptr - mPool.data()] = true;
             return true;
         }
         return false;
     }
-
 private:
     StaticVector<T, N> mPool;
     StaticVector<bool, N> mVacant;

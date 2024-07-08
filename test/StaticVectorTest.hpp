@@ -1,8 +1,8 @@
 #pragma once
 
-#include <gtest/gtest.h>
-
 #include "StaticVector.tpp"
+
+#include <gtest/gtest.h>
 
 class StaticVectorTest : public testing::Test
 {
@@ -16,7 +16,8 @@ protected:
         vec2[0][0] = 12;
         vec2[4][3] = 15;
     }
-    StaticVector<char, 2> vec0; // uninitialized
+
+    StaticVector<char, 2> vec0;   // uninitialized
     StaticVector<int, 3> vec1;
     StaticVector<StaticVector<unsigned, 4>, 5> vec2;
 };

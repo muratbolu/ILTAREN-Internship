@@ -60,12 +60,12 @@ public:
 
     constexpr ContIter<T> begin() noexcept
     {
-        return ContIter<T>{ mData };
+        return ContIter<T> { mData };
     }
 
     constexpr ContIter<T> end() noexcept
     {
-        return ContIter<T>{ mData + mSize };
+        return ContIter<T> { mData + mSize };
     }
 
     [[nodiscard]] constexpr bool empty() const noexcept
@@ -80,14 +80,13 @@ public:
 
     constexpr void clear() noexcept
     {
-        for (unsigned i{ 0 }; i < mSize; ++i)
+        for (unsigned i { 0 }; i < mSize; ++i)
         {
             mData[i] = 0;
         }
     }
-
 private:
     // TODO: Remove default initialization
-    T mData[N + 1]{ T() };
-    unsigned mSize{ N };
+    T mData[N + 1] { T() };
+    unsigned mSize { N };
 };

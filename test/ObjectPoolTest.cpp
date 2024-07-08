@@ -1,6 +1,8 @@
 #include "ObjectPoolTest.hpp"
 
-TEST_F(ObjectPoolTest, Initialization) {}
+TEST_F(ObjectPoolTest, Initialization)
+{
+}
 
 TEST_F(ObjectPoolTest, Allocation)
 {
@@ -64,7 +66,7 @@ TEST_F(ObjectPoolTest, AllocateAndDeallocate)
 
 TEST_F(ObjectPoolTest, AllocateAll)
 {
-    for (unsigned i{ 0 }; i < 100; ++i)
+    for (unsigned i { 0 }; i < 100; ++i)
     {
         p2.allocate();
     }

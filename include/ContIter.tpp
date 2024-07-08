@@ -6,10 +6,11 @@ template<typename T>
 class ContIter : public IIter<T>
 {
 public:
-    constexpr ContIter(T* ptr) noexcept
-        : mPtr{ ptr }
+    constexpr ContIter(T* ptr) noexcept :
+        mPtr { ptr }
     {
     }
+
     constexpr ~ContIter() noexcept override = default;
     constexpr ContIter(const ContIter&) noexcept = default;
     constexpr ContIter(ContIter&&) noexcept = default;
@@ -73,8 +74,7 @@ public:
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const ContIter& lhs,
-                                            const ContIter& rhs) noexcept
+    constexpr friend inline bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
     {
         return lhs.mPtr == rhs.mPtr;
     }
@@ -85,8 +85,7 @@ public:
     }
 
     // operators <, <=, >, >=  are automatically generated
-    constexpr friend inline auto operator<=>(const ContIter& lhs,
-                                             const ContIter& rhs) noexcept
+    constexpr friend inline auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
     {
         return lhs.mPtr <=> rhs.mPtr;
     }
@@ -95,7 +94,6 @@ public:
     {
         return mPtr <=> rhs;
     }
-
 private:
     T* mPtr;
 };

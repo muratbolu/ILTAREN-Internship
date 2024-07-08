@@ -1,9 +1,9 @@
 #pragma once
 
-#include <gtest/gtest.h>
-
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
+
+#include <gtest/gtest.h>
 
 class ObjectPoolTest : public testing::Test
 {

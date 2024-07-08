@@ -51,15 +51,15 @@ TEST_F(StaticVectorTest, Iterate1)
     {
         EXPECT_EQ(it, 0);
     }
-    for (ContIter<int> it{ vec1.begin() }; it != vec1.end(); ++it)
+    for (ContIter<int> it { vec1.begin() }; it != vec1.end(); ++it)
     {
         EXPECT_EQ(*it, 0);
     }
-    for (ContIter<int> it{ vec1.begin() }; it != vec1.end(); it++)
+    for (ContIter<int> it { vec1.begin() }; it != vec1.end(); it++)
     {
         EXPECT_EQ(*it, 0);
     }
-    for (ContIter<int> it{ vec1.end() }; it-- != vec1.begin();)
+    for (ContIter<int> it { vec1.end() }; it-- != vec1.begin();)
     {
         EXPECT_EQ(*it, 0);
     }
@@ -96,7 +96,7 @@ TEST_F(StaticVectorTest, Size)
 TEST_F(StaticVectorTest, Clear)
 {
     vec1.clear();
-    for (ContIter<int> it{ vec1.begin() }; it != vec1.end(); ++it)
+    for (ContIter<int> it { vec1.begin() }; it != vec1.end(); ++it)
     {
         EXPECT_EQ(*it, 0);
     }

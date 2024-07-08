@@ -7,10 +7,11 @@ template<typename T>
 class NodeIter : public IIter<T>
 {
 public:
-    constexpr NodeIter(Node<T>* ptr) noexcept
-        : mPtr{ ptr }
+    constexpr NodeIter(Node<T>* ptr) noexcept :
+        mPtr { ptr }
     {
     }
+
     constexpr ~NodeIter() noexcept override = default;
     constexpr NodeIter(const NodeIter&) noexcept = default;
     constexpr NodeIter(NodeIter&&) noexcept = default;
@@ -74,8 +75,7 @@ public:
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const NodeIter& lhs,
-                                            const NodeIter& rhs) noexcept
+    constexpr friend inline bool operator==(const NodeIter& lhs, const NodeIter& rhs) noexcept
     {
         return lhs.mPtr == rhs.mPtr;
     }
@@ -86,8 +86,7 @@ public:
     }
 
     // operators <, <=, >, >=  are automatically generated
-    constexpr friend inline auto operator<=>(const NodeIter& lhs,
-                                             const NodeIter& rhs) noexcept
+    constexpr friend inline auto operator<=>(const NodeIter& lhs, const NodeIter& rhs) noexcept
     {
         return lhs.mPtr <=> rhs.mPtr;
     }
@@ -96,7 +95,6 @@ public:
     {
         return mPtr <=> rhs;
     }
-
 private:
     Node<T>* mPtr;
 };
