@@ -20,14 +20,16 @@ int main(int argc, char* argv[])
     // Traveler::printMatrix(stdout, t.adjacencyMatrix);
     // Traveler::printMatrix(stdout, t.filteredAdjacencyMatrix);
     t.travel();
+    t.printRoute(stdout);
+    /*
     if (t.cities != nullptr && t.validator(*t.cities))
     {
         puts("Valid route");
-        t.printRoute(stdout);
     }
     else
     {
         puts("Invalid route");
     }
+    */
     return 0;
 }

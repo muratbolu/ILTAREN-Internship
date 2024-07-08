@@ -196,14 +196,15 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        citiesStack.back()->push_back(startCity);
-        cities = visitableCitiesDAG(citiesStack.back());
+        // citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        // citiesStack.back()->push_back(startCity);
+        // cities = visitableCitiesDAG(citiesStack.back());
+        cities = kahnsAlgorithm();
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
          * return value of visitableCities.
          */
-        citiesStack.pop_front();
+        // citiesStack.pop_front();
     }
 
     // TODO: eliminate recursive methods.
@@ -351,6 +352,30 @@ public:
 
         // return the first push_back
         return shortestDistances;
+    }
+
+    LinkedList<unsigned>* kahnsAlgorithm() noexcept
+    {
+        // the first push_back is the return value.
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* result = citiesStack.back();
+
+        result->push_back(startCity);
+        unsigned i{0};
+        do {
+            for(unsigned j{0}; j < 81; ++j)
+            {
+                unsigned dist { filteredAdjacencyMatrix[*result->at(i)][j] };
+                if (dist < UINT_MAX && !result->contains(j))
+                {
+                    result->push_back(j);
+                }
+            }
+            ++i;
+        } while(i < result->size());
+
+        // return the first push_back
+        return result;
     }
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
