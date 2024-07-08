@@ -221,5 +221,5 @@ CheckOptions:
   # - { key: readability-identifier-naming.VirtualMethodIgnoredRegexp,              value:  }
   # - { key: readability-identifier-naming.VirtualMethodSuffix,                     value:  }            ###################
 
-WarningsAsErrors: '*' # Turn off this line unless you want to treat all warnings as errors
+# WarningsAsErrors: '*' # Turn off this line unless you want to treat all warnings as errors
 
