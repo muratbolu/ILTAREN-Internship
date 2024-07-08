@@ -198,7 +198,7 @@ public:
     {
         citiesStack.push_back(LinkedList<unsigned> { &nodePool });
         citiesStack.back()->push_back(startCity);
-        cities = visitableCities(citiesStack.back());
+        cities = visitableCitiesLongestDistanceHeuristic(citiesStack.back());
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
          * return value of visitableCities.
@@ -246,6 +246,74 @@ public:
 
         // return the first push_back
         return bestSoFar;
+    }
+
+    LinkedList<unsigned>* visitableCitiesLongestDistanceHeuristic(const LinkedList<unsigned>* visited) noexcept
+    {
+        // the first push_back is the return value.
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* longestDistances = citiesStack.back();
+
+        // the actual computation goes here
+        *longestDistances = *visited;
+        bool notStuck { true };
+        while (notStuck)
+        {
+            notStuck = false;
+            unsigned currNext { static_cast<unsigned>(-1) };
+            unsigned currMax { 0 };
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                unsigned dist { filteredAdjacencyMatrix[*longestDistances->back()][i] };
+                if (dist < UINT_MAX && dist > currMax && !longestDistances->contains(i))
+                {
+                    currNext = i;
+                    currMax = dist;
+                    notStuck = true;
+                }
+            }
+            if (notStuck)
+            {
+                longestDistances->push_back(currNext);
+            }
+        }
+
+        // return the first push_back
+        return longestDistances;
+    }
+
+    LinkedList<unsigned>* visitableCitiesShortestDistanceHeuristic(const LinkedList<unsigned>* visited) noexcept
+    {
+        // the first push_back is the return value.
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* shortestDistances = citiesStack.back();
+
+        // the actual computation goes here
+        *shortestDistances = *visited;
+        bool notStuck { true };
+        while (notStuck)
+        {
+            notStuck = false;
+            unsigned currNext { static_cast<unsigned>(-1) };
+            unsigned currMin { UINT_MAX };
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                unsigned dist { filteredAdjacencyMatrix[*shortestDistances->back()][i] };
+                if (dist < currMin && !shortestDistances->contains(i))
+                {
+                    currNext = i;
+                    currMin = dist;
+                    notStuck = true;
+                }
+            }
+            if (notStuck)
+            {
+                shortestDistances->push_back(currNext);
+            }
+        }
+
+        // return the first push_back
+        return shortestDistances;
     }
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
