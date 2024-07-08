@@ -30,7 +30,6 @@ public:
         X { static_cast<unsigned>(atoi(arg3)) },
         Y { static_cast<unsigned>(atoi(arg4)) }
     {
-        cities.pool() = &nodePool;
         citiesStack.pool() = &llPool;
 
         getInput(arg1);
@@ -197,10 +196,14 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        citiesStack.push_back(LinkedList<unsigned> {});
-        citiesStack.back()->pool() = &nodePool;
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
         citiesStack.back()->push_back(startCity);
-        cities = *visitableCities(citiesStack.back());
+        cities = visitableCities(citiesStack.back());
+        /* There must be two values on the stack now. The first
+         * value is the visited cities and the second value is the
+         * return value of visitableCities.
+         */
+        citiesStack.pop_front();
     }
 
     // TODO: eliminate stack allocations.
@@ -208,15 +211,42 @@ public:
 
     /* Returns the longest path of cities visitable, not visiting the
      * previously-visited cities. Exists early if a sufficiently long
-     * route is found.
+     * route is found. "Stack load" of visitableCities is always 1.
      */
 
-    const LinkedList<unsigned>* visitableCities(const LinkedList<unsigned>* visited) noexcept
+    LinkedList<unsigned>* visitableCities(const LinkedList<unsigned>* visited) noexcept
     {
-        citiesStack.push_back(LinkedList<unsigned> {});
-        citiesStack.back()->pool() = &nodePool;
-        citiesStack.back()->push_back(25);
-        return citiesStack.back();
+        // the first push_back is the return value.
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* bestSoFar = citiesStack.back();
+
+        // the actual computation goes here
+        *bestSoFar = *visited;
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            unsigned dist { filteredAdjacencyMatrix[*visited->back()][i] };
+            if (dist < UINT_MAX && !visited->contains(i))
+            {
+                citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+                *citiesStack.back() = *visited;
+                citiesStack.back()->push_back(i);
+
+                LinkedList<unsigned>* candidate = visitableCities(citiesStack.back());
+                if (candidate->size() > bestSoFar->size())
+                {
+                    *bestSoFar = *candidate;
+                }
+                citiesStack.pop_back();   // pop candidate
+                citiesStack.pop_back();   // pop augmented visited list
+                if (bestSoFar->size() > 55)
+                {
+                    break;
+                }
+            }
+        }
+
+        // return the first push_back
+        return bestSoFar;
     }
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
@@ -243,8 +273,8 @@ public:
 
     void printRoute(FILE* stream) const noexcept
     {
-        fprintf(stream, "Length: %d\n", cities.size());
-        cities.map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stream);
+        fprintf(stream, "Length: %d\n", cities->size());
+        cities->map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stream);
         fputc('\n', stream);
     }
 
@@ -271,12 +301,12 @@ private:
     // Used by printRoute()
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
-    static inline ObjectPool<Node<unsigned>, 1000> nodePool;
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 1000> llPool;
+    static inline ObjectPool<Node<unsigned>, 5000> nodePool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 5000> llPool;
     static inline LinkedList<LinkedList<unsigned>> citiesStack;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
      */
-    static inline LinkedList<unsigned> cities;
+    LinkedList<unsigned>* cities { nullptr };
 };

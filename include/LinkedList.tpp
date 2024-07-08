@@ -12,6 +12,11 @@ class LinkedList
 public:
     constexpr LinkedList() noexcept = default;
 
+    constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept :
+        mNodePool { pool }
+    {
+    }
+
     constexpr ~LinkedList() noexcept
     {
         deleteAll(mHead);
