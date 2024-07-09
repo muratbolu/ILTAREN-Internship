@@ -5,6 +5,7 @@
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
+#include <array>
 #include <cassert>
 #include <climits>
 // #include <compare>   // Needed because of a bug in MSVC
@@ -218,7 +219,7 @@ public:
         LinkedList<unsigned>* startCityList = citiesStack.back();
         startCityList->push_back(startCity);
 
-        cities = visitableCitiesMostEdgesHeuristic(startCityList);
+        cities = visitableCities(startCityList);
         // cities = visitableCities(cities);
         // cities = kahnsAlgorithm();
         // shortestPath(cities);
@@ -247,6 +248,10 @@ public:
 
         // the actual computation goes here
         *bestSoFar = *visited;
+
+        printf("Length: %d\n", bestSoFar->size());
+        bestSoFar->map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stdout);
+
         for (unsigned i { 0 }; i < 81; ++i)
         {
             if (traversable(*visited->back(), i) && !visited->contains(i))
@@ -256,13 +261,16 @@ public:
                 citiesStack.back()->push_back(i);
 
                 LinkedList<unsigned>* candidate = visitableCities(citiesStack.back());
+
+                putc('\n', stdout);
+
                 if (candidate->size() > bestSoFar->size())
                 {
                     *bestSoFar = *candidate;
                 }
                 citiesStack.pop_back();   // pop candidate
                 citiesStack.pop_back();   // pop augmented visited list
-                if (bestSoFar->size() > 65)
+                if (bestSoFar->size() > 40)
                 {
                     break;
                 }
@@ -272,6 +280,16 @@ public:
         // return the first push_back
         return bestSoFar;
     }
+
+    /* TODO: Write visitableCitiesWithHeuristics that implement:
+     * 1. Basic symmetry detection, assign a prime number for each city
+     *    and instead of keeping a 'visited' list, just check if a city's
+     *    prime number divides the return value. But how to prune states
+     *    such that states with identical 'numbers' are pruned?
+     * 2. Reachable dominance detection, assign a prime number for each city
+     *    and if the visited of a state divides the best seen so far, prune
+     *    that state.
+     */
 
     LinkedList<unsigned>* visitableCitiesImprove(const LinkedList<unsigned>* visited, const LinkedList<unsigned>* banned) const noexcept
     {

@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     }
     Traveler t { argv[1], argv[2], argv[3], argv[4] };
     t.filterByRange(t.filteredAdjacencyMatrix, t.adjacencyMatrix);
-    t.preprocessMatrix();
+    // t.preprocessMatrix();
     // Traveler::printMatrix(stdout, t.adjacencyMatrix);
     // Traveler::printMatrix(stdout, t.filteredAdjacencyMatrix);
     t.travel();
