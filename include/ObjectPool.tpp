@@ -20,6 +20,11 @@ public:
 
     constexpr T* allocate() noexcept override
     {
+        currAllocated++;
+        if (currAllocated > maxAllocated)
+        {
+            maxAllocated = currAllocated;
+        }
         // TODO: implement a red-black tree for search
         for (unsigned i { 0 }; i < N; ++i)
         {
@@ -34,6 +39,7 @@ public:
 
     constexpr bool deallocate(T* ptr) noexcept override
     {
+        currAllocated--;
         if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() && !mOccupied[ptr - mPool.data()] == false)
         {
             mOccupied[ptr - mPool.data()] = false;
@@ -41,6 +47,9 @@ public:
         }
         return false;
     }
+
+    unsigned maxAllocated { 0 };
+    unsigned currAllocated { 0 };
 private:
     StaticVector<T, N> mPool;
     StaticVector<bool, N> mOccupied;
