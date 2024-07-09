@@ -195,6 +195,22 @@ public:
         }
     }
 
+    void preprocessMatrix() const noexcept
+    {
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            unsigned edgeCount { 0 };
+            for (unsigned j { 0 }; j < 81; ++j)
+            {
+                if (filteredAdjacencyMatrix[i][j] < UINT_MAX)
+                {
+                    edgeCount++;
+                }
+            }
+            edgeCounts[i] = edgeCount;
+        }
+    }
+
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
@@ -202,16 +218,8 @@ public:
         LinkedList<unsigned>* startCityList = citiesStack.back();
         startCityList->push_back(startCity);
 
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* emptyList = citiesStack.back();
-        emptyList->push_back(32);
-
-        cities = visitableCitiesDFSHeuristic(startCityList);
-        for (unsigned i { 0 }; i < 11; ++i)
-        {
-            cities->pop_back();
-        }
-        cities = visitableCitiesImprove(cities, emptyList);
+        cities = visitableCitiesMostEdgesHeuristic(startCityList);
+        // cities = visitableCities(cities);
         // cities = kahnsAlgorithm();
         // shortestPath(cities);
         // printf("Length: %d\n", distances.size());
@@ -221,7 +229,6 @@ public:
          * value is the visited cities and the second value is the
          * return value of visitableCities.
          */
-        citiesStack.pop_front();
         citiesStack.pop_front();
     }
 
@@ -252,10 +259,6 @@ public:
                 if (candidate->size() > bestSoFar->size())
                 {
                     *bestSoFar = *candidate;
-                    if (bestSoFar->size() > 60)
-                    {
-                        printf("Best so far: %d\n", bestSoFar->size());
-                    }
                 }
                 citiesStack.pop_back();   // pop candidate
                 citiesStack.pop_back();   // pop augmented visited list
@@ -404,6 +407,47 @@ public:
 
         // return the first push_back
         return shortestDistances;
+    }
+
+    LinkedList<unsigned>* visitableCitiesMostEdgesHeuristic(const LinkedList<unsigned>* visited) const noexcept
+    {
+        // the first push_back is the return value.
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* mostEdges = citiesStack.back();
+
+        // the actual computation goes here
+        *mostEdges = *visited;
+        bool notStuck { true };
+        while (notStuck)
+        {
+            notStuck = false;
+            unsigned currNext { static_cast<unsigned>(-1) };
+            unsigned currMax { 0 };
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                unsigned dist { filteredAdjacencyMatrix[*mostEdges->back()][i] };
+                if (traversable(*mostEdges->back(), i) && edgeCounts[i] > currMax && !mostEdges->contains(i))
+                {
+                    currNext = i;
+                    currMax = edgeCounts[i];
+                    notStuck = true;
+                }
+            }
+            if (notStuck)
+            {
+                mostEdges->push_back(currNext);
+                for (unsigned i { 0 }; i < 81; ++i)
+                {
+                    if (traversable(currNext, i))
+                    {
+                        edgeCounts[i]--;
+                    }
+                }
+            }
+        }
+
+        // return the first push_back
+        return mostEdges;
     }
 
     LinkedList<unsigned>* visitableCitiesDFSHeuristic(const LinkedList<unsigned>* visited) const noexcept
@@ -598,9 +642,11 @@ private:
     // Used by printRoute()
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
-    static inline ObjectPool<Node<unsigned>, 15000> nodePool;
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 250> llPool;
+    static inline ObjectPool<Node<unsigned>, 8000> nodePool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 200> llPool;
     static inline LinkedList<LinkedList<unsigned>> citiesStack;
+
+    static inline StaticVector<unsigned, 81> edgeCounts;
 
     // static inline ObjectPool<Node<int>, 81> distancesPool;
     // static inline LinkedList<int> distances;
