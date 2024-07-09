@@ -5,11 +5,11 @@
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
+#include <cassert>
 #include <climits>
-#include <compare>   // Needed because of a bug in MSVC
+// #include <compare>   // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
-#include <cassert>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -198,10 +198,10 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        // citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        // citiesStack.back()->push_back(startCity);
-        // cities = visitableCitiesDAG(citiesStack.back());
-        cities = kahnsAlgorithm();
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        citiesStack.back()->push_back(startCity);
+        cities = visitableCitiesLongestDistanceHeuristic(citiesStack.back());
+        // cities = kahnsAlgorithm();
         // shortestPath(cities);
         // printf("Length: %d\n", distances.size());
         // distances.printNums(stdout);
@@ -210,7 +210,7 @@ public:
          * value is the visited cities and the second value is the
          * return value of visitableCities.
          */
-        // citiesStack.pop_front();
+        citiesStack.pop_front();
     }
 
     // TODO: eliminate recursive methods.
@@ -323,43 +323,6 @@ public:
         return shortestDistances;
     }
 
-    LinkedList<unsigned>* visitableCitiesDAG(const LinkedList<unsigned>* visited) noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* shortestDistances = citiesStack.back();
-
-        // the actual computation goes here
-        *shortestDistances = *visited;
-
-        /*
-        bool notStuck { true };
-        while (notStuck)
-        {
-            notStuck = false;
-            unsigned currNext { static_cast<unsigned>(-1) };
-            unsigned currMin { UINT_MAX };
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*shortestDistances->back()][i] };
-                if (dist < currMin && !shortestDistances->contains(i))
-                {
-                    currNext = i;
-                    currMin = dist;
-                    notStuck = true;
-                }
-            }
-            if (notStuck)
-            {
-                shortestDistances->push_back(currNext);
-            }
-        }
-        */
-
-        // return the first push_back
-        return shortestDistances;
-    }
-
     LinkedList<unsigned>* kahnsAlgorithm() noexcept
     {
         // the first push_back is the return value.
@@ -367,9 +330,10 @@ public:
         LinkedList<unsigned>* result = citiesStack.back();
 
         result->push_back(startCity);
-        unsigned i{0};
-        do {
-            for(unsigned j{0}; j < 81; ++j)
+        unsigned i { 0 };
+        do
+        {
+            for (unsigned j { 0 }; j < 81; ++j)
             {
                 unsigned dist { filteredAdjacencyMatrix[*result->at(i)][j] };
                 if (dist < UINT_MAX && !result->contains(j))
@@ -378,7 +342,7 @@ public:
                 }
             }
             ++i;
-        } while(i < result->size());
+        } while (i < result->size());
 
         // return the first push_back
         return result;
@@ -394,7 +358,7 @@ public:
         }
         citiesStack.push_back(LinkedList<unsigned> { &nodePool });
         LinkedList<unsigned>* visited = citiesStack.back();
-        
+
         citiesStack.push_back(LinkedList<unsigned> { &nodePool });
         LinkedList<unsigned>* topSort = citiesStack.back();
         *topSort = *ts;
