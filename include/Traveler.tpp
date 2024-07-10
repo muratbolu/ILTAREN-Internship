@@ -9,7 +9,7 @@
 // #include <compare>   // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
-#include <utility>
+#include <tuple>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -201,7 +201,7 @@ public:
     }
 
     // Zero-indexing for cities, 0 => ADANA, etc.
-    void travel() noexcept
+    constexpr void travel() noexcept
     {
         citiesStack.push_back(LinkedList<unsigned> { &nodePool });
         LinkedList<unsigned>* startCityList = citiesStack.back();
@@ -227,29 +227,24 @@ public:
      * route is found. "Stack load" of visitableCities is always 1.
      */
 
-    void visitableCities(LinkedList<unsigned>* visited) const noexcept
+    constexpr void visitableCities(LinkedList<unsigned>* visited) const noexcept
     {
         StaticVector<bool, 81> visitedArr { toCityArray(visited) };
         unsigned currCity { *visited->back() };
 
         for (unsigned i { 0 }; i < 81 && cities->size() < 68; ++i)
         {
-            if (traversable(currCity, i) && !visitedArr[i] && !traversed.contains({ visitedArr, i }))
+            std::tuple triplet { visitedArr, i, DFS(visitedArr, i) };
+            if (traversable(currCity, i) && !visitedArr[i] && RDD(triplet))
             {
                 visited->push_back(i);
                 if (visited->size() > cities->size())
                 {
                     *cities = *visited;
                 }
-                if (visited->size() + depthFirstSearch(visited) < cities->size())
-                {
-                    visited->pop_back();
-                    traversed.push_back({ visitedArr, i });
-                    continue;
-                }
                 visitableCities(visited);
                 visited->pop_back();
-                traversed.push_back({ visitedArr, i });
+                traversed.push_back(std::move(triplet));
             }
         }
     }
@@ -264,6 +259,7 @@ public:
      *    that state.
      */
 
+    /*
     LinkedList<unsigned>* visitableCitiesDFSHeuristic(const LinkedList<unsigned>* visited) const noexcept
     {
         // the first push_back is the return value.
@@ -299,10 +295,12 @@ public:
         // return the first push_back
         return citiesDFS;
     }
+    */
 
     /* Calculates the number of visitable nodes from the last node in ll,
      * not visiting any of the nodes in ll.
      */
+    /*
     unsigned depthFirstSearch(const LinkedList<unsigned>* ll) const noexcept
     {
         citiesStack.push_back(LinkedList<unsigned> { &nodePool });
@@ -328,6 +326,86 @@ public:
         }
         citiesStack.pop_back();
         return visitable;
+    }
+    */
+
+    /* Makes a stack allocation. Return the reachable states, not including
+     * those in the visitedArr, starting from n.
+     */
+    constexpr StaticVector<bool, 81> DFS(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
+    {
+        StaticVector<bool, 81> reachables;
+        reachables.clear();
+
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* stack = citiesStack.back();
+        stack->push_back(n);
+        while (stack->size() > 0)
+        {
+            unsigned curr { *stack->pop_back() };
+            reachables[curr] = true;
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                if (traversable(curr, i) && !visitedArr[i] && !reachables[i] && !stack->contains(i))
+                {
+                    stack->push_back(i);
+                }
+            }
+        }
+        citiesStack.pop_back();
+
+        /* We delete the reachability of the start node and consider only
+         * the "movable" states.
+         */
+        reachables[n] = false;
+        return reachables;
+    }
+
+    constexpr bool RDD(const std::tuple<const StaticVector<bool, 81>&, const unsigned&, const StaticVector<bool, 81>&>& t) const noexcept
+    {
+        auto countTrue = [](const StaticVector<bool, 81>& v) -> unsigned
+        {
+            unsigned result { 0 };
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                if (v[i])
+                {
+                    ++result;
+                }
+            }
+            return result;
+        };
+
+        unsigned visitedNum { countTrue(get<0>(t)) };
+        unsigned visitableNum { countTrue(get<2>(t)) };
+
+        if (visitedNum + 1 + visitableNum < cities->size())
+        {
+            traversed.push_back(t);
+            return false;
+        }
+
+        for (const auto& path : traversed)
+        {
+            if (get<1>(path) == get<1>(t) && countTrue(get<0>(path)) >= visitedNum && isSubsetOf(get<2>(t), get<2>(path)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    constexpr bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) const noexcept
+    {
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            if (fst[i] == true && snd[i] == false)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
@@ -404,9 +482,9 @@ private:
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
     // Used by traversed
-    static inline ObjectPool<Node<std::pair<StaticVector<bool, 81>, unsigned>>, 5000> traversedPool;
+    static inline ObjectPool<Node<std::tuple<StaticVector<bool, 81>, unsigned, StaticVector<bool, 81>>>, 5000> traversedPool;
     // Used by visitedCities to cache previously visited combinations
-    static inline LinkedList<std::pair<StaticVector<bool, 81>, unsigned>> traversed;
+    static inline LinkedList<std::tuple<StaticVector<bool, 81>, unsigned, StaticVector<bool, 81>>> traversed;
 
     // Used by citiesStack
     static inline ObjectPool<Node<unsigned>, 10000> nodePool;
