@@ -232,7 +232,7 @@ public:
         StaticVector<bool, 81> visitedArr { toCityArray(visited) };
         unsigned currCity { *visited->back() };
 
-        for (unsigned i { 0 }; i < 81; ++i)
+        for (unsigned i { 0 }; i < 81 && cities->size() < 66; ++i)
         {
             if (traversable(currCity, i) && !visitedArr[i] && !traversed.contains({ visitedArr, i }))
             {
@@ -241,13 +241,15 @@ public:
                 {
                     *cities = *visited;
                 }
+                if (visited->size() + depthFirstSearch(visited) < cities->size())
+                {
+                    visited->pop_back();
+                    traversed.push_back({ visitedArr, i });
+                    continue;
+                }
                 visitableCities(visited);
                 visited->pop_back();
                 traversed.push_back({ visitedArr, i });
-                if (cities->size() > 66)   // early return
-                {
-                    return;
-                }
             }
         }
     }
@@ -303,32 +305,11 @@ public:
      */
     unsigned depthFirstSearch(const LinkedList<unsigned>* ll) const noexcept
     {
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* cityStack = citiesStack.back();
-
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* visited = citiesStack.back();
-        *visited = *ll;
-
-        cityStack->push_back(*visited->pop_back());
-        while (cityStack->size() > 0)
-        {
-            visited->push_back(*cityStack->pop_back());
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                if (traversable(*visited->back(), i) && !visited->contains(i))
-                {
-                    cityStack->push_back(i);
-                }
-            }
-        }
-
-        unsigned result { visited->size() - ll->size() };
-
-        citiesStack.pop_back();
-        citiesStack.pop_back();
-
-        return result;
+        unsigned visitable { 81 };
+        /* TODO: initialize visitable to zero and calculate the total number
+         * visitable nodes.
+         */
+        return visitable;
     }
 
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
@@ -410,9 +391,9 @@ private:
     static inline LinkedList<std::pair<StaticVector<bool, 81>, unsigned>> traversed;
 
     // Used by citiesStack
-    static inline ObjectPool<Node<unsigned>, 5000> nodePool;
+    static inline ObjectPool<Node<unsigned>, 10000> nodePool;
     // Used by citiesStack
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 10> llPool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 500> llPool;
     // Used by visitedCities
     static inline LinkedList<LinkedList<unsigned>> citiesStack;
 public:
