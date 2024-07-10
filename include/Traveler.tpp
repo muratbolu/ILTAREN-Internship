@@ -232,7 +232,7 @@ public:
         StaticVector<bool, 81> visitedArr { toCityArray(visited) };
         unsigned currCity { *visited->back() };
 
-        for (unsigned i { 0 }; i < 81 && cities->size() < 66; ++i)
+        for (unsigned i { 0 }; i < 81 && cities->size() < 68; ++i)
         {
             if (traversable(currCity, i) && !visitedArr[i] && !traversed.contains({ visitedArr, i }))
             {
@@ -305,10 +305,28 @@ public:
      */
     unsigned depthFirstSearch(const LinkedList<unsigned>* ll) const noexcept
     {
-        unsigned visitable { 81 };
-        /* TODO: initialize visitable to zero and calculate the total number
-         * visitable nodes.
-         */
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        LinkedList<unsigned>* stack = citiesStack.back();
+
+        StaticVector<bool, 81> visitedArr { toCityArray(ll) };
+
+        stack->push_back(*ll->back());
+
+        unsigned visitable { 0 };
+        while (stack->size() > 0)
+        {
+            unsigned curr { *stack->pop_back() };
+            visitable++;
+            visitedArr[curr] = true;
+            for (unsigned i { 0 }; i < 81; ++i)
+            {
+                if (traversable(curr, i) && !visitedArr[i])
+                {
+                    stack->push_back(i);
+                }
+            }
+        }
+        citiesStack.pop_back();
         return visitable;
     }
 
