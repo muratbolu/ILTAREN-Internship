@@ -39,14 +39,9 @@ public:
     }
 
     // returns false if something goes wrong but we don't use it
-    bool getInput(char arg[]) noexcept
+    constexpr static bool getInput(char arg[]) noexcept
     {
-        FILE* fp;
-        if (fopen_s(&fp, arg, "r") != 0)
-        {
-            perror("Could not open file");
-            return false;
-        }
+        FILE* fp = fopen( arg, "r");
         if (fp == nullptr)
         {
             perror("Could not open file");
@@ -222,15 +217,17 @@ public:
 
     // TODO: eliminate recursive methods.
 
-    /* Returns the longest path of cities visitable, not visiting the
-     * previously-visited cities. Exists early if a sufficiently long
-     * route is found. "Stack load" of visitableCities is always 1.
+    /* Tries to find the longest path by picking the neighbor
+     * with the highest DFS-Score, i.e., the node that can
+     * reach the most nodes without visiting the previously
+     * visited ones.
      */
 
     constexpr void visitableCities(unsigned n) const noexcept
     {
         unsigned currCity { n };
         StaticVector<bool, 81> visitedArr;
+        visitedArr.clear();
         visitedArr[currCity] = true;
 
         bool notStuck { true };
@@ -246,7 +243,6 @@ public:
                     continue;
                 }
                 int visitable { static_cast<int>(countTrue(DFS(visitedArr, i))) };
-                printf("Visitable for %s: %d\n", toNames(i), visitable);
                 if (maxVisitable < visitable)
                 {
                     notStuck = true;
@@ -259,12 +255,6 @@ public:
                 currCity = nextCity;
                 cities->push_back(currCity);
                 visitedArr[currCity] = true;
-                printf("[");
-                for (unsigned i { 0 }; i < 81; ++i)
-                {
-                    printf("%d, ", visitedArr[i]);
-                }
-                printf("]\n");
             }
         }
     }
@@ -351,10 +341,8 @@ public:
 
     /* Makes a stack allocation. Return the reachable states, not including
      * those in the visitedArr, starting from n.
-     * TODO: this method makes too many Node allocations. Can I reduce it?
-     * I am only interested in visitable states from a particular state.
      */
-    constexpr StaticVector<bool, 81> DFS(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
+    [[nodiscard]] constexpr StaticVector<bool, 81> DFS(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
         StaticVector<bool, 81> reachables;
         reachables.clear();
@@ -362,18 +350,18 @@ public:
         StaticVector<unsigned, 81> stack;
         unsigned currIndex { 0 };
         stack[currIndex++] = n;
-        if (n == 6 && visitedArr[19])
-        {
-            // TODO: fix DFS!
-            printf("hello");
-        }
+
         while (currIndex)
         {
-            unsigned curr { stack[currIndex--] };
-            reachables[curr] = true;
-            for (unsigned i { 0 }; i < 81; ++i)
+            unsigned curr = stack[--currIndex];
+            if (reachables[curr])
             {
-                if (traversable(curr, i) && !visitedArr[i] && !reachables[i] && !stack.contains(i))
+                continue;
+            }
+            reachables[curr] = true;
+            for (unsigned i = 0; i < 81; ++i)
+            {
+                if (traversable(curr, i) && !visitedArr[i] && !reachables[i])
                 {
                     stack[currIndex++] = i;
                 }
@@ -387,7 +375,7 @@ public:
         return reachables;
     }
 
-    constexpr unsigned countTrue(const StaticVector<bool, 81>& v) const noexcept
+    [[nodiscard]] constexpr static unsigned countTrue(const StaticVector<bool, 81>& v) noexcept
     {
         unsigned result { 0 };
         for (unsigned i { 0 }; i < 81; ++i)
@@ -398,14 +386,14 @@ public:
             }
         }
         return result;
-    };
+    }
 
-    constexpr unsigned countEdges(const StaticVector<bool, 81>& visited, unsigned n) const noexcept
+    [[nodiscard]] constexpr unsigned countEdges(const StaticVector<bool, 81>& visited, unsigned n) const noexcept
     {
         unsigned edges { 0 };
         for (unsigned i { 0 }; i < 81; ++i)
         {
-            if (traversable(n, i) && !visited.contains(i))
+            if (traversable(n, i) && !visited[i])
             {
                 ++edges;
             }
@@ -413,7 +401,7 @@ public:
         return edges;
     }
 
-    constexpr bool RDD(const std::tuple<const StaticVector<bool, 81>&, const unsigned&, const StaticVector<bool, 81>&>& t) const noexcept
+    [[nodiscard]] constexpr bool RDD(const std::tuple<const StaticVector<bool, 81>&, const unsigned&, const StaticVector<bool, 81>&>& t) const noexcept
     {
         unsigned visitedNum { countTrue(get<0>(t)) };
         unsigned visitableNum { countTrue(get<2>(t)) };
@@ -435,11 +423,11 @@ public:
         return true;
     }
 
-    constexpr bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) const noexcept
+    [[nodiscard]] constexpr static bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) noexcept
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
-            if (fst[i] == true && snd[i] == false)
+            if (fst[i] && !snd[i])
             {
                 return false;
             }
@@ -491,13 +479,13 @@ private:
         return Traveler::cityNames[n];
     }
 
-    constexpr bool traversable(unsigned n, unsigned m) const noexcept
+    [[nodiscard]] constexpr bool traversable(unsigned n, unsigned m) const noexcept
     {
         return filteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
 
     // Makes a stack allocation
-    constexpr StaticVector<bool, 81> toCityArray(const LinkedList<unsigned>* ll) const noexcept
+    constexpr static StaticVector<bool, 81> toCityArray(const LinkedList<unsigned>* ll) noexcept
     {
         StaticVector<bool, 81> arr;
         arr.clear();
