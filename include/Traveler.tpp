@@ -211,7 +211,7 @@ public:
         cities = citiesStack.back();
         *cities = *startCityList;
 
-        visitableCities(startCityList);   // writes to cities
+        visitableCities(startCity);   // writes to cities
 
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
@@ -227,24 +227,44 @@ public:
      * route is found. "Stack load" of visitableCities is always 1.
      */
 
-    constexpr void visitableCities(LinkedList<unsigned>* visited) const noexcept
+    constexpr void visitableCities(unsigned n) const noexcept
     {
-        StaticVector<bool, 81> visitedArr { toCityArray(visited) };
-        unsigned currCity { *visited->back() };
+        unsigned currCity { n };
+        StaticVector<bool, 81> visitedArr;
+        visitedArr[currCity] = true;
 
-        for (unsigned i { 0 }; i < 81 && cities->size() < 68; ++i)
+        bool notStuck { true };
+        while (notStuck)
         {
-            std::tuple triplet { visitedArr, i, DFS(visitedArr, i) };
-            if (traversable(currCity, i) && !visitedArr[i] && RDD(triplet))
+            notStuck = false;
+            unsigned nextCity { static_cast<unsigned>(-1) };
+            int maxVisitable { -1 };
+            for (unsigned i { 0 }; i < 81; ++i)
             {
-                visited->push_back(i);
-                if (visited->size() > cities->size())
+                if (!traversable(currCity, i) || visitedArr[i])
                 {
-                    *cities = *visited;
+                    continue;
                 }
-                visitableCities(visited);
-                visited->pop_back();
-                traversed.push_back(std::move(triplet));
+                int visitable { static_cast<int>(countTrue(DFS(visitedArr, i))) };
+                printf("Visitable for %s: %d\n", toNames(i), visitable);
+                if (maxVisitable < visitable)
+                {
+                    notStuck = true;
+                    nextCity = i;
+                    maxVisitable = visitable;
+                }
+            }
+            if (notStuck)
+            {
+                currCity = nextCity;
+                cities->push_back(currCity);
+                visitedArr[currCity] = true;
+                printf("[");
+                for (unsigned i { 0 }; i < 81; ++i)
+                {
+                    printf("%d, ", visitedArr[i]);
+                }
+                printf("]\n");
             }
         }
     }
@@ -342,6 +362,11 @@ public:
         StaticVector<unsigned, 81> stack;
         unsigned currIndex { 0 };
         stack[currIndex++] = n;
+        if (n == 6 && visitedArr[19])
+        {
+            // TODO: fix DFS!
+            printf("hello");
+        }
         while (currIndex)
         {
             unsigned curr { stack[currIndex--] };
@@ -362,21 +387,34 @@ public:
         return reachables;
     }
 
+    constexpr unsigned countTrue(const StaticVector<bool, 81>& v) const noexcept
+    {
+        unsigned result { 0 };
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            if (v[i])
+            {
+                ++result;
+            }
+        }
+        return result;
+    };
+
+    constexpr unsigned countEdges(const StaticVector<bool, 81>& visited, unsigned n) const noexcept
+    {
+        unsigned edges { 0 };
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            if (traversable(n, i) && !visited.contains(i))
+            {
+                ++edges;
+            }
+        }
+        return edges;
+    }
+
     constexpr bool RDD(const std::tuple<const StaticVector<bool, 81>&, const unsigned&, const StaticVector<bool, 81>&>& t) const noexcept
     {
-        auto countTrue = [](const StaticVector<bool, 81>& v) -> unsigned
-        {
-            unsigned result { 0 };
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                if (v[i])
-                {
-                    ++result;
-                }
-            }
-            return result;
-        };
-
         unsigned visitedNum { countTrue(get<0>(t)) };
         unsigned visitableNum { countTrue(get<2>(t)) };
 
