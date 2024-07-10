@@ -331,28 +331,29 @@ public:
 
     /* Makes a stack allocation. Return the reachable states, not including
      * those in the visitedArr, starting from n.
+     * TODO: this method makes too many Node allocations. Can I reduce it?
+     * I am only interested in visitable states from a particular state.
      */
     constexpr StaticVector<bool, 81> DFS(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
         StaticVector<bool, 81> reachables;
         reachables.clear();
 
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* stack = citiesStack.back();
-        stack->push_back(n);
-        while (stack->size() > 0)
+        StaticVector<unsigned, 81> stack;
+        unsigned currIndex { 0 };
+        stack[currIndex++] = n;
+        while (currIndex)
         {
-            unsigned curr { *stack->pop_back() };
+            unsigned curr { stack[currIndex--] };
             reachables[curr] = true;
             for (unsigned i { 0 }; i < 81; ++i)
             {
-                if (traversable(curr, i) && !visitedArr[i] && !reachables[i] && !stack->contains(i))
+                if (traversable(curr, i) && !visitedArr[i] && !reachables[i] && !stack.contains(i))
                 {
-                    stack->push_back(i);
+                    stack[currIndex++] = i;
                 }
             }
         }
-        citiesStack.pop_back();
 
         /* We delete the reachability of the start node and consider only
          * the "movable" states.

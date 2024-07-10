@@ -86,6 +86,18 @@ public:
         }
     }
 
+    constexpr bool contains(const T& obj) const noexcept
+    {
+        for (unsigned i { 0 }; i < mSize; ++i)
+        {
+            if (obj == mData[i])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // operator!= is automatically generated
     constexpr friend inline bool operator==(const StaticVector& lhs, const StaticVector& rhs) noexcept
     {
