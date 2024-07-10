@@ -5,12 +5,11 @@
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
-#include <array>
-#include <cassert>
 #include <climits>
 // #include <compare>   // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
+#include <utility>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -33,7 +32,7 @@ public:
         Y { static_cast<unsigned>(atoi(arg4)) }
     {
         citiesStack.pool() = &llPool;
-        // distances.pool() = &distancesPool;
+        traversed.pool() = &traversedPool;
 
         getInput(arg1);
         parseInput();
@@ -42,7 +41,12 @@ public:
     // returns false if something goes wrong but we don't use it
     bool getInput(char arg[]) noexcept
     {
-        FILE* fp = fopen(arg, "r");
+        FILE* fp;
+        if (fopen_s(&fp, arg, "r") != 0)
+        {
+            perror("Could not open file");
+            return false;
+        }
         if (fp == nullptr)
         {
             perror("Could not open file");
@@ -196,22 +200,6 @@ public:
         }
     }
 
-    void preprocessMatrix() const noexcept
-    {
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            unsigned edgeCount { 0 };
-            for (unsigned j { 0 }; j < 81; ++j)
-            {
-                if (filteredAdjacencyMatrix[i][j] < UINT_MAX)
-                {
-                    edgeCount++;
-                }
-            }
-            edgeCounts[i] = edgeCount;
-        }
-    }
-
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
@@ -219,13 +207,12 @@ public:
         LinkedList<unsigned>* startCityList = citiesStack.back();
         startCityList->push_back(startCity);
 
-        cities = visitableCities(startCityList);
-        // cities = visitableCities(cities);
-        // cities = kahnsAlgorithm();
-        // shortestPath(cities);
-        // printf("Length: %d\n", distances.size());
-        // distances.printNums(stdout);
-        // putc('\n', stdout);
+        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
+        cities = citiesStack.back();
+        *cities = *startCityList;
+
+        visitableCities(startCityList);   // writes to cities
+
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
          * return value of visitableCities.
@@ -240,45 +227,29 @@ public:
      * route is found. "Stack load" of visitableCities is always 1.
      */
 
-    LinkedList<unsigned>* visitableCities(const LinkedList<unsigned>* visited) const noexcept
+    void visitableCities(LinkedList<unsigned>* visited) const noexcept
     {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* bestSoFar = citiesStack.back();
-
-        // the actual computation goes here
-        *bestSoFar = *visited;
-
-        printf("Length: %d\n", bestSoFar->size());
-        bestSoFar->map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stdout);
+        StaticVector<bool, 81> visitedArr { toCityArray(visited) };
+        unsigned currCity { *visited->back() };
 
         for (unsigned i { 0 }; i < 81; ++i)
         {
-            if (traversable(*visited->back(), i) && !visited->contains(i))
+            if (traversable(currCity, i) && !visitedArr[i] && !traversed.contains({ visitedArr, i }))
             {
-                citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-                *citiesStack.back() = *visited;
-                citiesStack.back()->push_back(i);
-
-                LinkedList<unsigned>* candidate = visitableCities(citiesStack.back());
-
-                putc('\n', stdout);
-
-                if (candidate->size() > bestSoFar->size())
+                visited->push_back(i);
+                if (visited->size() > cities->size())
                 {
-                    *bestSoFar = *candidate;
+                    *cities = *visited;
                 }
-                citiesStack.pop_back();   // pop candidate
-                citiesStack.pop_back();   // pop augmented visited list
-                if (bestSoFar->size() > 40)
+                visitableCities(visited);
+                visited->pop_back();
+                traversed.push_back({ visitedArr, i });
+                if (cities->size() > 66)   // early return
                 {
-                    break;
+                    return;
                 }
             }
         }
-
-        // return the first push_back
-        return bestSoFar;
     }
 
     /* TODO: Write visitableCitiesWithHeuristics that implement:
@@ -290,183 +261,6 @@ public:
      *    and if the visited of a state divides the best seen so far, prune
      *    that state.
      */
-
-    LinkedList<unsigned>* visitableCitiesImprove(const LinkedList<unsigned>* visited, const LinkedList<unsigned>* banned) const noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* bestSoFar = citiesStack.back();
-
-        // the actual computation goes here
-        *bestSoFar = *visited;
-        bool sameSolution { true };
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            if (traversable(*visited->back(), i) && !visited->contains(i) && !banned->contains(i))
-            {
-                citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-                *citiesStack.back() = *visited;
-                citiesStack.back()->push_back(i);
-
-                LinkedList<unsigned>* candidate = visitableCitiesImprove(citiesStack.back(), banned);
-                if (candidate->size() > bestSoFar->size())
-                {
-                    sameSolution = false;
-                    *bestSoFar = *candidate;
-                    if (bestSoFar->size() > 65)
-                    {
-                        printf("Best so far: %d\n", bestSoFar->size());
-                    }
-                }
-                citiesStack.pop_back();   // pop candidate
-                citiesStack.pop_back();   // pop augmented visited list
-                if (bestSoFar->size() > 65)
-                {
-                    break;
-                }
-            }
-        }
-        if (sameSolution && visited->size() > 40)
-        {
-            citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-            LinkedList<unsigned>* bestCopy = citiesStack.back();
-            *bestCopy = *bestSoFar;
-
-            citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-            LinkedList<unsigned>* bannedCopy = citiesStack.back();
-            *bannedCopy = *banned;
-
-            bannedCopy->push_back(*bestCopy->pop_back());
-            /*
-            LinkedList<unsigned>* candidate = visitableCitiesImprove(bestCopy, bannedCopy);
-            if (candidate->size() > bestSoFar->size())
-            {
-                *bestSoFar = *candidate;
-                if (bestSoFar->size() > 60)
-                {
-                    printf("Best so far: %d\n", bestSoFar->size());
-                }
-            }
-            citiesStack.pop_back();   // pop candidate
-            */
-
-            citiesStack.pop_back();   // pop bannedCopy
-            citiesStack.pop_back();   // pop bestCopy
-        }
-
-        // return the first push_back
-        return bestSoFar;
-    }
-
-    LinkedList<unsigned>* visitableCitiesLongestDistanceHeuristic(const LinkedList<unsigned>* visited) const noexcept
-
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* longestDistances = citiesStack.back();
-
-        // the actual computation goes here
-        *longestDistances = *visited;
-        bool notStuck { true };
-        while (notStuck)
-        {
-            notStuck = false;
-            unsigned currNext { static_cast<unsigned>(-1) };
-            unsigned currMax { 0 };
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*longestDistances->back()][i] };
-                if (traversable(*longestDistances->back(), i) && dist > currMax && !longestDistances->contains(i))
-                {
-                    currNext = i;
-                    currMax = dist;
-                    notStuck = true;
-                }
-            }
-            if (notStuck)
-            {
-                longestDistances->push_back(currNext);
-            }
-        }
-
-        // return the first push_back
-        return longestDistances;
-    }
-
-    LinkedList<unsigned>* visitableCitiesShortestDistanceHeuristic(const LinkedList<unsigned>* visited) const noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* shortestDistances = citiesStack.back();
-
-        // the actual computation goes here
-        *shortestDistances = *visited;
-        bool notStuck { true };
-        while (notStuck)
-        {
-            notStuck = false;
-            unsigned currNext { static_cast<unsigned>(-1) };
-            unsigned currMin { UINT_MAX };
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*shortestDistances->back()][i] };
-                if (dist < currMin && !shortestDistances->contains(i))
-                {
-                    currNext = i;
-                    currMin = dist;
-                    notStuck = true;
-                }
-            }
-            if (notStuck)
-            {
-                shortestDistances->push_back(currNext);
-            }
-        }
-
-        // return the first push_back
-        return shortestDistances;
-    }
-
-    LinkedList<unsigned>* visitableCitiesMostEdgesHeuristic(const LinkedList<unsigned>* visited) const noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* mostEdges = citiesStack.back();
-
-        // the actual computation goes here
-        *mostEdges = *visited;
-        bool notStuck { true };
-        while (notStuck)
-        {
-            notStuck = false;
-            unsigned currNext { static_cast<unsigned>(-1) };
-            unsigned currMax { 0 };
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*mostEdges->back()][i] };
-                if (traversable(*mostEdges->back(), i) && edgeCounts[i] > currMax && !mostEdges->contains(i))
-                {
-                    currNext = i;
-                    currMax = edgeCounts[i];
-                    notStuck = true;
-                }
-            }
-            if (notStuck)
-            {
-                mostEdges->push_back(currNext);
-                for (unsigned i { 0 }; i < 81; ++i)
-                {
-                    if (traversable(currNext, i))
-                    {
-                        edgeCounts[i]--;
-                    }
-                }
-            }
-        }
-
-        // return the first push_back
-        return mostEdges;
-    }
 
     LinkedList<unsigned>* visitableCitiesDFSHeuristic(const LinkedList<unsigned>* visited) const noexcept
     {
@@ -537,69 +331,6 @@ public:
         return result;
     }
 
-    LinkedList<unsigned>* kahnsAlgorithm() const noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* result = citiesStack.back();
-
-        result->push_back(startCity);
-        unsigned i { 0 };
-        do
-        {
-            for (unsigned j { 0 }; j < 81; ++j)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*result->at(i)][j] };
-                if (dist < UINT_MAX && !result->contains(j))
-                {
-                    result->push_back(j);
-                }
-            }
-            ++i;
-        } while (i < result->size());
-
-        // return the first push_back
-        return result;
-    }
-
-    /*
-    // writes the result to distances
-    void shortestPath(const LinkedList<unsigned>* ts) noexcept
-    {
-        for(unsigned i{0}; i < 81; ++i)
-        {
-            distances.push_back(INT_MAX);
-        }
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* visited = citiesStack.back();
-
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* topSort = citiesStack.back();
-        *topSort = *ts;
-
-        *distances.at(*topSort->front()) = 0;
-
-        while(topSort->size() > 0)
-        {
-            visited->push_back(*topSort->pop_front());
-            assert(*distances.at(*visited->back()) <= 0);
-            for(unsigned i{0}; i < 81; ++i)
-            {
-                unsigned dist { filteredAdjacencyMatrix[*visited->back()][i] };
-                if (dist < UINT_MAX
-                // && !visited->contains(i)
-                && *distances.at(*visited->back()) <= *distances.at(i))
-                {
-                    *distances.at(i) = *distances.at(*visited->back()) - 1;
-                }
-            }
-        }
-
-        citiesStack.pop_back();
-        citiesStack.pop_back();
-    }
-    */
-
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
         for (unsigned i { 0 }; (i + 1) < cs.size(); ++i)
@@ -625,11 +356,12 @@ public:
     void printRoute(FILE* stream) const noexcept
     {
         fprintf(stream, "Length: %d\n", cities->size());
-        cities->map(&Traveler::toNames, &Traveler::cityNamesPool).printStrs(stream);
+        cities->map(&toNames, &cityNamesPool).printStrs(stream);
         fputc('\n', stream);
 
         fprintf(stream, "Max allocation nodes: %d\n", nodePool.maxAllocated);
         fprintf(stream, "Max allocation lls: %d\n", llPool.maxAllocated);
+        fprintf(stream, "Max allocation traversed: %d\n", traversedPool.maxAllocated);
     }
 
     // Filled in by parseInput()
@@ -648,11 +380,23 @@ private:
         return filteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
 
+    // Makes a stack allocation
+    constexpr StaticVector<bool, 81> toCityArray(const LinkedList<unsigned>* ll) const noexcept
+    {
+        StaticVector<bool, 81> arr;
+        arr.clear();
+        for (const unsigned& c : *ll)
+        {
+            arr[c] = true;
+        }
+        return arr;
+    }
+
     // Filled in by constructor
     unsigned startCity, X, Y;
 
     // Used by parseInput()
-    StaticVector<char, BUF_SIZE> buffer;
+    static inline StaticVector<char, BUF_SIZE> buffer;
 
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
@@ -660,17 +404,20 @@ private:
     // Used by printRoute()
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
 
-    static inline ObjectPool<Node<unsigned>, 8000> nodePool;
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 200> llPool;
+    // Used by traversed
+    static inline ObjectPool<Node<std::pair<StaticVector<bool, 81>, unsigned>>, 5000> traversedPool;
+    // Used by visitedCities to cache previously visited combinations
+    static inline LinkedList<std::pair<StaticVector<bool, 81>, unsigned>> traversed;
+
+    // Used by citiesStack
+    static inline ObjectPool<Node<unsigned>, 5000> nodePool;
+    // Used by citiesStack
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 10> llPool;
+    // Used by visitedCities
     static inline LinkedList<LinkedList<unsigned>> citiesStack;
-
-    static inline StaticVector<unsigned, 81> edgeCounts;
-
-    // static inline ObjectPool<Node<int>, 81> distancesPool;
-    // static inline LinkedList<int> distances;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!
      */
-    LinkedList<unsigned>* cities { nullptr };
+    LinkedList<unsigned>* cities;
 };

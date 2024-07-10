@@ -85,6 +85,19 @@ public:
             mData[i] = 0;
         }
     }
+
+    // operator!= is automatically generated
+    constexpr friend inline bool operator==(const StaticVector& lhs, const StaticVector& rhs) noexcept
+    {
+        for (unsigned i { 0 }; i < N; ++i)
+        {
+            if (lhs[i] != rhs[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 private:
     T mData[N] { T {} };
     unsigned mSize { N };
