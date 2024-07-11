@@ -151,12 +151,12 @@ IndentWrappedFunctionNames: true
 # JavaScriptWrapImports: true
 
 # InsertBraces: true -> safer to do manually
-# InsertNewlineAtEndOfFile: true
+InsertNewlineAtEOF: true
 InsertTrailingCommas: None # Wrapped
 
 # IntegerLiteralSeperator:
 
-# KeepEmptyLinesAtEOF: false
+KeepEmptyLinesAtEOF: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # LambdaBodyIndentation: Signature OuterScope
@@ -214,7 +214,7 @@ SpaceBeforeCaseColon: true
 SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
-# SpaceBeforeJsonColon: true
+SpaceBeforeJsonColon: true
 SpaceBeforeParens: ControlStatements # Never ControlStatementsExceptControlMacros NonEmptyParentheses Always Custom
 # SpaceBeforeParensOptions # if custom
 SpaceBeforeRangeBasedForLoopColon: true
