@@ -78,6 +78,14 @@ public:
         return mSize;
     }
 
+    constexpr void fill(const T& data) noexcept
+    {
+        for (unsigned i { 0 }; i < mSize; ++i)
+        {
+            mData[i] = data;
+        }
+    }
+
     constexpr void clear() noexcept
     {
         for (unsigned i { 0 }; i < mSize; ++i)

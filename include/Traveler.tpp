@@ -8,6 +8,7 @@
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
+#include <utility>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -218,6 +219,7 @@ public:
             notStuck = false;
             unsigned nextCity { static_cast<unsigned>(-1) };
             int maxVisitable { -1 };
+            int maxEdges { -1 };
             for (unsigned i { 0 }; i < 81; ++i)
             {
                 if (!traversable(currCity, i) || visitedArr[i])
@@ -225,6 +227,7 @@ public:
                     continue;
                 }
                 int visitable { static_cast<int>(countTrue(dfs(visitedArr, i))) };
+                int edgeCount { static_cast<int>(edges(visitedArr, i)) };
                 if (maxVisitable < visitable)
                 {
                     notStuck = true;
@@ -275,6 +278,73 @@ public:
          */
         reachables[n] = false;
         return reachables;
+    }
+
+    /* Returns the StaticVector of pairs such that the first element of the pair
+     * is the StaticVector of biconnected components, and the second element
+     * of the pair is the StaticVector of articulation points of the such
+     * component. The algorithm starts from n, ignoring all nodes in visitedArr.
+     * Makes a stack allocation of its return value.
+     */
+    [[nodiscard]] constexpr StaticVector<std::pair<StaticVector<bool, 81>, StaticVector<bool, 81>>, 81> bcc(const StaticVector<bool, 81>& visitedArr,
+                                                                                                            const unsigned& n) const noexcept
+    {
+        StaticVector<std::pair<StaticVector<bool, 81>, StaticVector<bool, 81>>, 81> pairs;
+        unsigned pairIndex { 0 };
+
+        StaticVector<unsigned, 81> discoveryTime;
+        discoveryTime.clear();
+
+        StaticVector<unsigned, 81> lowPt;
+        lowPt.clear();
+
+        StaticVector<bool, 81> bcc;
+        bcc.clear();
+        StaticVector<bool, 81> artPts;
+        artPts.clear();
+
+        StaticVector<bool, 81> visited;
+        visited.clear();
+
+        StaticVector<unsigned, 81> stack;
+        unsigned currIndex { 0 };
+        stack[currIndex++] = n;
+
+        while (currIndex)
+        {
+            unsigned curr = stack[--currIndex];
+            if (visited[curr])
+            {
+                continue;
+            }
+            visited[curr] = true;
+            for (unsigned i = 0; i < 81; ++i)
+            {
+                if (traversable(curr, i) && !visitedArr[i] && !visited[i] && !stack.contains(i))
+                {
+                    stack[currIndex++] = i;
+                }
+            }
+            /* This part should be inside the while loop.
+            // Fill the bcc and artPts while processing the stack
+            pairs[pairIndex] = { bcc, artPts };
+            */
+        }
+
+        return pairs;
+    }
+
+    [[nodiscard]] constexpr unsigned edges(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
+    {
+        unsigned edgeCount { 0 };
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            if (traversable(n, i) && !visitedArr[i])
+            {
+                ++edgeCount;
+            }
+        }
+        return edgeCount;
     }
 
     [[nodiscard]] constexpr static unsigned countTrue(const StaticVector<bool, 81>& v) noexcept
