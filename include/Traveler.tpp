@@ -27,6 +27,8 @@ public:
         y { static_cast<unsigned>(atoi(arg4)) }
     {
         mCitiesStack.pool() = &mLLPool;
+        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
+        cities = mCitiesStack.back();
 
         getInput(arg1);
         parseInput();
@@ -192,21 +194,8 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     constexpr void travel() noexcept
     {
-        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
-        LinkedList<unsigned>* startCityList = mCitiesStack.back();
-        startCityList->pushBack(mStartCity);
-
-        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
-        cities = mCitiesStack.back();
-        *cities = *startCityList;
-
+        cities->pushBack(mStartCity);
         visitableCities(mStartCity);   // writes to cities
-
-        /* There must be two values on the stack now. The first
-         * value is the visited cities and the second value is the
-         * return value of visitableCities.
-         */
-        mCitiesStack.popFront();
     }
 
     // TODO: Eliminate stack allocations
@@ -375,9 +364,9 @@ private:
     static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> mCityNamesPool;
 
     // Used by citiesStack
-    static inline ObjectPool<Node<unsigned>, 10000> mNodePool;
+    static inline ObjectPool<Node<unsigned>, 100> mNodePool;
     // Used by citiesStack
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 500> mLLPool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 5> mLLPool;
     // Used by visitedCities
     static inline LinkedList<LinkedList<unsigned>> mCitiesStack;
 public:
