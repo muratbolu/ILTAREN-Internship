@@ -5,10 +5,13 @@
 #include "ObjectPool.tpp"
 #include "StaticVector.tpp"
 
+#include <array>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
+#include <stack>
 #include <utility>
+#include <vector>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -197,6 +200,48 @@ public:
     {
         cities->pushBack(mStartCity);
         visitableCities(mStartCity);   // writes to cities
+
+        StaticVector<bool, 81> visited;
+        visited.fill(false);
+        auto val { bcc(visited, mStartCity) };
+        for (const auto& p : val)
+        {
+            bool notPrinted { true };
+            printf("[");
+            for (unsigned i { 0 }; i < p.first.size(); ++i)
+            {
+                if (p.first[i])
+                {
+                    if (notPrinted)
+                    {
+                        printf("%s", static_cast<char*>(toNames(i).data()));
+                        notPrinted = false;
+                    }
+                    else
+                    {
+                        printf(", %s", static_cast<char*>(toNames(i).data()));
+                    }
+                }
+            }
+            printf("], [");
+            notPrinted = true;
+            for (unsigned i { 0 }; i < p.second.size(); ++i)
+            {
+                if (p.second[i])
+                {
+                    if (notPrinted)
+                    {
+                        printf("%s", static_cast<char*>(toNames(i).data()));
+                        notPrinted = false;
+                    }
+                    else
+                    {
+                        printf(", %s", static_cast<char*>(toNames(i).data()));
+                    }
+                }
+            }
+            printf("]\n");
+        }
     }
 
     // TODO: Eliminate stack allocations
@@ -219,7 +264,7 @@ public:
             notStuck = false;
             unsigned nextCity { static_cast<unsigned>(-1) };
             int maxVisitable { -1 };
-            int maxEdges { -1 };
+            // int maxEdges { -1 };
             for (unsigned i { 0 }; i < 81; ++i)
             {
                 if (!traversable(currCity, i) || visitedArr[i])
@@ -227,7 +272,7 @@ public:
                     continue;
                 }
                 int visitable { static_cast<int>(countTrue(dfs(visitedArr, i))) };
-                int edgeCount { static_cast<int>(edges(visitedArr, i)) };
+                // int edgeCount { static_cast<int>(edges(visitedArr, i)) };
                 if (maxVisitable < visitable)
                 {
                     notStuck = true;
@@ -280,55 +325,133 @@ public:
         return reachables;
     }
 
-    /* Returns the StaticVector of pairs such that the first element of the pair
-     * is the StaticVector of biconnected components, and the second element
-     * of the pair is the StaticVector of articulation points of the such
+    /* Returns the vector of pairs such that the first element of the pair
+     * is the array of biconnected components, and the second element
+     * of the pair is the array of articulation points of the such
      * component. The algorithm starts from n, ignoring all nodes in visitedArr.
-     * Makes a stack allocation of its return value.
      */
-    [[nodiscard]] constexpr StaticVector<std::pair<StaticVector<bool, 81>, StaticVector<bool, 81>>, 81> bcc(const StaticVector<bool, 81>& visitedArr,
-                                                                                                            const unsigned& n) const noexcept
+    [[nodiscard]] std::vector<std::pair<std::array<bool, 81>, std::array<bool, 81>>> bcc(const StaticVector<bool, 81>& visitedArr,
+                                                                                         const unsigned& n) const noexcept
     {
-        StaticVector<std::pair<StaticVector<bool, 81>, StaticVector<bool, 81>>, 81> pairs;
-        unsigned pairIndex { 0 };
+        std::vector<std::pair<std::array<bool, 81>, std::array<bool, 81>>> pairs;
 
-        StaticVector<unsigned, 81> discoveryTime;
-        discoveryTime.clear();
+        std::array<unsigned, 81> discoveryTime;
+        discoveryTime.fill(static_cast<unsigned>(-1));
 
-        StaticVector<unsigned, 81> lowPt;
-        lowPt.clear();
+        std::array<unsigned, 81> lowPt;
+        lowPt.fill(static_cast<unsigned>(-1));
 
-        StaticVector<bool, 81> bcc;
-        bcc.clear();
-        StaticVector<bool, 81> artPts;
-        artPts.clear();
+        std::array<unsigned, 81> parent;
+        parent.fill(static_cast<unsigned>(-1));
 
-        StaticVector<bool, 81> visited;
-        visited.clear();
+        std::array<bool, 81> visited;
+        visited.fill(false);
 
-        StaticVector<unsigned, 81> stack;
-        unsigned currIndex { 0 };
-        stack[currIndex++] = n;
+        std::vector<unsigned> stack;
+        std::array<bool, 81> stackMember;
+        stackMember.fill(false);
 
-        while (currIndex)
+        unsigned time = 0;
+        unsigned currCity = n;
+
+        struct Frame
         {
-            unsigned curr = stack[--currIndex];
-            if (visited[curr])
+            unsigned u, vIndex;
+            bool childVisited;
+        };
+
+        std::vector<Frame> callStack;
+        callStack.push_back({ currCity, 0, false });
+
+        while (!callStack.empty())
+        {
+            auto& frame = callStack.back();
+            unsigned u = frame.u;
+            unsigned& vIndex = frame.vIndex;
+            bool& childVisited = frame.childVisited;
+
+            if (!childVisited)
             {
-                continue;
+                discoveryTime[u] = lowPt[u] = time++;
+                visited[u] = true;
+                stack.push_back(u);
+                stackMember[u] = true;
+                childVisited = true;
             }
-            visited[curr] = true;
-            for (unsigned i = 0; i < 81; ++i)
+
+            bool done = true;
+            unsigned children = 0;
+
+            for (; vIndex < 81; ++vIndex)
             {
-                if (traversable(curr, i) && !visitedArr[i] && !visited[i] && !stack.contains(i))
+                unsigned v = vIndex;
+
+                if (!traversable(u, v) || visitedArr[v])
                 {
-                    stack[currIndex++] = i;
+                    continue;
+                }
+
+                if (discoveryTime[v] == static_cast<unsigned>(-1))
+                {
+                    parent[v] = u;
+                    children++;
+                    callStack.push_back({ v, 0, false });
+                    done = false;
+                    break;
+                }
+                else if (stackMember[v] && v != parent[u])
+                {
+                    lowPt[u] = std::min(lowPt[u], discoveryTime[v]);
                 }
             }
-            /* This part should be inside the while loop.
-            // Fill the bcc and artPts while processing the stack
-            pairs[pairIndex] = { bcc, artPts };
-            */
+
+            if (done)
+            {
+                if (parent[u] == static_cast<unsigned>(-1) && children > 1)
+                {
+                }
+                if (parent[u] != static_cast<unsigned>(-1) && lowPt[u] >= discoveryTime[parent[u]])
+                {
+                    std::array<bool, 81> bcc = {};
+                    std::array<bool, 81> artPts = {};
+
+                    while (stack.back() != u)
+                    {
+                        bcc[stack.back()] = true;
+                        stackMember[stack.back()] = false;
+                        stack.pop_back();
+                    }
+                    bcc[u] = true;
+                    stackMember[u] = false;
+                    stack.pop_back();
+                    bcc[parent[u]] = true;
+
+                    artPts[parent[u]] = true;
+
+                    pairs.push_back({ bcc, artPts });
+                }
+                if (parent[u] != static_cast<unsigned>(-1))
+                {
+                    lowPt[parent[u]] = std::min(lowPt[parent[u]], lowPt[u]);
+                }
+                callStack.pop_back();
+            }
+        }
+
+        for (unsigned i = 0; i < 81; ++i)
+        {
+            if (discoveryTime[i] != static_cast<unsigned>(-1) && stackMember[i])
+            {
+                std::array<bool, 81> bcc = {};
+                std::array<bool, 81> artPts = {};
+                while (!stack.empty())
+                {
+                    bcc[stack.back()] = true;
+                    stackMember[stack.back()] = false;
+                    stack.pop_back();
+                }
+                pairs.push_back({ bcc, artPts });
+            }
         }
 
         return pairs;

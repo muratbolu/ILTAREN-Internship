@@ -88,10 +88,7 @@ public:
 
     constexpr void clear() noexcept
     {
-        for (unsigned i { 0 }; i < mSize; ++i)
-        {
-            mData[i] = 0;
-        }
+        fill(0);
     }
 
     constexpr bool contains(const T& obj) const noexcept
