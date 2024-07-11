@@ -9,6 +9,7 @@
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <stack>
 #include <utility>
 #include <vector>
@@ -196,38 +197,21 @@ public:
     }
 
     // Zero-indexing for cities, 0 => ADANA, etc.
-    constexpr void travel() noexcept
+    void travel() noexcept
     {
         cities->pushBack(mStartCity);
         visitableCities(mStartCity);   // writes to cities
+    }
 
-        StaticVector<bool, 81> visited;
-        visited.fill(false);
-        auto val { bcc(visited, mStartCity) };
+    void printSCC(const std::vector<StaticVector<bool, 81>>& val) const noexcept
+    {
         for (const auto& p : val)
         {
             bool notPrinted { true };
             printf("[");
-            for (unsigned i { 0 }; i < p.first.size(); ++i)
+            for (unsigned i { 0 }; i < p.size(); ++i)
             {
-                if (p.first[i])
-                {
-                    if (notPrinted)
-                    {
-                        printf("%s", static_cast<char*>(toNames(i).data()));
-                        notPrinted = false;
-                    }
-                    else
-                    {
-                        printf(", %s", static_cast<char*>(toNames(i).data()));
-                    }
-                }
-            }
-            printf("], [");
-            notPrinted = true;
-            for (unsigned i { 0 }; i < p.second.size(); ++i)
-            {
-                if (p.second[i])
+                if (p[i])
                 {
                     if (notPrinted)
                     {
@@ -242,14 +226,13 @@ public:
             }
             printf("]\n");
         }
+        printf("\n");
     }
 
     // TODO: Eliminate stack allocations
 
     /* Tries to find the longest path by picking the neighbor
-     * with the highest DFS-Score, i.e., the node that can
-     * reach the most nodes without visiting the previously
-     * visited ones.
+     * within the largest strongly connected component.
      */
     constexpr void visitableCities(unsigned n) const noexcept
     {
@@ -263,17 +246,33 @@ public:
         {
             notStuck = false;
             unsigned nextCity { static_cast<unsigned>(-1) };
+
             int maxVisitable { -1 };
-            // int maxEdges { -1 };
+
             for (unsigned i { 0 }; i < 81; ++i)
             {
                 if (!traversable(currCity, i) || visitedArr[i])
                 {
                     continue;
                 }
-                int visitable { static_cast<int>(countTrue(dfs(visitedArr, i))) };
-                // int edgeCount { static_cast<int>(edges(visitedArr, i)) };
-                if (maxVisitable < visitable)
+
+                auto sccResult { tarjanSCC(visitedArr, i) };
+                printSCC(sccResult);
+
+                int visitable { -1 };
+                for (const auto& scc : sccResult)
+                {
+                    if (scc[i])
+                    {
+                        int clusterSize { static_cast<int>(countTrue(scc)) };
+                        if (clusterSize > visitable)
+                        {
+                            visitable = clusterSize;
+                        }
+                    }
+                }
+
+                if (visitable > maxVisitable)
                 {
                     notStuck = true;
                     nextCity = i;
@@ -325,136 +324,78 @@ public:
         return reachables;
     }
 
-    /* Returns the vector of pairs such that the first element of the pair
-     * is the array of biconnected components, and the second element
-     * of the pair is the array of articulation points of the such
-     * component. The algorithm starts from n, ignoring all nodes in visitedArr.
+    /* Returns the vector of strongly connected components.
+     * The algorithm starts from n, ignoring all nodes in visitedArr.
      */
-    [[nodiscard]] std::vector<std::pair<std::array<bool, 81>, std::array<bool, 81>>> bcc(const StaticVector<bool, 81>& visitedArr,
-                                                                                         const unsigned& n) const noexcept
+    [[nodiscard]] std::vector<StaticVector<bool, 81>> tarjanSCC(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
-        std::vector<std::pair<std::array<bool, 81>, std::array<bool, 81>>> pairs;
+        std::vector<StaticVector<bool, 81>> sccs;
 
-        std::array<unsigned, 81> discoveryTime;
-        discoveryTime.fill(static_cast<unsigned>(-1));
+        std::array<int, 81> discoveryTime;
+        discoveryTime.fill(-1);
 
-        std::array<unsigned, 81> lowPt;
-        lowPt.fill(static_cast<unsigned>(-1));
+        std::array<int, 81> low;
+        low.fill(-1);
 
-        std::array<unsigned, 81> parent;
-        parent.fill(static_cast<unsigned>(-1));
-
-        std::array<bool, 81> visited;
-        visited.fill(false);
+        std::array<bool, 81> onStack;
+        onStack.fill(false);
 
         std::vector<unsigned> stack;
-        std::array<bool, 81> stackMember;
-        stackMember.fill(false);
 
-        unsigned time = 0;
-        unsigned currCity = n;
+        int time = 0;
 
-        struct Frame
+        std::function<void(unsigned)> tarjanDFS = [&](unsigned v)
         {
-            unsigned u, vIndex;
-            bool childVisited;
-        };
+            discoveryTime[v] = low[v] = time++;
+            stack.push_back(v);
+            onStack[v] = true;
 
-        std::vector<Frame> callStack;
-        callStack.push_back({ currCity, 0, false });
-
-        while (!callStack.empty())
-        {
-            auto& frame = callStack.back();
-            unsigned u = frame.u;
-            unsigned& vIndex = frame.vIndex;
-            bool& childVisited = frame.childVisited;
-
-            if (!childVisited)
+            for (unsigned u = 0; u < 81; ++u)
             {
-                discoveryTime[u] = lowPt[u] = time++;
-                visited[u] = true;
-                stack.push_back(u);
-                stackMember[u] = true;
-                childVisited = true;
-            }
-
-            bool done = true;
-            unsigned children = 0;
-
-            for (; vIndex < 81; ++vIndex)
-            {
-                unsigned v = vIndex;
-
-                if (!traversable(u, v) || visitedArr[v])
+                if (!traversable(v, u) || visitedArr[u])
                 {
                     continue;
                 }
 
-                if (discoveryTime[v] == static_cast<unsigned>(-1))
+                if (discoveryTime[u] == -1)
                 {
-                    parent[v] = u;
-                    children++;
-                    callStack.push_back({ v, 0, false });
-                    done = false;
-                    break;
+                    // u is not visited, recurse on it
+                    tarjanDFS(u);
+                    low[v] = std::min(low[v], low[u]);
                 }
-                else if (stackMember[v] && v != parent[u])
+                else if (onStack[u])
                 {
-                    lowPt[u] = std::min(lowPt[u], discoveryTime[v]);
+                    // u is in the current stack
+                    low[v] = std::min(low[v], discoveryTime[u]);
                 }
             }
 
-            if (done)
+            // If v is a root node, pop the stack and generate an SCC
+            if (low[v] == discoveryTime[v])
             {
-                if (parent[u] == static_cast<unsigned>(-1) && children > 1)
+                StaticVector<bool, 81> scc = {};
+                unsigned w = 0;
+                do
                 {
-                }
-                if (parent[u] != static_cast<unsigned>(-1) && lowPt[u] >= discoveryTime[parent[u]])
-                {
-                    std::array<bool, 81> bcc = {};
-                    std::array<bool, 81> artPts = {};
-
-                    while (stack.back() != u)
-                    {
-                        bcc[stack.back()] = true;
-                        stackMember[stack.back()] = false;
-                        stack.pop_back();
-                    }
-                    bcc[u] = true;
-                    stackMember[u] = false;
+                    w = stack.back();
                     stack.pop_back();
-                    bcc[parent[u]] = true;
-
-                    artPts[parent[u]] = true;
-
-                    pairs.push_back({ bcc, artPts });
-                }
-                if (parent[u] != static_cast<unsigned>(-1))
-                {
-                    lowPt[parent[u]] = std::min(lowPt[parent[u]], lowPt[u]);
-                }
-                callStack.pop_back();
+                    onStack[w] = false;
+                    scc[w] = true;
+                } while (w != v);
+                sccs.push_back(scc);
             }
-        }
-
+        };
+        // Initialize the DFS from the starting node n
+        tarjanDFS(n);
+        // Check if any nodes were missed and run DFS for them as well
         for (unsigned i = 0; i < 81; ++i)
         {
-            if (discoveryTime[i] != static_cast<unsigned>(-1) && stackMember[i])
+            if (!visitedArr[i] && discoveryTime[i] == -1)
             {
-                std::array<bool, 81> bcc = {};
-                std::array<bool, 81> artPts = {};
-                while (!stack.empty())
-                {
-                    bcc[stack.back()] = true;
-                    stackMember[stack.back()] = false;
-                    stack.pop_back();
-                }
-                pairs.push_back({ bcc, artPts });
+                tarjanDFS(i);
             }
         }
-
-        return pairs;
+        return sccs;
     }
 
     [[nodiscard]] constexpr unsigned edges(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
