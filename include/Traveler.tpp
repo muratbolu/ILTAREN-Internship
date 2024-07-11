@@ -6,19 +6,14 @@
 #include "StaticVector.tpp"
 
 #include <climits>
-// #include <compare>   // Needed because of a bug in MSVC
 #include <cstdio>
 #include <cstdlib>
-#include <tuple>
 
 // Separator is semicolon for our file
 #define SEP ';'
 
 // 2^16 char size buffer
 #define BUF_SIZE (1024 * 64)
-
-// 2^10 line size buffer
-#define LINE_SIZE (1024)
 
 // max 32 characters for city names
 #define MAX_NAME_SIZE (32)
@@ -27,28 +22,27 @@ class Traveler
 {
 public:
     Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept :
-        startCity { static_cast<unsigned>(atoi(arg2) - 1) },
-        X { static_cast<unsigned>(atoi(arg3)) },
-        Y { static_cast<unsigned>(atoi(arg4)) }
+        mStartCity { static_cast<unsigned>(atoi(arg2) - 1) },
+        x { static_cast<unsigned>(atoi(arg3)) },
+        y { static_cast<unsigned>(atoi(arg4)) }
     {
-        citiesStack.pool() = &llPool;
-        traversed.pool() = &traversedPool;
+        mCitiesStack.pool() = &mLLPool;
 
         getInput(arg1);
         parseInput();
     }
 
     // returns false if something goes wrong but we don't use it
-    constexpr static bool getInput(char arg[]) noexcept
+    static bool getInput(char arg[]) noexcept
     {
-        FILE* fp = fopen( arg, "r");
+        FILE* fp = fopen(arg, "r");
         if (fp == nullptr)
         {
             perror("Could not open file");
             return false;
         }
 
-        for (int c { EOF }; char& i : buffer)
+        for (int c { EOF }; char& i : mBuffer)
         {
             c = fgetc(fp);
             if (c == EOF)
@@ -98,7 +92,7 @@ public:
             CALC_NUM,
         } state { SKIP_CODE };
 
-        for (char c : buffer)
+        for (char c : mBuffer)
         {
             if (c == '\0')
             {
@@ -119,13 +113,13 @@ public:
             case GET_NAME : {
                 if (c == SEP)
                 {
-                    Traveler::cityNames[line][i++] = '\0';
+                    Traveler::mCityNames[line][i++] = '\0';
                     ++sc;
                     state = CALC_NUM;
                 }
                 else
                 {
-                    Traveler::cityNames[line][i++] = c;
+                    Traveler::mCityNames[line][i++] = c;
                 }
                 break;
             }
@@ -162,7 +156,7 @@ public:
         {
             fprintf(stream, "%02d", i + 1);
             fputc(SEP, stream);
-            fprintf(stream, "%s", Traveler::cityNames[i].data());
+            fprintf(stream, "%s", Traveler::mCityNames[i].data());
             fputc(SEP, stream);
             for (unsigned j { 0 }; j < 81; ++j)
             {
@@ -183,7 +177,7 @@ public:
         {
             for (unsigned j { 0 }; j < 81; ++j)
             {
-                if ((src[i][j] < (X - Y)) || (src[i][j] > (X + Y)))
+                if ((src[i][j] < (x - y)) || (src[i][j] > (x + y)))
                 {
                     dst[i][j] = UINT_MAX;
                 }
@@ -198,31 +192,30 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     constexpr void travel() noexcept
     {
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* startCityList = citiesStack.back();
-        startCityList->push_back(startCity);
+        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
+        LinkedList<unsigned>* startCityList = mCitiesStack.back();
+        startCityList->pushBack(mStartCity);
 
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        cities = citiesStack.back();
+        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
+        cities = mCitiesStack.back();
         *cities = *startCityList;
 
-        visitableCities(startCity);   // writes to cities
+        visitableCities(mStartCity);   // writes to cities
 
         /* There must be two values on the stack now. The first
          * value is the visited cities and the second value is the
          * return value of visitableCities.
          */
-        citiesStack.pop_front();
+        mCitiesStack.popFront();
     }
 
-    // TODO: eliminate recursive methods.
+    // TODO: Eliminate stack allocations
 
     /* Tries to find the longest path by picking the neighbor
      * with the highest DFS-Score, i.e., the node that can
      * reach the most nodes without visiting the previously
      * visited ones.
      */
-
     constexpr void visitableCities(unsigned n) const noexcept
     {
         unsigned currCity { n };
@@ -242,7 +235,7 @@ public:
                 {
                     continue;
                 }
-                int visitable { static_cast<int>(countTrue(DFS(visitedArr, i))) };
+                int visitable { static_cast<int>(countTrue(dfs(visitedArr, i))) };
                 if (maxVisitable < visitable)
                 {
                     notStuck = true;
@@ -253,96 +246,16 @@ public:
             if (notStuck)
             {
                 currCity = nextCity;
-                cities->push_back(currCity);
+                cities->pushBack(currCity);
                 visitedArr[currCity] = true;
             }
         }
     }
 
-    /* TODO: Write visitableCitiesWithHeuristics that implement:
-     * 1. Basic symmetry detection, assign a prime number for each city
-     *    and instead of keeping a 'visited' list, just check if a city's
-     *    prime number divides the return value. But how to prune states
-     *    such that states with identical 'numbers' are pruned?
-     * 2. Reachable dominance detection, assign a prime number for each city
-     *    and if the visited of a state divides the best seen so far, prune
-     *    that state.
-     */
-
-    /*
-    LinkedList<unsigned>* visitableCitiesDFSHeuristic(const LinkedList<unsigned>* visited) const noexcept
-    {
-        // the first push_back is the return value.
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* citiesDFS = citiesStack.back();
-        *citiesDFS = *visited;
-
-        unsigned currMaxDFS;
-        do
-        {
-            unsigned currNext { static_cast<unsigned>(-1) };
-            currMaxDFS = 0;
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                if (traversable(*citiesDFS->back(), i) && !citiesDFS->contains(i))
-                {
-                    citiesDFS->push_back(i);
-                    unsigned DFS { depthFirstSearch(citiesDFS) };
-                    if (DFS > currMaxDFS)
-                    {
-                        currMaxDFS = DFS;
-                        currNext = i;
-                    }
-                    citiesDFS->pop_back();
-                }
-            }
-            if (currMaxDFS)
-            {
-                citiesDFS->push_back(currNext);
-            }
-        } while (currMaxDFS);
-
-        // return the first push_back
-        return citiesDFS;
-    }
-    */
-
-    /* Calculates the number of visitable nodes from the last node in ll,
-     * not visiting any of the nodes in ll.
-     */
-    /*
-    unsigned depthFirstSearch(const LinkedList<unsigned>* ll) const noexcept
-    {
-        citiesStack.push_back(LinkedList<unsigned> { &nodePool });
-        LinkedList<unsigned>* stack = citiesStack.back();
-
-        StaticVector<bool, 81> visitedArr { toCityArray(ll) };
-
-        stack->push_back(*ll->back());
-
-        unsigned visitable { 0 };
-        while (stack->size() > 0)
-        {
-            unsigned curr { *stack->pop_back() };
-            visitable++;
-            visitedArr[curr] = true;
-            for (unsigned i { 0 }; i < 81; ++i)
-            {
-                if (traversable(curr, i) && !visitedArr[i])
-                {
-                    stack->push_back(i);
-                }
-            }
-        }
-        citiesStack.pop_back();
-        return visitable;
-    }
-    */
-
     /* Makes a stack allocation. Return the reachable states, not including
      * those in the visitedArr, starting from n.
      */
-    [[nodiscard]] constexpr StaticVector<bool, 81> DFS(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
+    [[nodiscard]] constexpr StaticVector<bool, 81> dfs(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
         StaticVector<bool, 81> reachables;
         reachables.clear();
@@ -361,7 +274,7 @@ public:
             reachables[curr] = true;
             for (unsigned i = 0; i < 81; ++i)
             {
-                if (traversable(curr, i) && !visitedArr[i] && !reachables[i])
+                if (traversable(curr, i) && !visitedArr[i] && !reachables[i] && !stack.contains(i))
                 {
                     stack[currIndex++] = i;
                 }
@@ -401,40 +314,6 @@ public:
         return edges;
     }
 
-    [[nodiscard]] constexpr bool RDD(const std::tuple<const StaticVector<bool, 81>&, const unsigned&, const StaticVector<bool, 81>&>& t) const noexcept
-    {
-        unsigned visitedNum { countTrue(get<0>(t)) };
-        unsigned visitableNum { countTrue(get<2>(t)) };
-
-        if (visitedNum + 1 + visitableNum < cities->size())
-        {
-            traversed.push_back(t);
-            return false;
-        }
-
-        for (const auto& path : traversed)
-        {
-            if (get<1>(path) == get<1>(t) && countTrue(get<0>(path)) >= visitedNum && isSubsetOf(get<2>(t), get<2>(path)))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    [[nodiscard]] constexpr static bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) noexcept
-    {
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            if (fst[i] && !snd[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
     {
         for (unsigned i { 0 }; (i + 1) < cs.size(); ++i)
@@ -460,12 +339,11 @@ public:
     void printRoute(FILE* stream) const noexcept
     {
         fprintf(stream, "Length: %d\n", cities->size());
-        cities->map(&toNames, &cityNamesPool).printStrs(stream);
+        cities->map(&toNames, &mCityNamesPool).printStrs(stream);
         fputc('\n', stream);
 
-        fprintf(stream, "Max allocation nodes: %d\n", nodePool.maxAllocated);
-        fprintf(stream, "Max allocation lls: %d\n", llPool.maxAllocated);
-        fprintf(stream, "Max allocation traversed: %d\n", traversedPool.maxAllocated);
+        fprintf(stream, "Max allocation nodes: %d\n", mNodePool.maxAllocated);
+        fprintf(stream, "Max allocation lls: %d\n", mLLPool.maxAllocated);
     }
 
     // Filled in by parseInput()
@@ -476,7 +354,7 @@ private:
     // Used by printRoute. Must be called after parseInput()
     constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
     {
-        return Traveler::cityNames[n];
+        return Traveler::mCityNames[n];
     }
 
     [[nodiscard]] constexpr bool traversable(unsigned n, unsigned m) const noexcept
@@ -484,41 +362,24 @@ private:
         return filteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
 
-    // Makes a stack allocation
-    constexpr static StaticVector<bool, 81> toCityArray(const LinkedList<unsigned>* ll) noexcept
-    {
-        StaticVector<bool, 81> arr;
-        arr.clear();
-        for (const unsigned& c : *ll)
-        {
-            arr[c] = true;
-        }
-        return arr;
-    }
-
     // Filled in by constructor
-    unsigned startCity, X, Y;
+    unsigned mStartCity, x, y;
 
     // Used by parseInput()
-    static inline StaticVector<char, BUF_SIZE> buffer;
+    static inline StaticVector<char, BUF_SIZE> mBuffer;
 
     // Filled in by parseInput()
-    static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> cityNames;
+    static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
     // Used by printRoute()
-    static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> cityNamesPool;
-
-    // Used by traversed
-    static inline ObjectPool<Node<std::tuple<StaticVector<bool, 81>, unsigned, StaticVector<bool, 81>>>, 5000> traversedPool;
-    // Used by visitedCities to cache previously visited combinations
-    static inline LinkedList<std::tuple<StaticVector<bool, 81>, unsigned, StaticVector<bool, 81>>> traversed;
+    static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> mCityNamesPool;
 
     // Used by citiesStack
-    static inline ObjectPool<Node<unsigned>, 10000> nodePool;
+    static inline ObjectPool<Node<unsigned>, 10000> mNodePool;
     // Used by citiesStack
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 500> llPool;
+    static inline ObjectPool<Node<LinkedList<unsigned>>, 500> mLLPool;
     // Used by visitedCities
-    static inline LinkedList<LinkedList<unsigned>> citiesStack;
+    static inline LinkedList<LinkedList<unsigned>> mCitiesStack;
 public:
     /* LinkedList needs to be below ObjectPool because the objects in
      * the class are destructed from below to top!!!

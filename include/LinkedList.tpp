@@ -27,7 +27,7 @@ public:
     {
         for (const T& o : obj)
         {
-            push_back(o);
+            pushBack(o);
         }
     }
 
@@ -57,7 +57,7 @@ public:
         mSize = 0;
         for (const T& o : obj)
         {
-            push_back(o);
+            pushBack(o);
         }
         return *this;
     }
@@ -157,7 +157,7 @@ public:
         return false;
     }
 
-    constexpr bool push_front(const T& data) noexcept
+    constexpr bool pushFront(const T& data) noexcept
     {
         Node<T>* node = mNodePool->allocate();
         if (node == nullptr)
@@ -182,7 +182,7 @@ public:
         return true;
     }
 
-    constexpr bool push_back(const T& data) noexcept
+    constexpr bool pushBack(const T& data) noexcept
     {
         Node<T>* node = mNodePool->allocate();
         if (node == nullptr)
@@ -207,7 +207,7 @@ public:
         return true;
     }
 
-    constexpr T* pop_front() noexcept
+    constexpr T* popFront() noexcept
     {
         if (mHead == nullptr)
         {
@@ -235,7 +235,7 @@ public:
         return result;
     }
 
-    constexpr T* pop_back() noexcept
+    constexpr T* popBack() noexcept
     {
         if (mHead == nullptr)
         {
@@ -275,7 +275,7 @@ public:
 
         for (const T& o : *this)
         {
-            result.push_back(func(o));
+            result.pushBack(func(o));
         }
 
         return result;
