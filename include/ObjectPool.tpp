@@ -9,7 +9,7 @@ class ObjectPool : public IObjectPool<T>
 public:
     constexpr ObjectPool() noexcept
     {
-        mOccupied.clear();
+        mOccupied.fill(false);
     }
 
     constexpr ~ObjectPool() noexcept override = default;

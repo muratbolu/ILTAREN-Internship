@@ -46,7 +46,7 @@ TEST_F(StaticVectorTest, Assignment3)
 
 TEST_F(StaticVectorTest, Iterate1)
 {
-    vec1.clear();
+    vec1.fill(0);
     for (int it : vec1)
     {
         EXPECT_EQ(it, 0);
@@ -95,7 +95,7 @@ TEST_F(StaticVectorTest, Size)
 
 TEST_F(StaticVectorTest, Clear)
 {
-    vec1.clear();
+    vec1.fill(0);
     for (ContIter<int> it { vec1.begin() }; it != vec1.end(); ++it)
     {
         EXPECT_EQ(*it, 0);

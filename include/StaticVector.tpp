@@ -43,12 +43,12 @@ public:
         return mData[0];
     }
 
-    constexpr T back() const noexcept
+    virtual constexpr T back() const noexcept
     {
         return mData[mSize - 1];
     }
 
-    constexpr T& back() noexcept
+    virtual constexpr T& back() noexcept
     {
         return mData[mSize - 1];
     }
@@ -63,35 +63,30 @@ public:
         return ContIter<T> { mData };
     }
 
-    constexpr ContIter<T> end() noexcept
+    virtual constexpr ContIter<T> end() noexcept
     {
         return ContIter<T> { mData + mSize };
     }
 
-    [[nodiscard]] constexpr bool empty() const noexcept
+    [[nodiscard]] virtual constexpr bool empty() const noexcept
     {
         return mSize == 0;
     }
 
-    [[nodiscard]] constexpr unsigned size() const noexcept
+    [[nodiscard]] virtual constexpr unsigned size() const noexcept
     {
         return mSize;
     }
 
-    constexpr void fill(const T& data) noexcept
+    constexpr void fill(const T& obj) noexcept
     {
         for (unsigned i { 0 }; i < mSize; ++i)
         {
-            mData[i] = data;
+            mData[i] = obj;
         }
     }
 
-    constexpr void clear() noexcept
-    {
-        fill(0);
-    }
-
-    constexpr bool contains(const T& obj) const noexcept
+    virtual constexpr bool contains(const T& obj) const noexcept
     {
         for (unsigned i { 0 }; i < mSize; ++i)
         {
@@ -101,6 +96,19 @@ public:
             }
         }
         return false;
+    }
+
+    virtual constexpr unsigned count(const T& obj) const noexcept
+    {
+        unsigned num { 0 };
+        for (unsigned i { 0 }; i < mSize; ++i)
+        {
+            if (obj == mData[i])
+            {
+                ++num;
+            }
+        }
+        return num;
     }
 
     // operator!= is automatically generated

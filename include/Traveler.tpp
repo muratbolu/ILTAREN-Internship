@@ -1,8 +1,6 @@
 #pragma once
 
-#include "LinkedList.tpp"
-#include "Node.tpp"
-#include "ObjectPool.tpp"
+#include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
 #include <array>
@@ -10,7 +8,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
-#include <stack>
 #include <utility>
 #include <vector>
 
@@ -31,9 +28,7 @@ public:
         x { static_cast<unsigned>(atoi(arg3)) },
         y { static_cast<unsigned>(atoi(arg4)) }
     {
-        mCitiesStack.pool() = &mLLPool;
-        mCitiesStack.pushBack(LinkedList<unsigned> { &mNodePool });
-        cities = mCitiesStack.back();
+        mCities.fill(UINT_MAX);
 
         getInput(arg1);
         parseInput();
@@ -80,7 +75,7 @@ public:
     }
 
     // Assumes that the input is well-formed.
-    constexpr void parseInput() noexcept
+    void parseInput() noexcept
     {
         // sc keeps tracks of how many semicolons are encountered
         unsigned sc { 0 };
@@ -199,7 +194,7 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        cities->pushBack(mStartCity);
+        mCities[0] = mStartCity;
         visitableCities(mStartCity);   // writes to cities
     }
 
@@ -234,13 +229,14 @@ public:
     /* Tries to find the longest path by picking the neighbor
      * within the largest strongly connected component.
      */
-    constexpr void visitableCities(unsigned n) const noexcept
+    void visitableCities(unsigned n) noexcept
     {
         unsigned currCity { n };
         StaticVector<bool, 81> visitedArr;
-        visitedArr.clear();
+        visitedArr.fill(false);
         visitedArr[currCity] = true;
 
+        unsigned currIndex { 0 };
         bool notStuck { true };
         while (notStuck)
         {
@@ -251,11 +247,12 @@ public:
 
             for (unsigned i { 0 }; i < 81; ++i)
             {
-                if (!traversable(currCity, i) || visitedArr[i])
+                if (!traversable(currCity, i) || visitedArr[i] || alreadyVisited({ visitedArr, i }))
                 {
                     continue;
                 }
 
+                /*
                 auto sccResult { tarjanSCC(visitedArr, i) };
                 printSCC(sccResult);
 
@@ -264,27 +261,51 @@ public:
                 {
                     if (scc[i])
                     {
-                        int clusterSize { static_cast<int>(countTrue(scc)) };
+                        int clusterSize { static_cast<int>(scc.count(true)) };
                         if (clusterSize > visitable)
                         {
                             visitable = clusterSize;
                         }
                     }
                 }
+                */
 
-                if (visitable > maxVisitable)
-                {
-                    notStuck = true;
-                    nextCity = i;
-                    maxVisitable = visitable;
-                }
+                // if (visitable > maxVisitable)
+                // {
+                notStuck = true;
+                nextCity = i;
+                //    maxVisitable = visitable;
+                // }
             }
             if (notStuck)
             {
                 currCity = nextCity;
-                cities->pushBack(currCity);
+                mCities[++currIndex] = currCity;
                 visitedArr[currCity] = true;
             }
+            else
+            {
+                ;
+            }
+
+            // TODO: early termination heuristic
+            if (countValid(mCities) > 35)
+            {
+                break;
+            }
+        }
+    }
+
+    [[nodiscard]] bool alreadyVisited(const std::pair<StaticVector<bool, 81>, unsigned>& p) noexcept
+    {
+        if (mVisitedConfigs.contains(p))
+        {
+            return true;
+        }
+        else
+        {
+            mVisitedConfigs.pushBack(p);
+            return false;
         }
     }
 
@@ -294,7 +315,7 @@ public:
     [[nodiscard]] constexpr StaticVector<bool, 81> dfs(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
         StaticVector<bool, 81> reachables;
-        reachables.clear();
+        reachables.fill(false);
 
         StaticVector<unsigned, 81> stack;
         unsigned currIndex { 0 };
@@ -398,6 +419,7 @@ public:
         return sccs;
     }
 
+    /*
     [[nodiscard]] constexpr unsigned edges(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
     {
         unsigned edgeCount { 0 };
@@ -410,20 +432,14 @@ public:
         }
         return edgeCount;
     }
+    */
 
-    [[nodiscard]] constexpr static unsigned countTrue(const StaticVector<bool, 81>& v) noexcept
+    [[nodiscard]] constexpr static unsigned countValid(const StaticVector<unsigned, 81>& v) noexcept
     {
-        unsigned result { 0 };
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            if (v[i])
-            {
-                ++result;
-            }
-        }
-        return result;
+        return v.size() - v.count(UINT_MAX);
     }
 
+    /*
     [[nodiscard]] constexpr unsigned countEdges(const StaticVector<bool, 81>& visited, unsigned n) const noexcept
     {
         unsigned edges { 0 };
@@ -436,21 +452,22 @@ public:
         }
         return edges;
     }
+    */
 
-    [[nodiscard]] constexpr bool validator(const LinkedList<unsigned>& cs) const noexcept
+    [[nodiscard]] constexpr bool validator(const StaticVector<unsigned, 81>& cs) const noexcept
     {
-        for (unsigned i { 0 }; (i + 1) < cs.size(); ++i)
+        for (unsigned i { 0 }; cs[i + 1] != UINT_MAX; ++i)
         {
-            if (filteredAdjacencyMatrix[*cs[i]][*cs[i + 1]] == UINT_MAX)
+            if (filteredAdjacencyMatrix[cs[i]][cs[i + 1]] == UINT_MAX)
             {
                 return false;
             }
         }
-        for (unsigned i { 0 }; i < cs.size(); ++i)
+        for (unsigned i { 0 }; cs[i] != UINT_MAX; ++i)
         {
-            for (unsigned j { i + 1 }; j < cs.size(); ++j)
+            for (unsigned j { i + 1 }; cs[j] != UINT_MAX; ++j)
             {
-                if (*cs[i] == *cs[j])
+                if (cs[i] == cs[j])
                 {
                     return false;
                 }
@@ -461,12 +478,17 @@ public:
 
     void printRoute(FILE* stream) const noexcept
     {
-        fprintf(stream, "Length: %d\n", cities->size());
-        cities->map(&toNames, &mCityNamesPool).printStrs(stream);
-        fputc('\n', stream);
-
-        fprintf(stream, "Max allocation nodes: %d\n", mNodePool.maxAllocated);
-        fprintf(stream, "Max allocation lls: %d\n", mLLPool.maxAllocated);
+        fprintf(stream, "Length: %d\n", countValid(mCities));
+        fputs("[", stream);
+        for (unsigned i { 0 }; mCities[i] != UINT_MAX; ++i)
+        {
+            if (i > 0)
+            {
+                fputs(", ", stream);
+            }
+            fprintf(stream, "%s", static_cast<char*>(toNames(mCities[i]).data()));
+        }
+        fputs("]\n", stream);
     }
 
     // Filled in by parseInput()
@@ -494,18 +516,8 @@ private:
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
-    // Used by printRoute()
-    static inline ObjectPool<Node<StaticVector<char, MAX_NAME_SIZE>>, 81> mCityNamesPool;
-
-    // Used by citiesStack
-    static inline ObjectPool<Node<unsigned>, 100> mNodePool;
-    // Used by citiesStack
-    static inline ObjectPool<Node<LinkedList<unsigned>>, 5> mLLPool;
-    // Used by visitedCities
-    static inline LinkedList<LinkedList<unsigned>> mCitiesStack;
+    static inline StaticStack<std::pair<StaticVector<bool, 81>, unsigned>, 1000> mVisitedConfigs;
 public:
-    /* LinkedList needs to be below ObjectPool because the objects in
-     * the class are destructed from below to top!!!
-     */
-    LinkedList<unsigned>* cities;
+    // Has UINT_MAX for empty members at the end
+    static inline StaticVector<unsigned, 81> mCities;
 };

@@ -57,6 +57,12 @@ public:
     {
         return mPrev;
     }
+
+    // operator!= is automatically generated
+    constexpr friend inline bool operator==(const Node& lhs, const Node& rhs) noexcept
+    {
+        return (lhs.mData == rhs.mData) && (lhs.mNext == rhs.mNext) && (lhs.mPrev == rhs.mPrev);
+    }
 private:
     T mData;
     Node* mNext { nullptr };
