@@ -4,11 +4,14 @@
 #include "StaticVector.tpp"
 
 #include <array>
+#include <bitset>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
 #include <tuple>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 // Separator is semicolon for our file
@@ -20,10 +23,34 @@
 // max 32 characters for city names
 #define MAX_NAME_SIZE (32)
 
+// Put the type definitions to top
+using Frame = std::tuple<StaticStack<unsigned, 81>, StaticVector<bool, 81>, unsigned>;
+
+template<>
+struct std::hash<StaticVector<bool, 81>>
+{
+    std::size_t operator()(const StaticVector<bool, 81>& v) const noexcept
+    {
+        std::bitset<81> bs;
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            bs[i] = v[i];
+        }
+        return std::hash<std::bitset<81>> {}(bs);
+    }
+};
+
+template<>
+struct std::hash<Frame>
+{
+    std::size_t operator()(const Frame& f) const noexcept
+    {
+        return std::hash<StaticVector<bool, 81>> {}(get<1>(f));
+    }
+};
+
 class Traveler
 {
-    // Put the type definitions to top
-    using Frame = std::tuple<StaticStack<unsigned, 81>, StaticVector<bool, 81>, unsigned>;
 public:
     Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept :
         mStartCity { static_cast<unsigned>(atoi(arg2) - 1) },
@@ -241,16 +268,16 @@ public:
         while (!mCurrStack.empty())
         {
             const auto& [cities, visited, currCity] { mCurrStack.popBack() };
-            if (visited.count(true) > 62)   // TODO: early termination heuristic
+            if (visited.count(true) > 68)   // TODO: early termination heuristic
             {
                 mCities = cities;
                 return;
             }
-            if (stackContains(mVisitedStack, { cities, visited, currCity }))
+            if (mVisitedSet.contains({ cities, visited, currCity }))
             {
                 continue;
             }
-            mVisitedStack.pushBack({ cities, visited, currCity });
+            mVisitedSet.insert({ cities, visited, currCity });
             StaticStack<unsigned, 81> validCities;
             for (unsigned i { 0 }; i < 81; ++i)
             {
@@ -267,7 +294,7 @@ public:
                     newCities.pushBack(validCities[i]);
                     StaticVector<bool, 81> newVisited { visited };
                     newVisited[validCities[i]] = true;
-                    mCurrStack.pushBack({ newCities, newVisited, validCities[i] });
+                    mCurrStack.pushBack({ std::move(newCities), std::move(newVisited), validCities[i] });
                 }
             }
         }
@@ -479,7 +506,6 @@ public:
         }
         fputs("]\n", stream);
         fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
-        fprintf(stream, "Max mVisitedStack usage:%d\n", mVisitedStack.mMaxIndex);
     }
 
     // Filled in by parseInput()
@@ -507,8 +533,8 @@ private:
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
-    static inline StaticStack<Frame, 5000> mCurrStack;
-    static inline StaticStack<Frame, 10000> mVisitedStack;
+    static inline StaticStack<Frame, 1000000> mCurrStack;
+    static inline std::unordered_set<Frame> mVisitedSet;
 public:
     // Has UINT_MAX for empty members at the end
     static inline StaticStack<unsigned, 81> mCities;
