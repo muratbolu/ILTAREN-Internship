@@ -79,8 +79,8 @@ public:
     }
 
     // operator!= is automatically generated
-    template<unsigned U1, unsigned U2>
-    constexpr friend inline bool operator==(const StaticStack<T, U1>& lhs, const StaticStack<T, U2>& rhs) noexcept
+    template<unsigned U>
+    constexpr friend inline bool operator==(const StaticStack<T, N>& lhs, const StaticStack<T, U>& rhs) noexcept
     {
         if (lhs.mCurrIndex != rhs.mCurrIndex)
         {
@@ -98,6 +98,7 @@ public:
 
     constexpr void pushBack(const T& obj) noexcept
     {
+        mMaxIndex++;
         this->at(mCurrIndex++) = obj;
     }
 
@@ -105,6 +106,8 @@ public:
     {
         return this->at(--mCurrIndex);
     }
+
+    unsigned mMaxIndex { 0 };
 private:
     unsigned mCurrIndex { 0 };
 };

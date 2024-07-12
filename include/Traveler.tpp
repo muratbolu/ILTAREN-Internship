@@ -22,6 +22,8 @@
 
 class Traveler
 {
+    // Put the type definitions to top
+    using Frame = std::tuple<StaticStack<unsigned, 81>, StaticVector<bool, 81>, unsigned>;
 public:
     Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept :
         mStartCity { static_cast<unsigned>(atoi(arg2) - 1) },
@@ -239,12 +241,12 @@ public:
         while (!mCurrStack.empty())
         {
             const auto& [cities, visited, currCity] { mCurrStack.popBack() };
-            if (visited.count(true) > 64)   // TODO: early termination heuristic
+            if (visited.count(true) > 62)   // TODO: early termination heuristic
             {
                 mCities = cities;
                 return;
             }
-            if (mVisitedStack.contains({ cities, visited, currCity }))
+            if (stackContains(mVisitedStack, { cities, visited, currCity }))
             {
                 continue;
             }
@@ -269,6 +271,31 @@ public:
                 }
             }
         }
+    }
+
+    template<unsigned U>
+    [[nodiscard]] constexpr bool stackContains(const StaticStack<Frame, U>& stack, const Frame& f) const noexcept
+    {
+        for (unsigned i { 0 }; i < stack.size(); ++i)
+        {
+            if (isSubsetOf(get<1>(stack[i]), get<1>(f)) && get<2>(stack[i]) == get<2>(f))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    [[nodiscard]] constexpr bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) const noexcept
+    {
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            if (fst[i] && !snd[i])
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /* Makes a stack allocation. Return the reachable states, not including
@@ -451,6 +478,8 @@ public:
             fprintf(stream, "%s", static_cast<char*>(toNames(mCities[i]).data()));
         }
         fputs("]\n", stream);
+        fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
+        fprintf(stream, "Max mVisitedStack usage:%d\n", mVisitedStack.mMaxIndex);
     }
 
     // Filled in by parseInput()
@@ -478,9 +507,8 @@ private:
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
-    using Frame = std::tuple<StaticStack<unsigned, 81>, StaticVector<bool, 81>, unsigned>;
-    static inline StaticStack<Frame, 100000> mCurrStack;
-    static inline StaticStack<Frame, 100000> mVisitedStack;
+    static inline StaticStack<Frame, 5000> mCurrStack;
+    static inline StaticStack<Frame, 10000> mVisitedStack;
 public:
     // Has UINT_MAX for empty members at the end
     static inline StaticStack<unsigned, 81> mCities;
