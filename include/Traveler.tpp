@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 // Separator is semicolon for our file
@@ -28,8 +28,6 @@ public:
         x { static_cast<unsigned>(atoi(arg3)) },
         y { static_cast<unsigned>(atoi(arg4)) }
     {
-        mCities.fill(UINT_MAX);
-
         getInput(arg1);
         parseInput();
     }
@@ -194,8 +192,7 @@ public:
     // Zero-indexing for cities, 0 => ADANA, etc.
     void travel() noexcept
     {
-        mCities[0] = mStartCity;
-        visitableCities(mStartCity);   // writes to cities
+        visitableCities(mStartCity);   // writes to mBest
     }
 
     void printSCC(const std::vector<StaticVector<bool, 81>>& val) const noexcept
@@ -226,86 +223,51 @@ public:
 
     // TODO: Eliminate stack allocations
 
-    /* Tries to find the longest path by picking the neighbor
-     * within the largest strongly connected component.
+    /* Tries to find the longest path by brute force, caching previously
+     * visited configurations in mVisitedStack.
      */
     void visitableCities(unsigned n) noexcept
     {
-        unsigned currCity { n };
+        mCities.clear();
+        mCities.pushBack(n);
+
         StaticVector<bool, 81> visitedArr;
         visitedArr.fill(false);
-        visitedArr[currCity] = true;
+        visitedArr[n] = true;
 
-        unsigned currIndex { 0 };
-        bool notStuck { true };
-        while (notStuck)
+        mCurrStack.pushBack({ mCities, visitedArr, n });
+        while (!mCurrStack.empty())
         {
-            notStuck = false;
-            unsigned nextCity { static_cast<unsigned>(-1) };
-
-            int maxVisitable { -1 };
-
+            const auto& [cities, visited, currCity] { mCurrStack.popBack() };
+            if (visited.count(true) > 64)   // TODO: early termination heuristic
+            {
+                mCities = cities;
+                return;
+            }
+            if (mVisitedStack.contains({ cities, visited, currCity }))
+            {
+                continue;
+            }
+            mVisitedStack.pushBack({ cities, visited, currCity });
+            StaticStack<unsigned, 81> validCities;
             for (unsigned i { 0 }; i < 81; ++i)
             {
-                if (!traversable(currCity, i) || visitedArr[i] || alreadyVisited({ visitedArr, i }))
+                if (traversable(currCity, i) && !visited[i])
                 {
-                    continue;
+                    validCities.pushBack(i);
                 }
-
-                /*
-                auto sccResult { tarjanSCC(visitedArr, i) };
-                printSCC(sccResult);
-
-                int visitable { -1 };
-                for (const auto& scc : sccResult)
+            }
+            if (!validCities.empty())
+            {
+                for (unsigned i { 0 }; i < validCities.size(); ++i)
                 {
-                    if (scc[i])
-                    {
-                        int clusterSize { static_cast<int>(scc.count(true)) };
-                        if (clusterSize > visitable)
-                        {
-                            visitable = clusterSize;
-                        }
-                    }
+                    StaticStack<unsigned, 81> newCities { cities };
+                    newCities.pushBack(validCities[i]);
+                    StaticVector<bool, 81> newVisited { visited };
+                    newVisited[validCities[i]] = true;
+                    mCurrStack.pushBack({ newCities, newVisited, validCities[i] });
                 }
-                */
-
-                // if (visitable > maxVisitable)
-                // {
-                notStuck = true;
-                nextCity = i;
-                //    maxVisitable = visitable;
-                // }
             }
-            if (notStuck)
-            {
-                currCity = nextCity;
-                mCities[++currIndex] = currCity;
-                visitedArr[currCity] = true;
-            }
-            else
-            {
-                ;
-            }
-
-            // TODO: early termination heuristic
-            if (countValid(mCities) > 35)
-            {
-                break;
-            }
-        }
-    }
-
-    [[nodiscard]] bool alreadyVisited(const std::pair<StaticVector<bool, 81>, unsigned>& p) noexcept
-    {
-        if (mVisitedConfigs.contains(p))
-        {
-            return true;
-        }
-        else
-        {
-            mVisitedConfigs.pushBack(p);
-            return false;
         }
     }
 
@@ -454,18 +416,18 @@ public:
     }
     */
 
-    [[nodiscard]] constexpr bool validator(const StaticVector<unsigned, 81>& cs) const noexcept
+    [[nodiscard]] constexpr bool validator(const StaticStack<unsigned, 81>& cs) const noexcept
     {
-        for (unsigned i { 0 }; cs[i + 1] != UINT_MAX; ++i)
+        for (unsigned i { 0 }; i + 1 < cs.size(); ++i)
         {
             if (filteredAdjacencyMatrix[cs[i]][cs[i + 1]] == UINT_MAX)
             {
                 return false;
             }
         }
-        for (unsigned i { 0 }; cs[i] != UINT_MAX; ++i)
+        for (unsigned i { 0 }; i < cs.size(); ++i)
         {
-            for (unsigned j { i + 1 }; cs[j] != UINT_MAX; ++j)
+            for (unsigned j { i + 1 }; j < cs.size(); ++j)
             {
                 if (cs[i] == cs[j])
                 {
@@ -480,7 +442,7 @@ public:
     {
         fprintf(stream, "Length: %d\n", countValid(mCities));
         fputs("[", stream);
-        for (unsigned i { 0 }; mCities[i] != UINT_MAX; ++i)
+        for (unsigned i { 0 }; i < mCities.size(); ++i)
         {
             if (i > 0)
             {
@@ -516,8 +478,10 @@ private:
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
-    static inline StaticStack<std::pair<StaticVector<bool, 81>, unsigned>, 1000> mVisitedConfigs;
+    using Frame = std::tuple<StaticStack<unsigned, 81>, StaticVector<bool, 81>, unsigned>;
+    static inline StaticStack<Frame, 100000> mCurrStack;
+    static inline StaticStack<Frame, 100000> mVisitedStack;
 public:
     // Has UINT_MAX for empty members at the end
-    static inline StaticVector<unsigned, 81> mCities;
+    static inline StaticStack<unsigned, 81> mCities;
 };
