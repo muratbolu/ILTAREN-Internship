@@ -235,22 +235,26 @@ public:
         mBestState.citiesStack.clear();
         mBestState.visitedArray.fill(false);
 
-        while (!mCurrStack.empty())
+        unsigned notChanged { 0 };
+        while (notChanged < 10000 && !mCurrStack.empty())
         {
             const State& currState { mCurrStack.popBack() };
 
             if (isSubsetOf(currState.visitedArray, mBestState.visitedArray))
             {
+                notChanged++;
                 continue;
             }
 
             if (currState.visitedCount + dfs(currState) < mBestState.visitedCount)
             {
+                notChanged++;
                 continue;
             }
 
             if (currState.visitedCount > mBestState.visitedCount)
             {
+                notChanged = 0;
                 mBestState = currState;
                 printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
             }
