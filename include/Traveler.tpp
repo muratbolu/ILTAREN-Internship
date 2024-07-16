@@ -230,6 +230,7 @@ public:
 
         mBestState.visitedCount = 1;
 
+        mCurrStack.clear();
         mCurrStack.pushBack(mBestState);
 
         mBestState.citiesStack.clear();
@@ -256,7 +257,7 @@ public:
             {
                 notChanged = 0;
                 mBestState = currState;
-                printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
+                // printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
             }
 
             /* Caching visited sets do not work
@@ -327,6 +328,7 @@ public:
         mReachables.fill(false);
 
         // StaticVector<unsigned, 81> stack;
+        mDFSStack.clear();
         mDFSStack.pushBack(s.citiesStack.back());
 
         while (mDFSStack.size() > 0)
@@ -394,7 +396,7 @@ public:
             fprintf(stream, "%s", static_cast<char*>(toNames(mBestState.citiesStack[i]).data()));
         }
         fputs("]\n", stream);
-        fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
+        // fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
     }
 
     // Filled in by parseInput()
@@ -413,9 +415,6 @@ private:
         return filteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
 
-    // Filled in by constructor
-    unsigned mStartCity, x, y;
-
     // Used by parseInput()
     static inline StaticVector<char, BUF_SIZE> mBuffer;
 
@@ -432,5 +431,9 @@ private:
     static inline StaticVector<bool, 81> mReachables;
     static inline StaticStack<unsigned, 81> mDFSStack;
 public:
+    // Filled in by constructor
+    unsigned mStartCity, x, y;
+
+    // Filled in by travel method
     static inline State mBestState;
 };

@@ -16,18 +16,31 @@ int main(int argc, char* argv[])
         return 1;   // EXIT_FAILURE
     }
     Traveler t { argv[1], argv[2], argv[3], argv[4] };
-    t.filterByRange(t.filteredAdjacencyMatrix, t.adjacencyMatrix);
-    // Traveler::printMatrix(stdout, t.adjacencyMatrix);
-    // Traveler::printMatrix(stdout, t.filteredAdjacencyMatrix);
-    t.travel();
-    if (t.validator(t.mBestState.citiesStack))
+
+    unsigned currMax { 0 };
+    // TODO
+    for (unsigned i { 0 }; i < 200; i += 10)
     {
-        t.printRoute(stdout);
-        puts("Valid route");
-    }
-    else
-    {
-        puts("Invalid route");
+        for (unsigned j { 0 }; j <= i; j += 10)
+        {
+            t.x = i;
+            t.y = j;
+            t.filterByRange(t.filteredAdjacencyMatrix, t.adjacencyMatrix);
+            t.travel();
+            if (t.validator(t.mBestState.citiesStack))
+            {
+                if (t.mBestState.visitedCount > currMax)
+                {
+                    t.printRoute(stdout);
+                    currMax = t.mBestState.visitedCount;
+                    printf("x: %d, y: %d\n\n", t.x, t.y);
+                }
+            }
+            else
+            {
+                puts("Invalid route");
+            }
+        }
     }
     return 0;
 }
