@@ -3,6 +3,7 @@
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
+#include <cassert>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
@@ -23,7 +24,24 @@ class Traveler
         StaticStack<unsigned, 81> citiesStack;
         StaticVector<bool, 81> visitedArray;
         unsigned visitedCount;
-        unsigned currCity;
+
+        constexpr State() noexcept = default;
+
+        // try to delete this
+        // constexpr State(const State&) noexcept = delete;
+        constexpr State(const State&) noexcept = default;
+
+        constexpr State(const StaticStack<unsigned, 81>& citiesStack, const StaticVector<bool, 81>& visitedArray, const unsigned& visitedCount) :
+            citiesStack { citiesStack },
+            visitedArray { visitedArray },
+            visitedCount { visitedCount }
+        {
+        }
+
+        constexpr State& operator=(const State&) noexcept = default;
+        constexpr State(State&&) noexcept = default;
+        constexpr State& operator=(State&&) noexcept = default;
+
         constexpr inline bool operator==(const State&) const noexcept = default;
     };
 public:
@@ -204,66 +222,87 @@ public:
      */
     void visitableCities(unsigned n) noexcept
     {
-        mCities.clear();
-        mCities.pushBack(n);
+        mBestState.citiesStack.clear();
+        mBestState.citiesStack.pushBack(n);
 
-        // StaticVector<bool, 81> visitedArr;
-        mVisitedArr.fill(false);
-        mVisitedArr[n] = true;
+        mBestState.visitedArray.fill(false);
+        mBestState.visitedArray[n] = true;
 
-        mCurrStack.pushBack({ mCities, mVisitedArr, 1, n });
+        mBestState.visitedCount = 1;
+
+        mCurrStack.pushBack(mBestState);
+
+        mBestState.citiesStack.clear();
+        mBestState.visitedArray.fill(false);
+
         while (!mCurrStack.empty())
         {
-            const State& state { mCurrStack.popBack() };
-            if (mCities.size() > 66)   // TODO: early termination heuristic
+            const State& currState { mCurrStack.popBack() };
+
+            if (isSubsetOf(currState.visitedArray, mBestState.visitedArray))
             {
-                return;
+                continue;
             }
-            if (state.visitedCount > 66)
+
+            if (currState.visitedCount + dfs(currState) < mBestState.visitedCount)
             {
-                mCities = state.citiesStack;
+                continue;
             }
+
+            if (currState.visitedCount > mBestState.visitedCount)
+            {
+                mBestState = currState;
+                printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
+            }
+
+            /* Caching visited sets do not work
             if (stackContains(mVisitedSet, state))
             {
                 continue;
             }
             mVisitedSet.pushBack(state);
+            */
+
             // StaticStack<unsigned, 81> validCities;
             mValidCities.clear();
             for (unsigned i { 0 }; i < 81; ++i)
             {
-                if (traversable(state.currCity, i) && !state.visitedArray[i])
+                if (!currState.visitedArray[i] && traversable(currState.citiesStack.back(), i))
                 {
                     mValidCities.pushBack(i);
                 }
             }
+            // StaticStack<unsigned, 81> newCities { cities };
+            mNewCities = currState.citiesStack;
+            // StaticVector<bool, 81> newVisited { visited };
+            mNewVisited = currState.visitedArray;
             for (const unsigned& c : mValidCities)
             {
-                // StaticStack<unsigned, 81> newCities { cities };
-                mNewCities = state.citiesStack;
                 mNewCities.pushBack(c);
-                // StaticVector<bool, 81> newVisited { visited };
-                mNewVisited = state.visitedArray;
                 mNewVisited[c] = true;
-                mCurrStack.pushBack({ mNewCities, mNewVisited, mNewVisited.count(true), c });
+                mCurrStack.pushBack({ mNewCities, mNewVisited, mNewVisited.count(true) });
+                mNewCities.popBack();
+                mNewVisited[c] = false;
             }
         }
     }
 
+    /*
     template<unsigned U>
-    [[nodiscard]] constexpr bool stackContains(const StaticStack<State, U>& stack, const State& f) const noexcept
+    [[nodiscard]] constexpr bool stackContains(const StaticStack<State, U>& stack, const State& s) const noexcept
     {
         for (unsigned i { 0 }; i < stack.size(); ++i)
         {
-            if (stack[i].visitedArray == f.visitedArray && stack[i].currCity == f.currCity)
+            if (stack[i].currCity == s.currCity && isSubsetOf(stack[i].visitedArray, s.visitedArray))
             {
                 return true;
             }
         }
         return false;
     }
+    */
 
-    [[nodiscard]] constexpr bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) const noexcept
+    [[nodiscard]] constexpr static bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) noexcept
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
@@ -275,38 +314,40 @@ public:
         return true;
     }
 
-    // Return the reachable states, not including those in the visitedArr,
-    // starting from n.
-    [[nodiscard]] constexpr StaticVector<bool, 81> dfs(const StaticVector<bool, 81>& visitedArr, const unsigned& n) const noexcept
+    // Return the number of reachable states from a starting state.
+    [[nodiscard]] unsigned dfs(const State& s) const noexcept
     {
+        unsigned reachable { 0 };
+
         // StaticVector<bool, 81> reachables;
         mReachables.fill(false);
 
         // StaticVector<unsigned, 81> stack;
-        unsigned currIndex { 0 };
-        mDFSStack[currIndex++] = n;
+        mDFSStack.pushBack(s.citiesStack.back());
 
-        while (currIndex)
+        while (mDFSStack.size() > 0)
         {
-            unsigned curr = mDFSStack[--currIndex];
+            unsigned curr = mDFSStack.popBack();
             if (mReachables[curr])
             {
                 continue;
             }
             mReachables[curr] = true;
+            reachable++;
             for (unsigned i = 0; i < 81; ++i)
             {
-                if (traversable(curr, i) && !visitedArr[i] && !mReachables[i] && !mDFSStack.contains(i))
+                if (traversable(curr, i) && !s.visitedArray[i] && !mReachables[i] && !mDFSStack.contains(i))
                 {
-                    mDFSStack[currIndex++] = i;
+                    mDFSStack.pushBack(i);
                 }
             }
         }
 
         // We delete the reachability of the start node and consider only
         // the "movable" states.
-        mReachables[n] = false;
-        return mReachables;
+        mReachables[s.citiesStack.back()] = false;
+
+        return reachable;
     }
 
     [[nodiscard]] constexpr bool validator(const StaticStack<unsigned, 81>& cs) const noexcept
@@ -338,15 +379,15 @@ public:
 
     void printRoute(FILE* stream) const noexcept
     {
-        fprintf(stream, "Length: %d\n", countValid(mCities));
+        fprintf(stream, "Length: %d\n", countValid(mBestState.citiesStack));
         fputs("[", stream);
-        for (unsigned i { 0 }; i < mCities.size(); ++i)
+        for (unsigned i { 0 }; i < mBestState.citiesStack.size(); ++i)
         {
             if (i > 0)
             {
                 fputs(", ", stream);
             }
-            fprintf(stream, "%s", static_cast<char*>(toNames(mCities[i]).data()));
+            fprintf(stream, "%s", static_cast<char*>(toNames(mBestState.citiesStack[i]).data()));
         }
         fputs("]\n", stream);
         fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
@@ -378,17 +419,14 @@ private:
     static inline StaticVector<StaticVector<char, MAX_NAME_SIZE>, 81> mCityNames;
 
     // For visitableCities
-    static inline StaticStack<State, 50000> mCurrStack;
-    static inline StaticStack<State, 100000> mVisitedSet;
-    static inline StaticVector<bool, 81> mVisitedArr;
+    static inline StaticStack<State, 50000> mCurrStack;   // state stack
     static inline StaticStack<unsigned, 81> mValidCities;
     static inline StaticStack<unsigned, 81> mNewCities;
     static inline StaticVector<bool, 81> mNewVisited;
 
     // For DFS
     static inline StaticVector<bool, 81> mReachables;
-    static inline StaticVector<unsigned, 81> mDFSStack;
+    static inline StaticStack<unsigned, 81> mDFSStack;
 public:
-    // Has UINT_MAX for empty members at the end
-    static inline StaticStack<unsigned, 81> mCities;
+    static inline State mBestState;
 };

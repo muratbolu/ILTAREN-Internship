@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     // Traveler::printMatrix(stdout, t.adjacencyMatrix);
     // Traveler::printMatrix(stdout, t.filteredAdjacencyMatrix);
     t.travel();
-    if (t.validator(t.mCities))
+    if (t.validator(t.mBestState.citiesStack))
     {
         t.printRoute(stdout);
         puts("Valid route");
