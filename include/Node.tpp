@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: remove standard library
-#include <utility>
-
 template<typename T>
 class Node
 {
@@ -20,11 +17,6 @@ public:
 
     constexpr Node(const T& data) noexcept :
         mData { data }
-    {
-    }
-
-    constexpr Node(T&& data) noexcept :
-        mData { std::move(data) }
     {
     }
 
