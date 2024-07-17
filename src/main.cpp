@@ -1,4 +1,3 @@
-#include "StaticVector.tpp"
 #include "Traveler.tpp"
 
 #include <cstdio>
@@ -18,15 +17,23 @@ int main(int argc, char* argv[])
     }
     static Traveler t { argv[1], argv[2], argv[3], argv[4] };
 
+    // TODO: optimize x + y^2
+    // TODO: optimize the length of 70, starting from Ankara,
+    //       with lowest x + y^2
+
     unsigned currMax { 0 };
-    // i = x + y
+    // i = x + 2y
     for (unsigned i { 0 }; i < 300; ++i)
     {
         // j = y
-        for (unsigned j { 0 }; j <= i / 2; ++j)
+        for (unsigned j { 0 }; 3 * j <= i; ++j)
         {
-            t.x = i - j;
+            // t.x >= t.y
+            // i - 2 * j >= j
+            // i >= 3 * j
+            t.x = i - 2 * j;
             t.y = j;
+            // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
             t.filterByRange(t.mFilteredAdjacencyMatrix, t.mAdjacencyMatrix);
             if (t.matIsSubsetOf(t.mFilteredAdjacencyMatrix, t.mBestMat))
             {
