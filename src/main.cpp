@@ -1,6 +1,5 @@
 #include "Traveler.tpp"
 
-#include <cmath>
 #include <cstdio>
 
 int main(int argc, char* argv[])
@@ -17,6 +16,9 @@ int main(int argc, char* argv[])
         return 1;   // EXIT_FAILURE
     }
     static Traveler t { argv[1], argv[2], argv[3], argv[4] };
+    // t.printMatrix(stdout, t.mAdjacencyMatrix);
+    t.printMatrixInfo(t.mAdjacencyMatrix);
+    return 0;
 
 #define I (i)
 #define J (j)
