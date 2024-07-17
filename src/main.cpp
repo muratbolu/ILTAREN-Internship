@@ -1,5 +1,6 @@
 #include "Traveler.tpp"
 
+#include <cmath>
 #include <cstdio>
 
 int main(int argc, char* argv[])
@@ -17,22 +18,19 @@ int main(int argc, char* argv[])
     }
     static Traveler t { argv[1], argv[2], argv[3], argv[4] };
 
-    // TODO: optimize x + y^2
-    // TODO: optimize the length of 70, starting from Ankara,
-    //       with lowest x + y^2
+#define I (i)
+#define J (j)
+#define Y (J)                 // j = y
+#define FUNC(x) ((x) * (x))   // f(x) = x^2
+#define X (I - FUNC(Y))       // i = x + f(y)
+#define LIM 10000
 
-    unsigned currMax { 0 };
-    // i = x + 2y
-    for (unsigned i { 0 }; i < 300; ++i)
+    for (int i { 0 }; i < LIM; ++i)
     {
-        // j = y
-        for (unsigned j { 0 }; 3 * j <= i; ++j)
+        for (int j { 0 }; Y <= X; ++j)   // t.x >= t.y
         {
-            // t.x >= t.y
-            // i - 2 * j >= j
-            // i >= 3 * j
-            t.x = i - 2 * j;
-            t.y = j;
+            t.x = X;
+            t.y = Y;
             // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
             t.filterByRange(t.mFilteredAdjacencyMatrix, t.mAdjacencyMatrix);
             if (t.matIsSubsetOf(t.mFilteredAdjacencyMatrix, t.mBestMat))
@@ -42,16 +40,17 @@ int main(int argc, char* argv[])
             t.travel();
             if (t.validator(t.mBestState.citiesStack))
             {
+                static unsigned currMax { 0 };
                 if (t.mBestState.visitedCount > currMax)
                 {
                     t.printRoute(stdout);
                     currMax = t.mBestState.visitedCount;
                     t.mBestMat = t.mFilteredAdjacencyMatrix;
                     printf("x: %d, y: %d\n\n", t.x, t.y);
-                }
-                if (currMax == 81)
-                {
-                    return 0;
+                    if (currMax == 81)
+                    {
+                        return 0;
+                    }
                 }
             }
             else
