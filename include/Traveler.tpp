@@ -3,7 +3,6 @@
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
-#include <cassert>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
@@ -52,6 +51,9 @@ public:
     {
         getInput(arg1);
         parseInput();
+
+        mNulls.fill(UINT_MAX);
+        mBestMat.fill(mNulls);
     }
 
     // returns false if something goes wrong but we don't use it
@@ -149,13 +151,13 @@ public:
                 if (c == SEP)
                 {
                     ++sc;
-                    adjacencyMatrix[line][sc - 3] = number;
+                    mAdjacencyMatrix[line][sc - 3] = number;
                     number = 0;
                 }
                 else if (c == '\n')
                 {
                     ++sc;
-                    adjacencyMatrix[line][sc - 3] = number;
+                    mAdjacencyMatrix[line][sc - 3] = number;
                     sc = 0;
                     number = 0;
                     ++line;
@@ -209,6 +211,22 @@ public:
                 }
             }
         }
+    }
+
+    constexpr bool matIsSubsetOf(const StaticVector<StaticVector<unsigned, 81>, 81>& fst,
+                                 const StaticVector<StaticVector<unsigned, 81>, 81>& snd) const noexcept
+    {
+        for (unsigned i { 0 }; i < 81; ++i)
+        {
+            for (unsigned j { 0 }; j < 81; ++j)
+            {
+                if (fst[i][j] != UINT_MAX && snd[i][j] == UINT_MAX)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     // Zero-indexing for cities, 0 => ADANA, etc.
@@ -360,7 +378,7 @@ public:
     {
         for (unsigned i { 0 }; i + 1 < cs.size(); ++i)
         {
-            if (filteredAdjacencyMatrix[cs[i]][cs[i + 1]] == UINT_MAX)
+            if (mFilteredAdjacencyMatrix[cs[i]][cs[i + 1]] == UINT_MAX)
             {
                 return false;
             }
@@ -400,9 +418,13 @@ public:
     }
 
     // Filled in by parseInput()
-    StaticVector<StaticVector<unsigned, 81>, 81> adjacencyMatrix;
+    static inline StaticVector<StaticVector<unsigned, 81>, 81> mAdjacencyMatrix;
     // Filled in by filterByRange()
-    StaticVector<StaticVector<unsigned, 81>, 81> filteredAdjacencyMatrix;
+    static inline StaticVector<StaticVector<unsigned, 81>, 81> mFilteredAdjacencyMatrix;
+
+    // For mBestMat initialization
+    static inline StaticVector<unsigned, 81> mNulls;
+    static inline StaticVector<StaticVector<unsigned, 81>, 81> mBestMat;
 private:
     // Used by printRoute. Must be called after parseInput()
     constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
@@ -412,7 +434,7 @@ private:
 
     [[nodiscard]] constexpr bool traversable(unsigned n, unsigned m) const noexcept
     {
-        return filteredAdjacencyMatrix[n][m] < UINT_MAX;
+        return mFilteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
 
     // Used by parseInput()
