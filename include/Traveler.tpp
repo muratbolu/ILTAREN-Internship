@@ -3,13 +3,9 @@
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
-#include <algorithm>
-#include <array>
 #include <climits>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <utility>
 
 // Separator is semicolon for our file
 #define SEP ';'
@@ -22,6 +18,7 @@
 
 class Traveler
 {
+public:
     struct State
     {
         StaticStack<unsigned, 81> citiesStack;
@@ -53,7 +50,7 @@ class Traveler
 
         constexpr inline bool operator==(const State&) const noexcept = default;
     };
-public:
+
     Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
     {
         mStartCity = static_cast<unsigned>(atoi(arg2) - 1);
@@ -61,9 +58,6 @@ public:
         mY = static_cast<unsigned>(atoi(arg4));
         getInput(arg1);
         parseInput();
-
-        mNulls.fill(UINT_MAX);
-        mBestMat.fill(mNulls);
     }
 
     // returns false if something goes wrong but we don't use it
@@ -222,6 +216,19 @@ public:
         }
     }
 
+    [[nodiscard]] constexpr static bool stackContains(const StaticVector<StaticVector<unsigned, 81>, 81>& fst,
+                                                      const StaticStack<StaticVector<StaticVector<unsigned, 81>, 81>, 81>& stack) noexcept
+    {
+        for (unsigned i { stack.size() }; i-- > 0;)
+        {
+            if (matIsSubsetOf(fst, stack[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     [[nodiscard]] constexpr static bool matIsSubsetOf(const StaticVector<StaticVector<unsigned, 81>, 81>& fst,
                                                       const StaticVector<StaticVector<unsigned, 81>, 81>& snd) noexcept
     {
@@ -287,14 +294,6 @@ public:
                 // printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
             }
 
-            /* Caching visited sets do not work
-            if (stackContains(mVisitedSet, state))
-            {
-                continue;
-            }
-            mVisitedSet.pushBack(state);
-            */
-
             // StaticStack<unsigned, 81> validCities;
             mValidCities.clear();
             for (unsigned i { 0 }; i < 81; ++i)
@@ -318,21 +317,6 @@ public:
             }
         }
     }
-
-    /*
-    template<unsigned U>
-    [[nodiscard]] constexpr bool stackContains(const StaticStack<State, U>& stack, const State& s) const noexcept
-    {
-        for (unsigned i { 0 }; i < stack.size(); ++i)
-        {
-            if (stack[i].currCity == s.currCity && isSubsetOf(stack[i].visitedArray, s.visitedArray))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    */
 
     [[nodiscard]] constexpr static bool isSubsetOf(const StaticVector<bool, 81>& fst, const StaticVector<bool, 81>& snd) noexcept
     {
@@ -426,161 +410,6 @@ public:
         // fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
     }
 
-    static void printMatrixInfo(const StaticVector<StaticVector<unsigned, 81>, 81>& mat) noexcept
-    {
-        std::array<unsigned, 81 * 81> flattened;
-        for (unsigned i { 0 }; i < 81; ++i)
-        {
-            for (unsigned j { 0 }; j < 81; ++j)
-            {
-                flattened[81 * i + j] = mat[i][j];
-            }
-        }
-        unsigned sum { 0 };
-        for (auto&& i : flattened)
-        {
-            sum += i;
-        }
-        printf("Sum: %d\n", sum);
-        unsigned mean { sum / (81 * 81) };
-        printf("Mean: %d\n", mean);
-
-        /*
-        puts("[");
-        for (unsigned i { 0 }; i < 81 * 81; ++i)
-        {
-            if (i > 0)
-            {
-                printf(", ");
-            }
-            printf("%d", flattened[i]);
-        }
-        puts("]\n");
-        */
-        unsigned max { 0 };
-        for (auto&& i : flattened)
-        {
-            if (i > max)
-            {
-                max = i;
-            }
-        }
-        printf("Max: %d\n", max);
-
-        unsigned min { UINT_MAX };
-        for (auto&& i : flattened)
-        {
-            if (i < min)
-            {
-                min = i;
-            }
-        }
-        printf("Min: %d\n", min);
-
-        std::sort(flattened.begin(), flattened.end());
-        unsigned median { flattened[(81 * 81) / 2 + 1] };
-        printf("Median: %d\n", median);
-    }
-
-    constexpr static unsigned nthSmallest(const StaticVector<unsigned, 81 * 81>& lst, unsigned n) noexcept
-    {
-        unsigned index { select(lst, 0, 81 * 81 - 1, n - 1) };
-        return lst[index];
-    }
-
-    constexpr static unsigned select(const StaticVector<unsigned, 81 * 81>& lst, unsigned left, unsigned right, unsigned n) noexcept
-    {
-        for (;;)
-        {
-            if (left == right)
-            {
-                return left;
-            }
-            unsigned pivotIndex { pivot(lst, left, right) };
-            pivotIndex = partition(lst, left, right, pivotIndex, n);
-            if (n == pivotIndex)
-            {
-                return n;
-            }
-            if (n < pivotIndex)
-            {
-                right = pivotIndex - 1;
-            }
-            else
-            {
-                left = pivotIndex + 1;
-            }
-        }
-    }
-
-    constexpr static unsigned pivot(StaticVector<unsigned, 81 * 81> lst, unsigned left, unsigned right) noexcept
-    {
-        if (right - left < 5)
-        {
-            return partition5(lst, left, right);
-        }
-        for (unsigned i { left }; i <= right; i += 5)
-        {
-            unsigned subRight { i + 4 };
-            if (subRight > right)
-            {
-                subRight = right;
-            }
-            unsigned median5 { partition5(lst, i, subRight) };
-            std::swap(lst[median5], lst[left + static_cast<unsigned>(std::floor((i - left) / 5))]);
-        }
-        unsigned mid { static_cast<unsigned>(std::floor((right - left) / 10)) + left + 1 };
-        return select(lst, left, left + static_cast<unsigned>(std::floor((right - left) / 5)), mid);
-    }
-
-    constexpr static unsigned partition(StaticVector<unsigned, 81 * 81> lst, unsigned left, unsigned right, unsigned pivotIndex, unsigned n) noexcept
-    {
-        unsigned pivotValue { lst[pivotIndex] };
-        std::swap(lst[pivotIndex], lst[right]);
-        unsigned storeIndex { left };
-        for (unsigned i { left }; i < right; ++i)
-        {
-            if (lst[i] < pivotValue)
-            {
-                std::swap(lst[storeIndex++], lst[i]);
-            }
-        }
-        unsigned storeIndexEq { storeIndex };
-        for (unsigned i { storeIndex }; i < right; ++i)
-        {
-            if (lst[i] == pivotValue)
-            {
-                std::swap(lst[storeIndexEq++], lst[i]);
-            }
-        }
-        std::swap(lst[right], lst[storeIndexEq]);
-        if (n < storeIndex)
-        {
-            return storeIndex;
-        }
-        if (n <= storeIndexEq)
-        {
-            return n;
-        }
-        return storeIndexEq;
-    }
-
-    constexpr static unsigned partition5(StaticVector<unsigned, 81 * 81> lst, unsigned left, unsigned right) noexcept
-    {
-        unsigned i { left + 1 };
-        while (i <= right)
-        {
-            unsigned j { i };
-            while (j > left && lst[j - 1] > lst[j])
-            {
-                std::swap(lst[j - 1], lst[j]);
-                j = j - 1;
-            }
-            i = i + 1;
-        }
-        return left + (right - left) / 2;
-    }
-
     // Filled in by parseInput()
     static inline StaticVector<StaticVector<unsigned, 81>, 81> mAdjacencyMatrix;
     // Filled in by filterByRange()
@@ -588,7 +417,7 @@ public:
 
     // For mBestMat initialization
     static inline StaticVector<unsigned, 81> mNulls;
-    static inline StaticVector<StaticVector<unsigned, 81>, 81> mBestMat;
+    static inline StaticStack<StaticVector<StaticVector<unsigned, 81>, 81>, 81> mBestMats;
 private:
     // Used by printRoute. Must be called after parseInput()
     constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept

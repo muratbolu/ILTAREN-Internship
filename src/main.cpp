@@ -1,3 +1,5 @@
+#include "StaticStack.tpp"
+#include "StaticVector.tpp"
 #include "Traveler.tpp"
 
 #include <cassert>
@@ -17,9 +19,13 @@ int main(int argc, char* argv[])
         return 1;   // EXIT_FAILURE
     }
     static Traveler t { argv[1], argv[2], argv[3], argv[4] };
-    // t.printMatrix(stdout, t.mAdjacencyMatrix);
-    Traveler::printMatrixInfo(Traveler::mAdjacencyMatrix);
-    return 0;
+
+    static StaticStack<unsigned int, 81> cs;
+    cs.pushBack(Traveler::mStartCity);
+    static StaticVector<bool, 81> va;
+    va[Traveler::mStartCity] = true;
+    static unsigned vc { va.count(true) };
+    static Traveler::State startState { cs, va, vc };
 
 #define I (i)
 #define J (j)
@@ -38,7 +44,11 @@ int main(int argc, char* argv[])
             Traveler::mY = static_cast<unsigned>(Y);
             // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
             Traveler::filterByRange(Traveler::mFilteredAdjacencyMatrix, Traveler::mAdjacencyMatrix);
-            if (Traveler::matIsSubsetOf(Traveler::mFilteredAdjacencyMatrix, Traveler::mBestMat))
+            if (Traveler::stackContains(Traveler::mFilteredAdjacencyMatrix, Traveler::mBestMats))
+            {
+                continue;
+            }
+            if (Traveler::dfs(startState) < 81)
             {
                 continue;
             }
@@ -50,7 +60,7 @@ int main(int argc, char* argv[])
                 {
                     Traveler::printRoute(stdout);
                     currMax = Traveler::mBestState.visitedCount;
-                    Traveler::mBestMat = Traveler::mFilteredAdjacencyMatrix;
+                    Traveler::mBestMats.pushBack(Traveler::mFilteredAdjacencyMatrix);
                     printf("x: %d, y: %d\n\n", Traveler::mX, Traveler::mY);
                     if (currMax == 81)
                     {
