@@ -51,6 +51,13 @@ public:
         constexpr inline bool operator==(const State&) const noexcept = default;
     };
 
+    constexpr Traveler() noexcept = default;
+    constexpr ~Traveler() noexcept = default;
+    constexpr Traveler(const Traveler&) noexcept = delete;
+    constexpr Traveler(Traveler&&) noexcept = delete;
+    constexpr Traveler& operator=(const Traveler&) noexcept = delete;
+    constexpr Traveler& operator=(Traveler&&) noexcept = delete;
+
     Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
     {
         mStartCity = static_cast<unsigned>(atoi(arg2) - 1);
