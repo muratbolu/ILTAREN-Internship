@@ -34,9 +34,9 @@ int main(int argc, char* argv[])
 #define X (I - FUNC(Y))       // i = x + f(y)
 #define LIM 10000
 
-    for (int i { 0 }; i < LIM; ++i)
+    for (int i { 1 }; i < LIM; ++i)
     {
-        for (int j { 0 }; Y <= X; ++j)   // t.x >= t.y
+        for (int j { 1 }; Y <= X; ++j)   // t.x >= t.y
         {
             assert(X > 0);
             assert(Y > 0);
