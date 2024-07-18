@@ -47,7 +47,7 @@ TEST_F(NodeIterTest, Traversal3)
     ASSERT_TRUE(ll.pushBack(2));
     ASSERT_TRUE(ll.pushBack(3));
     ASSERT_TRUE(ll.pushBack(5));
-    for (auto& i : ll)
+    for (int& i : ll)
     {
         i *= 2;
     }
