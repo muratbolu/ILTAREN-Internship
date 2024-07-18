@@ -28,31 +28,37 @@ class Traveler
         StaticVector<bool, 81> visitedArray;
         unsigned visitedCount;
 
-        constexpr State() noexcept = default;
+        constexpr State() noexcept :
+            visitedCount { 0 }
+        {
+        }
+
+        constexpr State(const StaticStack<unsigned, 81>& cs, const StaticVector<bool, 81>& va, const unsigned& vc) noexcept :
+            citiesStack { cs },
+            visitedArray { va },
+            visitedCount { vc }
+        {
+        }
+
+        constexpr ~State() noexcept = default;
 
         // try to delete this
         // constexpr State(const State&) noexcept = delete;
         constexpr State(const State&) noexcept = default;
-
-        constexpr State(const StaticStack<unsigned, 81>& citiesStack, const StaticVector<bool, 81>& visitedArray, const unsigned& visitedCount) :
-            citiesStack { citiesStack },
-            visitedArray { visitedArray },
-            visitedCount { visitedCount }
-        {
-        }
-
-        constexpr State& operator=(const State&) noexcept = default;
         constexpr State(State&&) noexcept = default;
+        // try to delete this
+        // constexpr State& operator=(const State&) noexcept = delete;
+        constexpr State& operator=(const State&) noexcept = default;
         constexpr State& operator=(State&&) noexcept = default;
 
         constexpr inline bool operator==(const State&) const noexcept = default;
     };
 public:
-    Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept :
-        mStartCity { static_cast<unsigned>(atoi(arg2) - 1) },
-        x { static_cast<unsigned>(atoi(arg3)) },
-        y { static_cast<unsigned>(atoi(arg4)) }
+    Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
     {
+        mStartCity = static_cast<unsigned>(atoi(arg2) - 1);
+        mX = static_cast<unsigned>(atoi(arg3));
+        mY = static_cast<unsigned>(atoi(arg4));
         getInput(arg1);
         parseInput();
 
@@ -101,7 +107,7 @@ public:
     }
 
     // Assumes that the input is well-formed.
-    void parseInput() noexcept
+    static void parseInput() noexcept
     {
         // sc keeps tracks of how many semicolons are encountered
         unsigned sc { 0 };
@@ -141,13 +147,13 @@ public:
             case GET_NAME : {
                 if (c == SEP)
                 {
-                    Traveler::mCityNames[line][i++] = '\0';
+                    mCityNames[line][i++] = '\0';
                     ++sc;
                     state = CALC_NUM;
                 }
                 else
                 {
-                    Traveler::mCityNames[line][i++] = c;
+                    mCityNames[line][i++] = c;
                 }
                 break;
             }
@@ -184,7 +190,7 @@ public:
         {
             fprintf(stream, "%02d", i + 1);
             fputc(SEP, stream);
-            fprintf(stream, "%s", Traveler::mCityNames[i].data());
+            fprintf(stream, "%s", mCityNames[i].data());
             fputc(SEP, stream);
             for (unsigned j { 0 }; j < 81; ++j)
             {
@@ -198,14 +204,13 @@ public:
         }
     }
 
-    constexpr void filterByRange(StaticVector<StaticVector<unsigned, 81>, 81>& dst,
-                                 const StaticVector<StaticVector<unsigned, 81>, 81>& src) const noexcept
+    static void filterByRange(StaticVector<StaticVector<unsigned, 81>, 81>& dst, const StaticVector<StaticVector<unsigned, 81>, 81>& src) noexcept
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
             for (unsigned j { 0 }; j < 81; ++j)
             {
-                if ((src[i][j] < (x - y)) || (src[i][j] > (x + y)))
+                if ((src[i][j] < (mX - mY)) || (src[i][j] > (mX + mY)))
                 {
                     dst[i][j] = UINT_MAX;
                 }
@@ -217,8 +222,8 @@ public:
         }
     }
 
-    constexpr bool matIsSubsetOf(const StaticVector<StaticVector<unsigned, 81>, 81>& fst,
-                                 const StaticVector<StaticVector<unsigned, 81>, 81>& snd) const noexcept
+    [[nodiscard]] constexpr static bool matIsSubsetOf(const StaticVector<StaticVector<unsigned, 81>, 81>& fst,
+                                                      const StaticVector<StaticVector<unsigned, 81>, 81>& snd) noexcept
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
@@ -234,7 +239,7 @@ public:
     }
 
     // Zero-indexing for cities, 0 => ADANA, etc.
-    void travel() noexcept
+    static void travel() noexcept
     {
         visitableCities(mStartCity);   // writes to mBest
     }
@@ -242,7 +247,7 @@ public:
     /* Tries to find the longest path by brute force, caching previously
      * visited configurations in mVisitedStack.
      */
-    void visitableCities(unsigned n) noexcept
+    static void visitableCities(unsigned n) noexcept
     {
         mBestState.citiesStack.clear();
         mBestState.citiesStack.pushBack(n);
@@ -342,7 +347,7 @@ public:
     }
 
     // Return the number of reachable states from a starting state.
-    [[nodiscard]] unsigned dfs(const State& s) const noexcept
+    [[nodiscard]] static unsigned dfs(const State& s) noexcept
     {
         unsigned reachable { 0 };
 
@@ -378,7 +383,7 @@ public:
         return reachable;
     }
 
-    [[nodiscard]] constexpr bool validator(const StaticStack<unsigned, 81>& cs) const noexcept
+    [[nodiscard]] constexpr static bool validator(const StaticStack<unsigned, 81>& cs) noexcept
     {
         for (unsigned i { 0 }; i + 1 < cs.size(); ++i)
         {
@@ -405,7 +410,7 @@ public:
         return v.size() - v.count(UINT_MAX);
     }
 
-    void printRoute(FILE* stream) const noexcept
+    static void printRoute(FILE* stream) noexcept
     {
         fprintf(stream, "Length: %d\n", countValid(mBestState.citiesStack));
         fputs("[", stream);
@@ -497,7 +502,7 @@ public:
             {
                 return n;
             }
-            else if (n < pivotIndex)
+            if (n < pivotIndex)
             {
                 right = pivotIndex - 1;
             }
@@ -588,10 +593,10 @@ private:
     // Used by printRoute. Must be called after parseInput()
     constexpr static StaticVector<char, MAX_NAME_SIZE> toNames(unsigned n) noexcept
     {
-        return Traveler::mCityNames[n];
+        return mCityNames[n];
     }
 
-    [[nodiscard]] constexpr bool traversable(unsigned n, unsigned m) const noexcept
+    [[nodiscard]] constexpr static bool traversable(unsigned n, unsigned m) noexcept
     {
         return mFilteredAdjacencyMatrix[n][m] < UINT_MAX;
     }
@@ -613,7 +618,7 @@ private:
     static inline StaticStack<unsigned, 81> mDFSStack;
 public:
     // Filled in by constructor
-    unsigned mStartCity, x, y;
+    static inline unsigned mStartCity, mX, mY;
 
     // Filled in by travel method
     static inline State mBestState;

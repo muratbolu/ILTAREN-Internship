@@ -1,5 +1,6 @@
 #include "Traveler.tpp"
 
+#include <cassert>
 #include <cstdio>
 
 int main(int argc, char* argv[])
@@ -17,7 +18,7 @@ int main(int argc, char* argv[])
     }
     static Traveler t { argv[1], argv[2], argv[3], argv[4] };
     // t.printMatrix(stdout, t.mAdjacencyMatrix);
-    t.printMatrixInfo(t.mAdjacencyMatrix);
+    Traveler::printMatrixInfo(Traveler::mAdjacencyMatrix);
     return 0;
 
 #define I (i)
@@ -31,24 +32,26 @@ int main(int argc, char* argv[])
     {
         for (int j { 0 }; Y <= X; ++j)   // t.x >= t.y
         {
-            t.x = X;
-            t.y = Y;
+            assert(X > 0);
+            assert(Y > 0);
+            Traveler::mX = static_cast<unsigned>(X);
+            Traveler::mY = static_cast<unsigned>(Y);
             // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
-            t.filterByRange(t.mFilteredAdjacencyMatrix, t.mAdjacencyMatrix);
-            if (t.matIsSubsetOf(t.mFilteredAdjacencyMatrix, t.mBestMat))
+            Traveler::filterByRange(Traveler::mFilteredAdjacencyMatrix, Traveler::mAdjacencyMatrix);
+            if (Traveler::matIsSubsetOf(Traveler::mFilteredAdjacencyMatrix, Traveler::mBestMat))
             {
                 continue;
             }
-            t.travel();
-            if (t.validator(t.mBestState.citiesStack))
+            Traveler::travel();
+            if (Traveler::validator(Traveler::mBestState.citiesStack))
             {
                 static unsigned currMax { 0 };
-                if (t.mBestState.visitedCount > currMax)
+                if (Traveler::mBestState.visitedCount > currMax)
                 {
-                    t.printRoute(stdout);
-                    currMax = t.mBestState.visitedCount;
-                    t.mBestMat = t.mFilteredAdjacencyMatrix;
-                    printf("x: %d, y: %d\n\n", t.x, t.y);
+                    Traveler::printRoute(stdout);
+                    currMax = Traveler::mBestState.visitedCount;
+                    Traveler::mBestMat = Traveler::mFilteredAdjacencyMatrix;
+                    printf("x: %d, y: %d\n\n", Traveler::mX, Traveler::mY);
                     if (currMax == 81)
                     {
                         return 0;

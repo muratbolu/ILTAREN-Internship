@@ -7,7 +7,7 @@ class StaticVector
 {
 public:
     constexpr StaticVector() noexcept = default;
-    constexpr ~StaticVector() noexcept = default;
+    virtual constexpr ~StaticVector() noexcept = default;
     constexpr StaticVector(const StaticVector&) noexcept = default;
     constexpr StaticVector(StaticVector&&) noexcept = default;
     constexpr StaticVector& operator=(const StaticVector&) noexcept = default;

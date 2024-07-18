@@ -37,10 +37,14 @@ public:
 
     constexpr bool deallocate(T* ptr) noexcept override
     {
-        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end() && !mOccupied[static_cast<decltype(N)>(ptr - mPool.data())] == false)
+        if (ptr != nullptr && mPool.begin() <= ptr && ptr < mPool.end())
         {
-            mOccupied[static_cast<decltype(N)>(ptr - mPool.data())] = false;
-            return true;
+            bool& b { mOccupied[static_cast<decltype(N)>(ptr - mPool.data())] };
+            if (b)
+            {
+                b = false;
+                return true;
+            }
         }
         return false;
     }

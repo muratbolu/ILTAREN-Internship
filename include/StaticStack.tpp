@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ContIter.tpp"
 #include "StaticVector.tpp"
 
 template<typename T, unsigned N>
@@ -7,7 +8,7 @@ class StaticStack : public StaticVector<T, N>
 {
 public:
     constexpr StaticStack() noexcept = default;
-    constexpr ~StaticStack() noexcept = default;
+    constexpr ~StaticStack() noexcept override = default;
     constexpr StaticStack(const StaticStack&) noexcept = default;
     constexpr StaticStack(StaticStack&&) noexcept = default;
     constexpr StaticStack& operator=(const StaticStack&) noexcept = default;
