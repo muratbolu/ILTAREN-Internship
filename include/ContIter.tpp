@@ -2,6 +2,8 @@
 
 #include "IIter.tpp"
 
+#include <compare>
+
 template<typename T>
 class ContIter : public IIter<T>
 {

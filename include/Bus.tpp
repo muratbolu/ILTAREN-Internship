@@ -3,9 +3,14 @@
 #include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
+#include "Node.tpp"
+#include "ObjectPool.tpp"
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+
+#define POOL_SIZE 100
 
 class Bus
 {
@@ -15,26 +20,50 @@ public:
         if (argc != 4)
         {
             int rc = fputs("Provide exactly three arguments: number of buses, "
-                           "start time, end time.\n",
+                           "begin time, end time.\n",
                            stderr);
             if (rc == EOF)
             {
                 perror("Invalid argument number");
             }
+            return;
         }
-        else
+        // NOLINTBEGIN
+        mNumOfBuses = static_cast<unsigned>(atoi(argv[1]));
+        if (strlen(argv[2]) != 5 || strlen(argv[3]) != 5)
         {
-            // NOLINTBEGIN
-            mNumOfBuses = static_cast<unsigned>(atoi(argv[1]));
-            mBeginTime = chr::Time { argv[2] };
-            mEndTime = chr::Time { argv[3] };
-            // NOLINTEND
-            periods.pushBack(chr::Duration { 12 });
-            printSchedule(stdout);
+            int rc = fputs("Enter valid timestamps, in the form of 00:00.\n", stderr);
+            if (rc == EOF)
+            {
+                perror("Invalid timestamps");
+            }
+            return;
         }
+        mBeginTime = chr::Time { argv[2] };
+        mEndTime = chr::Time { argv[3] };
+        // NOLINTEND
+        if (mBeginTime >= mEndTime)
+        {
+            int rc = fputs("Begin time must be less than end time.\n", stderr);
+            if (rc == EOF)
+            {
+                perror("Invalid timestamps");
+            }
+            return;
+        }
+
+        // Assign periods
+        periods.pool() = &pool;
+        for (unsigned i { 0 }; i < mNumOfBuses; ++i)
+        {
+            periods.pushBack(chr::Duration { 20 + 10 * i });
+        }
+
+        // Print data members info
+        printSchedule(stdout);
     }
 
-    constexpr void printSchedule(FILE* stream) const noexcept
+    void printSchedule(FILE* stream) const noexcept
     {
         fprintf(stream, "buses: %d\n", mNumOfBuses);
         io::print(stream, periods);
@@ -46,5 +75,6 @@ public:
 private:
     unsigned mNumOfBuses { 0 };
     chr::Time mBeginTime, mEndTime;
+    ObjectPool<Node<chr::Duration>, POOL_SIZE> pool;
     LinkedList<chr::Duration> periods;
 };

@@ -3,6 +3,8 @@
 #include "IIter.tpp"
 #include "Node.tpp"
 
+#include <compare>
+
 template<typename T>
 class NodeIter : public IIter<T>
 {

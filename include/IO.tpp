@@ -9,29 +9,32 @@
 namespace io
 {
 // Prints the numbers as unsigned (%u)
-constexpr void print(FILE* stream, unsigned i) noexcept
+void print(FILE* stream, unsigned i) noexcept
 {
     fprintf(stream, "%u", i);
 }
 
-constexpr void print(FILE* stream, const chr::Time& t) noexcept
+void print(FILE* stream, const chr::Time& t) noexcept
 {
     fprintf(stream, "%02hhu:%02hhu\n", t.getHour(), t.getMinute());
 }
 
-constexpr void print(FILE* stream, const chr::Duration& d) noexcept
+void print(FILE* stream, const chr::Duration& d) noexcept
 {
-    fprintf(stream, "%u\n", d.getDuration());
+    fprintf(stream, "%u", d.getDuration());
 }
 
 template<typename T>
-constexpr void print(FILE* stream, const LinkedList<T>& ll) noexcept
+void print(FILE* stream, const LinkedList<T>& ll) noexcept
 {
     fputs("[", stream);
-    for (NodeIter<T> curr { ll.begin() }; curr != ll.end(); curr.next())
+    for (NodeIter<T> curr { ll.begin() }; curr != ll.end();)
     {
         io::print(stream, curr.data());
-        fputs(", ", stream);
+        if (curr.next() != ll.end())
+        {
+            fputs(", ", stream);
+        }
     }
     fputs("]\n", stream);
 }
