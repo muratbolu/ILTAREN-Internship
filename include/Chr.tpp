@@ -6,6 +6,46 @@
 
 namespace chr
 {
+class Duration
+{
+public:
+    constexpr Duration() noexcept = default;
+
+    constexpr Duration(unsigned dur) noexcept :
+        mDur { dur }
+    {
+    }
+
+    [[nodiscard]] constexpr unsigned getDuration() const noexcept
+    {
+        return mDur;
+    }
+
+    constexpr inline Duration& operator+=(const Duration& dur) noexcept
+    {
+        add(dur);
+        return *this;
+    }
+
+    constexpr friend inline Duration operator+(Duration lhs, const Duration& rhs) noexcept
+    {
+        lhs += rhs;
+        return lhs;
+    }
+
+    // operator!= is automatically generated
+    constexpr inline bool operator==(const Duration&) const noexcept = default;
+    // operators <, <=, >, >=  are automatically generated
+    constexpr inline auto operator<=>(const Duration&) const noexcept = default;
+private:
+    unsigned mDur { 0 };
+
+    constexpr void add(const Duration& dur) noexcept
+    {
+        mDur += dur.mDur;
+    }
+};
+
 class Time
 {
 public:
@@ -32,12 +72,28 @@ public:
         return mMinute;
     }
 
+    constexpr inline Time& operator+=(const Duration& dur) noexcept
+    {
+        add(dur);
+        return *this;
+    }
+
+    constexpr friend inline Time operator+(Time t, const Duration& dur) noexcept
+    {
+        t += dur;
+        return t;
+    }
+
     // operator!= is automatically generated
     constexpr friend inline bool operator==(const Time& lhs, const Time& rhs) noexcept = default;
 
     // operators <, <=, >, >=  are automatically generated
     constexpr friend inline auto operator<=>(const Time& lhs, const Time& rhs) noexcept
     {
+        if (lhs.overflow)
+        {
+            return std::strong_ordering::greater;
+        }
         std::strong_ordering s { lhs.mHour <=> rhs.mHour };
         if (s == 0)
         {
@@ -46,34 +102,30 @@ public:
         return s;
     }
 private:
-    uint8_t mHour { 0 }, mMinute { 0 };
+    unsigned mHour { 0 }, mMinute { 0 };
+    bool overflow { false };
 
     constexpr static uint8_t parseTimeDigits(char c1, char c2) noexcept
     {
         return static_cast<uint8_t>(10 * (c1 - '0') + (c2 - '0'));
     }
-};
 
-class Duration
-{
-public:
-    constexpr Duration() noexcept = default;
-
-    constexpr Duration(unsigned dur) noexcept :
-        mDur { dur }
+    constexpr void add(const Duration& dur) noexcept
     {
+        if (overflow)
+        {
+            return;
+        }
+        mMinute += dur.getDuration();
+        if (mMinute > 59)
+        {
+            mHour += mMinute / 60;
+            if (mHour > 23)
+            {
+                overflow = true;
+            }
+            mMinute %= 60;
+        }
     }
-
-    [[nodiscard]] constexpr unsigned getDuration() const noexcept
-    {
-        return mDur;
-    }
-
-    // operator!= is automatically generated
-    constexpr inline bool operator==(const Duration&) const noexcept = default;
-    // operators <, <=, >, >=  are automatically generated
-    constexpr inline auto operator<=>(const Duration&) const noexcept = default;
-private:
-    unsigned mDur { 0 };
 };
 }   // namespace chr

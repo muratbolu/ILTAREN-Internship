@@ -17,10 +17,10 @@ class Bus
 public:
     constexpr explicit Bus(int argc, char* argv[]) noexcept
     {
-        if (argc != 4)
+        if (argc != 5)
         {
-            int rc = fputs("Provide exactly three arguments: number of buses, "
-                           "begin time, end time.\n",
+            int rc = fputs("Provide exactly four arguments: output file, number"
+                           "of buses, begin time, end time.\n",
                            stderr);
             if (rc == EOF)
             {
@@ -29,8 +29,8 @@ public:
             return;
         }
         // NOLINTBEGIN
-        mNumOfBuses = static_cast<unsigned>(atoi(argv[1]));
-        if (strlen(argv[2]) != 5 || strlen(argv[3]) != 5)
+        mNumOfBuses = static_cast<unsigned>(atoi(argv[2]));
+        if (strlen(argv[3]) != 5 || strlen(argv[4]) != 5)
         {
             int rc = fputs("Enter valid timestamps, in the form of 00:00.\n", stderr);
             if (rc == EOF)
@@ -39,8 +39,8 @@ public:
             }
             return;
         }
-        mBeginTime = chr::Time { argv[2] };
-        mEndTime = chr::Time { argv[3] };
+        mBeginTime = chr::Time { argv[3] };
+        mEndTime = chr::Time { argv[4] };
         // NOLINTEND
         if (mBeginTime >= mEndTime)
         {
@@ -61,6 +61,14 @@ public:
 
         // Print data members info
         printSchedule(stdout);
+
+        FILE* fp = fopen(argv[1], "w");
+        if (fp == nullptr)
+        {
+            perror("Could not open file");
+            return;
+        }
+        printArrivals(fp);
     }
 
     void printSchedule(FILE* stream) const noexcept
@@ -71,6 +79,24 @@ public:
         io::print(stream, mBeginTime);
         fprintf(stream, "  end: ");
         io::print(stream, mEndTime);
+    }
+
+    void printArrivals(FILE* stream) const noexcept
+    {
+        io::print(stream, mBeginTime);
+        fputs("\n", stream);
+        for (chr::Duration d { 10 }; mBeginTime + d <= mEndTime; d += 10)
+        {
+            io::print(stream, mBeginTime + d);
+            for (auto&& p : periods)
+            {
+                if ((d.getDuration() % p.getDuration()) == 0U)
+                {
+                    fprintf(stream, " %d", p.getDuration());
+                }
+            }
+            fputs("\n", stream);
+        }
     }
 private:
     unsigned mNumOfBuses { 0 };

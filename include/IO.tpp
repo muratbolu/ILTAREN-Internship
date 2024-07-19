@@ -16,7 +16,7 @@ void print(FILE* stream, unsigned i) noexcept
 
 void print(FILE* stream, const chr::Time& t) noexcept
 {
-    fprintf(stream, "%02hhu:%02hhu\n", t.getHour(), t.getMinute());
+    fprintf(stream, "%02hhu:%02hhu", t.getHour(), t.getMinute());
 }
 
 void print(FILE* stream, const chr::Duration& d) noexcept
