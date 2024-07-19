@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#define POOL_SIZE 100
+#define POOL_SIZE 500
 
 class Bus
 {
@@ -54,6 +54,7 @@ public:
 
         // Assign periods
         periods.pool() = &pool;
+        deducedPeriods.pool() = &pool;
         for (unsigned i { 0 }; i < mNumOfBuses; ++i)
         {
             periods.pushBack(chr::Duration { 20 + 10 * i });
@@ -69,6 +70,14 @@ public:
             return;
         }
         printArrivals(fp);
+
+        fp = fopen(argv[1], "r");   // NOLINT
+        if (fp == nullptr)
+        {
+            perror("Could not open file");
+            return;
+        }
+        parseArrivals(fp);
     }
 
     void printSchedule(FILE* stream) const noexcept
@@ -102,9 +111,15 @@ public:
             }
         }
     }
+
+    void parseArrivals(FILE* stream) noexcept
+    {
+        ;
+    }
 private:
     unsigned mNumOfBuses { 0 };
     chr::Time mBeginTime, mEndTime;
     ObjectPool<Node<chr::Duration>, POOL_SIZE> pool;
     LinkedList<chr::Duration> periods;
+    LinkedList<chr::Duration> deducedPeriods;
 };
