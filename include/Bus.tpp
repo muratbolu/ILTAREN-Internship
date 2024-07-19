@@ -60,9 +60,9 @@ public:
         }
 
         // Print data members info
-        printSchedule(stdout);
+        // printSchedule(stdout);
 
-        FILE* fp = fopen(argv[1], "w");
+        FILE* fp = fopen(argv[1], "w");   // NOLINT
         if (fp == nullptr)
         {
             perror("Could not open file");
@@ -81,21 +81,25 @@ public:
         io::print(stream, mEndTime);
     }
 
+    // TODO: given the output of this func, deduce the periods of buses
     void printArrivals(FILE* stream) const noexcept
     {
-        io::print(stream, mBeginTime);
-        fputs("\n", stream);
         for (chr::Duration d { 10 }; mBeginTime + d <= mEndTime; d += 10)
         {
-            io::print(stream, mBeginTime + d);
+            unsigned num { 0 };
             for (auto&& p : periods)
             {
                 if ((d.getDuration() % p.getDuration()) == 0U)
                 {
-                    fprintf(stream, " %d", p.getDuration());
+                    ++num;
                 }
             }
-            fputs("\n", stream);
+            if (num > 0)
+            {
+                io::print(stream, mBeginTime + d);
+                fprintf(stream, " %d", num);
+                fputs("\n", stream);
+            }
         }
     }
 private:
