@@ -4,8 +4,6 @@
 #include "Node.tpp"
 #include "NodeIter.tpp"
 
-#include <cstdio>
-
 template<typename T>
 class LinkedList
 {
@@ -86,7 +84,7 @@ public:
         return mNodePool;
     }
 
-    constexpr unsigned size() const noexcept
+    [[nodiscard]] constexpr unsigned size() const noexcept
     {
         return mSize;
     }
@@ -279,37 +277,6 @@ public:
         }
 
         return result;
-    }
-
-    // TODO: export print methods into friend methods in a separate file
-    // Only use it with NULL-terminated strings
-    constexpr void printStrs(FILE* stream) const noexcept
-    {
-        fputs("[", stream);
-        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
-        {
-            fprintf(stream, "%s", static_cast<char*>(curr->data().data()));
-            if (curr->next() != nullptr)
-            {
-                fputs(", ", stream);
-            }
-        }
-        fputs("]", stream);
-    }
-
-    // Prints the numbers as int (%d)
-    constexpr void printNums(FILE* stream) const noexcept
-    {
-        fputs("[", stream);
-        for (Node<T>* curr { mHead }; curr != nullptr; curr = curr->next())
-        {
-            fprintf(stream, "%d", curr->data());
-            if (curr->next() != nullptr)
-            {
-                fputs(", ", stream);
-            }
-        }
-        fputs("]", stream);
     }
 private:
     Node<T>* mHead { nullptr };

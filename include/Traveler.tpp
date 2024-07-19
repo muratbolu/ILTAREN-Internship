@@ -3,6 +3,7 @@
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
+#include <cassert>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
@@ -58,13 +59,27 @@ public:
     constexpr Traveler& operator=(const Traveler&) noexcept = delete;
     constexpr Traveler& operator=(Traveler&&) noexcept = delete;
 
-    Traveler(char arg1[], char arg2[], char arg3[], char arg4[]) noexcept
+    Traveler(int argc, char* argv[]) noexcept
     {
-        mStartCity = static_cast<unsigned>(atoi(arg2) - 1);
-        mX = static_cast<unsigned>(atoi(arg3));
-        mY = static_cast<unsigned>(atoi(arg4));
-        getInput(arg1);
-        parseInput();
+        if (argc != 5)
+        {
+            int rc = fputs("Provide exactly four arguments: input file, start city "
+                           "code, X, and Y.\n",
+                           stderr);
+            if (rc == EOF)
+            {
+                perror("Invalid argument number");
+            }
+        }
+        else
+        {
+            mStartCity = static_cast<unsigned>(atoi(argv[2]) - 1);
+            mX = static_cast<unsigned>(atoi(argv[3]));
+            mY = static_cast<unsigned>(atoi(argv[4]));
+            getInput(argv[1]);
+            parseInput();
+            searchBestPath();
+        }
     }
 
     // returns false if something goes wrong but we don't use it
@@ -241,7 +256,7 @@ public:
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
-            for (unsigned j { 0 }; j < 81; ++j)
+            for (unsigned j { i + 1 }; j < 81; ++j)
             {
                 if (fst[i][j] != UINT_MAX && snd[i][j] == UINT_MAX)
                 {
@@ -250,6 +265,64 @@ public:
             }
         }
         return true;
+    }
+
+    static void searchBestPath() noexcept
+    {
+#define I (i)
+#define J (j)
+#define Y (J)               // j = y
+#define FUNC(x) (2 * (x))   // f(x) = x^2
+#define X (I - FUNC(Y))     // i = x + f(y)
+#define LIM 5000
+
+        static StaticStack<unsigned int, 81> cs;
+        cs.pushBack(Traveler::mStartCity);
+        static StaticVector<bool, 81> va;
+        va[Traveler::mStartCity] = true;
+        static unsigned vc { va.count(true) };
+        static Traveler::State startState { cs, va, vc };
+
+        for (int i { 1 }; i < LIM; ++i)
+        {
+            for (int j { 1 }; Y <= X; ++j)   // t.x >= t.y
+            {
+                assert(X > 0);
+                assert(Y > 0);
+                Traveler::mX = static_cast<unsigned>(X);
+                Traveler::mY = static_cast<unsigned>(Y);
+                // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
+                Traveler::filterByRange(Traveler::mFilteredAdjacencyMatrix, Traveler::mAdjacencyMatrix);
+                if (Traveler::stackContains(Traveler::mFilteredAdjacencyMatrix, Traveler::mBestMats))
+                {
+                    continue;
+                }
+                if (Traveler::dfs(startState) < 81)
+                {
+                    continue;
+                }
+                Traveler::travel();
+                if (Traveler::validator(Traveler::mBestState.citiesStack))
+                {
+                    static unsigned currMax { 0 };
+                    if (Traveler::mBestState.visitedCount > currMax)
+                    {
+                        Traveler::printRoute(stdout);
+                        currMax = Traveler::mBestState.visitedCount;
+                        Traveler::mBestMats.pushBack(Traveler::mFilteredAdjacencyMatrix);
+                        printf("x: %d, y: %d\n\n", Traveler::mX, Traveler::mY);
+                        if (currMax == 81)
+                        {
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    puts("Invalid route");
+                }
+            }
+        }
     }
 
     // Zero-indexing for cities, 0 => ADANA, etc.
