@@ -11,12 +11,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#define POOL_SIZE 500
+#define BS_POOL_SIZE 500
 
 class BusSchedule
 {
 public:
-    constexpr static Maybe<BusSchedule> create(int argc, char* argv[]) noexcept
+    constexpr static Maybe<BusSchedule> create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -52,13 +52,13 @@ public:
             }
             return nothing<BusSchedule>();
         }
-        return just<BusSchedule>({ numOfBuses, begin, end });
+        return just<BusSchedule>({ numOfBuses, begin, end, samplingPeriod });
     }
 
     void printSchedule(FILE* stream) const noexcept
     {
         fprintf(stream, "Buses: %d\n", mNumofBuses);
-        io::print(stream, periods);
+        io::print(stream, mPeriods);
         fprintf(stream, "begin: ");
         io::print(stream, mBeginTime);
         fprintf(stream, "  end: ");
@@ -68,10 +68,10 @@ public:
     // TODO: given the output of this func, deduce the periods of BusSchedulees
     void printArrivals(FILE* stream) const noexcept
     {
-        for (chr::Duration d { 0 }; mBeginTime + d <= mEndTime; d += 10)
+        for (chr::Duration d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
-            for (auto&& p : periods)
+            for (auto&& p : mPeriods)
             {
                 if ((d.getDuration() % p.getDuration()) == 0U)
                 {
@@ -86,30 +86,25 @@ public:
             }
         }
     }
-
-    void parseArrivals(FILE* stream) noexcept
-    {
-        // TODO
-    }
 private:
     unsigned mNumofBuses;
     chr::Time mBeginTime, mEndTime;
-    ObjectPool<Node<chr::Duration>, POOL_SIZE> pool;
-    LinkedList<chr::Duration> periods;
-    LinkedList<chr::Duration> deducedPeriods;
+    unsigned mSamplingPeriod;
+    ObjectPool<Node<chr::Duration>, BS_POOL_SIZE> mPool;
+    LinkedList<chr::Duration> mPeriods;
 
     // Private constructor
-    constexpr BusSchedule(unsigned numOfBuses, chr::Time begin, chr::Time end) noexcept :
+    constexpr BusSchedule(unsigned numOfBuses, chr::Time begin, chr::Time end, unsigned samplingPeriod) noexcept :
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
-        mEndTime { end }
+        mEndTime { end },
+        mSamplingPeriod { samplingPeriod }
     {
         // Assign periods
-        periods.pool() = &pool;
-        deducedPeriods.pool() = &pool;
+        mPeriods.pool() = &mPool;
         for (unsigned i { 0 }; i < mNumofBuses; ++i)
         {
-            periods.pushBack(chr::Duration { 20 + 10 * i });
+            mPeriods.pushBack(chr::Duration { 20 + 10 * i });
         }
     }
 };
