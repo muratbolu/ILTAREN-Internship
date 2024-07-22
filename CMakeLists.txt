@@ -33,6 +33,7 @@ set(TEST_SOURCES
     test/ObjectPoolTest.cpp
     test/NodeTest.cpp
     test/LinkedListTest.cpp
+    test/MaybeTest.cpp
 )
 
 # Statically link Google Test

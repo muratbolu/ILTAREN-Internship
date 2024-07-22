@@ -3,6 +3,7 @@
 #include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
+#include "Maybe.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
 
@@ -12,10 +13,10 @@
 
 #define POOL_SIZE 500
 
-class Bus
+class BusSchedule
 {
 public:
-    constexpr explicit Bus(int argc, char* argv[]) noexcept
+    constexpr static Maybe<BusSchedule> create(int argc, char* argv[]) noexcept
     {
         if (argc != 5)
         {
@@ -26,10 +27,10 @@ public:
             {
                 perror("Invalid argument number");
             }
-            return;
+            return nothing<BusSchedule>();
         }
         // NOLINTBEGIN
-        mNumOfBuses = static_cast<unsigned>(atoi(argv[2]));
+        unsigned numOfBuses { static_cast<unsigned>(atoi(argv[2])) };
         if (strlen(argv[3]) != 5 || strlen(argv[4]) != 5)
         {
             int rc = fputs("Enter valid timestamps, in the form of 00:00.\n", stderr);
@@ -37,52 +38,26 @@ public:
             {
                 perror("Invalid timestamps");
             }
-            return;
+            return nothing<BusSchedule>();
         }
-        mBeginTime = chr::Time { argv[3] };
-        mEndTime = chr::Time { argv[4] };
+        chr::Time begin { chr::Time { argv[3] } };
+        chr::Time end { chr::Time { argv[4] } };
         // NOLINTEND
-        if (mBeginTime >= mEndTime)
+        if (begin >= end)
         {
             int rc = fputs("Begin time must be less than end time.\n", stderr);
             if (rc == EOF)
             {
                 perror("Invalid timestamps");
             }
-            return;
+            return nothing<BusSchedule>();
         }
-
-        // Assign periods
-        periods.pool() = &pool;
-        deducedPeriods.pool() = &pool;
-        for (unsigned i { 0 }; i < mNumOfBuses; ++i)
-        {
-            periods.pushBack(chr::Duration { 20 + 10 * i });
-        }
-
-        // Print data members info
-        // printSchedule(stdout);
-
-        FILE* fp = fopen(argv[1], "w");   // NOLINT
-        if (fp == nullptr)
-        {
-            perror("Could not open file");
-            return;
-        }
-        printArrivals(fp);
-
-        fp = fopen(argv[1], "r");   // NOLINT
-        if (fp == nullptr)
-        {
-            perror("Could not open file");
-            return;
-        }
-        parseArrivals(fp);
+        return just<BusSchedule>({ numOfBuses, begin, end });
     }
 
     void printSchedule(FILE* stream) const noexcept
     {
-        fprintf(stream, "buses: %d\n", mNumOfBuses);
+        fprintf(stream, "Buses: %d\n", mNumofBuses);
         io::print(stream, periods);
         fprintf(stream, "begin: ");
         io::print(stream, mBeginTime);
@@ -90,10 +65,10 @@ public:
         io::print(stream, mEndTime);
     }
 
-    // TODO: given the output of this func, deduce the periods of buses
+    // TODO: given the output of this func, deduce the periods of BusSchedulees
     void printArrivals(FILE* stream) const noexcept
     {
-        for (chr::Duration d { 10 }; mBeginTime + d <= mEndTime; d += 10)
+        for (chr::Duration d { 0 }; mBeginTime + d <= mEndTime; d += 10)
         {
             unsigned num { 0 };
             for (auto&& p : periods)
@@ -117,9 +92,24 @@ public:
         // TODO
     }
 private:
-    unsigned mNumOfBuses { 0 };
+    unsigned mNumofBuses;
     chr::Time mBeginTime, mEndTime;
     ObjectPool<Node<chr::Duration>, POOL_SIZE> pool;
     LinkedList<chr::Duration> periods;
     LinkedList<chr::Duration> deducedPeriods;
+
+    // Private constructor
+    constexpr BusSchedule(unsigned numOfBuses, chr::Time begin, chr::Time end) noexcept :
+        mNumofBuses { numOfBuses },
+        mBeginTime { begin },
+        mEndTime { end }
+    {
+        // Assign periods
+        periods.pool() = &pool;
+        deducedPeriods.pool() = &pool;
+        for (unsigned i { 0 }; i < mNumofBuses; ++i)
+        {
+            periods.pushBack(chr::Duration { 20 + 10 * i });
+        }
+    }
 };

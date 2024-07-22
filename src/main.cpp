@@ -1,4 +1,5 @@
 // TRAVELER or BUS
+#include <cstdlib>
 #define BUS
 
 #ifdef TRAVELER
@@ -12,11 +13,27 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef BUS
-#include "Bus.tpp"
+#include "BusSchedule.tpp"
+#include "Maybe.tpp"
+
+#include <cstdio>
 
 int main(int argc, char* argv[])
 {
-    Bus b { argc, argv };
+    Maybe<BusSchedule> b { BusSchedule::create(argc, argv) };
+    if (!b.exists())
+    {
+        return EXIT_FAILURE;
+    }
+
+    FILE* fp = fopen(argv[1], "w");   // NOLINT
+    if (fp == nullptr)
+    {
+        perror("Could not open file");
+        return EXIT_FAILURE;
+    }
+
+    b.data().printArrivals(fp);
     return 0;
 }
 #endif
