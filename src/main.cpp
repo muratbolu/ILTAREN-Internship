@@ -15,7 +15,6 @@ int main(int argc, char* argv[])
 #ifdef BUS
 #include "BusPeriods.tpp"
 #include "BusSchedule.tpp"
-#include "Maybe.tpp"
 
 #include <cstdio>
 
@@ -23,8 +22,8 @@ constexpr static unsigned samplingPeriod { 10 };
 
 int main(int argc, char* argv[])
 {
-    Maybe<BusSchedule> bs { BusSchedule::create(argc, argv, samplingPeriod) };
-    if (!bs.exists())
+    BusSchedule* bs { BusSchedule::create(argc, argv, samplingPeriod) };
+    if (bs == nullptr)
     {
         return EXIT_FAILURE;
     }
@@ -34,10 +33,10 @@ int main(int argc, char* argv[])
         perror("Could not open file");
         return EXIT_FAILURE;
     }
-    bs.data().printArrivals(fw);
+    bs->printArrivals(fw);
 
-    Maybe<BusPeriods> bp { BusPeriods::create(samplingPeriod) };
-    if (!bp.exists())
+    BusPeriods* bp { BusPeriods::create(samplingPeriod) };
+    if (bp == nullptr)
     {
         return EXIT_FAILURE;
     }
@@ -47,7 +46,7 @@ int main(int argc, char* argv[])
         perror("Could not open file");
         return EXIT_FAILURE;
     }
-    bp.data().parseArrivals(fr, stdout);
+    bp->parseArrivals(fr, stdout);
 
     return 0;
 }

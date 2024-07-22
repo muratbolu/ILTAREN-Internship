@@ -3,7 +3,6 @@
 #include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
-#include "Maybe.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
 
@@ -16,7 +15,14 @@
 class BusSchedule
 {
 public:
-    constexpr static Maybe<BusSchedule> create(int argc, char* argv[], unsigned samplingPeriod) noexcept
+    constexpr BusSchedule() noexcept = delete;
+    constexpr ~BusSchedule() noexcept = default;
+    constexpr BusSchedule(const BusSchedule&) noexcept = delete;
+    constexpr BusSchedule(BusSchedule&&) noexcept = default;
+    constexpr BusSchedule& operator=(const BusSchedule&) noexcept = delete;
+    constexpr BusSchedule& operator=(BusSchedule&&) noexcept = default;
+
+    constexpr static BusSchedule* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -27,7 +33,7 @@ public:
             {
                 perror("Invalid argument number");
             }
-            return nothing<BusSchedule>();
+            return nullptr;
         }
         // NOLINTBEGIN
         unsigned numOfBuses { static_cast<unsigned>(atoi(argv[2])) };
@@ -38,7 +44,7 @@ public:
             {
                 perror("Invalid timestamps");
             }
-            return nothing<BusSchedule>();
+            return nullptr;
         }
         chr::Time begin { chr::Time { argv[3] } };
         chr::Time end { chr::Time { argv[4] } };
@@ -50,9 +56,9 @@ public:
             {
                 perror("Invalid timestamps");
             }
-            return nothing<BusSchedule>();
+            return nullptr;
         }
-        return just<BusSchedule>({ numOfBuses, begin, end, samplingPeriod });
+        return new BusSchedule { numOfBuses, begin, end, samplingPeriod };
     }
 
     void printSchedule(FILE* stream) const noexcept

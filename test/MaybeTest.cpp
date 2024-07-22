@@ -15,6 +15,12 @@ TEST_F(MaybeTest, Initialization)
     just(5);
 }
 
+TEST_F(MaybeTest, TwoMaybes)
+{
+    just(5);
+    just(6);
+}
+
 TEST_F(MaybeTest, Exists)
 {
     Maybe<int> m1 { just(5) };
