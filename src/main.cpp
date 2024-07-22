@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
     bs->printArrivals(fw);
+    fflush(fw);
 
     BusPeriods* bp { BusPeriods::create(samplingPeriod) };
     if (bp == nullptr)

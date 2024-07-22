@@ -4,9 +4,10 @@
 #include "LinkedList.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
-#include "StaticVector.tpp"
+#include "StaticStack.tpp"
 
 #include <cstdio>
+#include <iostream>
 
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
@@ -21,27 +22,33 @@ public:
 
     void parseArrivals(FILE* istream, FILE* ostream) noexcept
     {
-        mSamples.pushBack(5);
-        mSamples.pushBack(7);
-
-        /*
-        for (;;)
+        // Assume that EOF is not zero in the implementation
+        for (int c { 0 }; c != EOF;)
         {
-            mLines.pushBack(StaticVector<char, MAX_LINE_LEN> {});
-            if (fgets(mLines.back()->data(), MAX_LINE_LEN, istream) == nullptr)
+            mLines.pushBack(StaticStack<char, MAX_LINE_LEN> {});
+            StaticStack<char, MAX_LINE_LEN>* back { mLines.back() };
+            for (;;)
             {
-                break;
+                c = fgetc(istream);
+                if (c == EOF || c == '\n')
+                {
+                    break;
+                }
+                back->pushBack(static_cast<char>(c));
+            }
+            if (c == EOF)
+            {
+                mLines.popBack();
             }
         }
-        */
-
-        io::print(ostream, mSamples);
+        io::print(ostream, mLines);
+        fputc('\n', ostream);
     }
 private:
     unsigned mSamplingPeriod;
 
-    ObjectPool<Node<StaticVector<char, MAX_LINE_LEN>>, BP_POOL_SIZE> mLinePool;
-    LinkedList<StaticVector<char, MAX_LINE_LEN>> mLines;
+    ObjectPool<Node<StaticStack<char, MAX_LINE_LEN>>, BP_POOL_SIZE> mLinePool;
+    LinkedList<StaticStack<char, MAX_LINE_LEN>> mLines;
 
     ObjectPool<Node<unsigned>, BP_POOL_SIZE> mSamplePool;
     LinkedList<unsigned> mSamples;
