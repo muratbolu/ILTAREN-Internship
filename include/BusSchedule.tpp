@@ -74,6 +74,8 @@ public:
     // TODO: given the output of this func, deduce the periods of BusSchedulees
     void printArrivals(FILE* stream) const noexcept
     {
+        io::print(stream, mBeginTime);
+        fputc('\n', stream);
         for (chr::Duration d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
@@ -88,7 +90,7 @@ public:
             {
                 io::print(stream, mBeginTime + d);
                 fprintf(stream, " %d", num);
-                fputs("\n", stream);
+                fputc('\n', stream);
             }
         }
     }

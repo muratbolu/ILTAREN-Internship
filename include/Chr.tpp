@@ -84,6 +84,11 @@ public:
         return t;
     }
 
+    constexpr friend inline Duration operator-(const Time& lhs, const Time& rhs) noexcept
+    {
+        return { 60 * (lhs.mHour - rhs.mHour) + lhs.mMinute - rhs.mMinute };
+    }
+
     // operator!= is automatically generated
     constexpr friend inline bool operator==(const Time& lhs, const Time& rhs) noexcept = default;
 

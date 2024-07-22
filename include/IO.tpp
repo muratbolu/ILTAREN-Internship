@@ -79,13 +79,4 @@ void print(FILE* stream, const LinkedList<T>& ll) noexcept
     }
     fputs("]", stream);
 }
-
-/*
-// TODO: export print methods into friend methods in a separate file
-// Only use it with NULL-terminated strings
-constexpr void print(FILE* stream, unsigned i) noexcept
-{
-    fprintf(stream, "%s", static_cast<char*>(curr->data().data()));
-}
-*/
 }   // namespace io
