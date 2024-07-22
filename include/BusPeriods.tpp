@@ -7,6 +7,8 @@
 #include "ObjectPool.tpp"
 #include "StaticStack.tpp"
 
+#include <cmath>
+#include <complex>
 #include <cstdio>
 #include <cstdlib>
 
@@ -56,8 +58,59 @@ public:
         {
             mSamples[(chr::Time { mLines[i]->data() } - begin).getDuration() / mSamplingPeriod - 1] = atoi(mLines[i]->data() + 6);
         }
+        while (((mSamples.size()) & (mSamples.size() - 1)) != 0)
+        {
+            mSamples.pushBack(0);
+        }
         io::print(ostream, mSamples);
         fputc('\n', ostream);
+        for (unsigned i { 0 }; i < mSamples.size(); ++i)
+        {
+            mComplexSamples.pushBack(std::complex<float> { static_cast<float>(mSamples[i]), 0 });
+        }
+        io::print(ostream, mComplexSamples);
+        fputc('\n', ostream);
+        mFourierTransform = fft(mComplexSamples);
+        io::print(ostream, mFourierTransform);
+        fputc('\n', ostream);
+        for (unsigned i { 0 }; i < mFourierTransform.size(); ++i)
+        {
+            mAbsFT.pushBack(std::abs(mFourierTransform[i]));
+        }
+        io::print(ostream, mAbsFT);
+        fputc('\n', ostream);
+    }
+
+    constexpr static StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) noexcept
+    {
+        if (p.size() == 1)
+        {
+            return p;
+        }
+        std::complex<float> omega { 1, static_cast<float>(2 * PI / p.size()) };
+        StaticStack<std::complex<float>, MAX_SAMPLES> pe;
+        StaticStack<std::complex<float>, MAX_SAMPLES> po;
+        for (unsigned i { 0 }; i + 1 < p.size(); i += 2)
+        {
+            pe.pushBack(p[i]);
+            po.pushBack(p[i + 1]);
+        }
+
+        StaticStack<std::complex<float>, MAX_SAMPLES> ye { fft(pe) };
+        StaticStack<std::complex<float>, MAX_SAMPLES> yo { fft(po) };
+
+        StaticStack<std::complex<float>, MAX_SAMPLES> y;
+        for (unsigned i { 0 }; i < p.size(); ++i)
+        {
+            y.pushBack(std::complex<float> { 0, 0 });
+        }
+        for (unsigned i { 0 }; i < p.size() / 2; ++i)
+        {
+            std::complex<float> omegaJ { std::pow(omega, i) };
+            y[i] = ye[i] + omegaJ * yo[i];
+            y[i + p.size() / 2] = ye[i] - omegaJ * yo[i];
+        }
+        return y;
     }
 private:
     unsigned mSamplingPeriod;
@@ -66,6 +119,9 @@ private:
     LinkedList<StaticStack<char, MAX_LINE_LEN>> mLines;
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
+    StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
+    StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
+    StaticStack<float, MAX_SAMPLES> mAbsFT;
 
     // Private constructor
     constexpr BusPeriods(unsigned samplingPeriod) noexcept :

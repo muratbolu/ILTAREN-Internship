@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Chr.tpp"
+#include "Complex.tpp"
 #include "LinkedList.tpp"
 #include "NodeIter.tpp"
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
 
+#include <complex>
 #include <cstdio>
 
 namespace io
@@ -25,6 +27,11 @@ void print(FILE* stream, char i) noexcept
     fprintf(stream, "%c", i);
 }
 
+void print(FILE* stream, float i) noexcept
+{
+    fprintf(stream, "%.2f", i);
+}
+
 void print(FILE* stream, const chr::Time& t) noexcept
 {
     fprintf(stream, "%02hhu:%02hhu", t.getHour(), t.getMinute());
@@ -33,6 +40,11 @@ void print(FILE* stream, const chr::Time& t) noexcept
 void print(FILE* stream, const chr::Duration& d) noexcept
 {
     fprintf(stream, "%u", d.getDuration());
+}
+
+void print(FILE* stream, const std::complex<float>& c) noexcept
+{
+    fprintf(stream, "(%.2f,%.2f)", c.real(), c.imag());
 }
 
 template<typename T, unsigned N>
