@@ -7,6 +7,7 @@
 #include "ObjectPool.tpp"
 #include "StaticStack.tpp"
 
+#include <cassert>
 #include <cmath>
 #include <complex>
 #include <cstdio>
@@ -54,10 +55,25 @@ public:
         {
             mSamples.pushBack(0);
         }
-        for (unsigned i { 1 }; i < mLines.size(); ++i)
+        for (unsigned i { 0 }; i < mLines.size(); ++i)
         {
-            mSamples[(chr::Time { mLines[i]->data() } - begin).getDuration() / mSamplingPeriod - 1] = atoi(mLines[i]->data() + 6);
+            mSamples[(chr::Time { mLines[i]->data() } - begin).getDuration() / mSamplingPeriod] = atoi(mLines[i]->data() + 6);
         }
+        io::print(ostream, mSamples);
+        fputc('\n', ostream);
+        for (;;)
+        {
+            mFreqs.pushBack(extractHighestFreq(mSamples) * mSamplingPeriod);
+            if (mFreqs.back() == 0)
+            {
+                mFreqs.popBack();
+                break;
+            }
+        }
+        io::print(ostream, mFreqs);
+        fputc('\n', ostream);
+        // TODO: separate the synthesizer and analyzer programs
+        /*
         while (((mSamples.size()) & (mSamples.size() - 1)) != 0)
         {
             mSamples.pushBack(0);
@@ -79,8 +95,10 @@ public:
         }
         io::print(ostream, mAbsFT);
         fputc('\n', ostream);
+        */
     }
 
+    /*
     constexpr static StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) noexcept
     {
         if (p.size() == 1)
@@ -112,6 +130,29 @@ public:
         }
         return y;
     }
+    */
+    constexpr unsigned extractHighestFreq(StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    {
+        unsigned period { 0 };
+        for (unsigned i { 0 }; i < s.size(); ++i)
+        {
+            if (s[i] > 0)
+            {
+                assert(s[i] == 1);
+                period = i;
+                break;
+            }
+        }
+        if (period == 0)
+        {
+            return 0;
+        }
+        for (unsigned i { period }; i < s.size(); i += period)
+        {
+            --s[i];
+        }
+        return period;
+    }
 private:
     unsigned mSamplingPeriod;
 
@@ -119,9 +160,11 @@ private:
     LinkedList<StaticStack<char, MAX_LINE_LEN>> mLines;
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
-    StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
-    StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
-    StaticStack<float, MAX_SAMPLES> mAbsFT;
+    StaticStack<unsigned, MAX_SAMPLES> mFreqs;
+
+    // StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
+    // StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
+    // StaticStack<float, MAX_SAMPLES> mAbsFT;
 
     // Private constructor
     constexpr BusPeriods(unsigned samplingPeriod) noexcept :
