@@ -22,6 +22,8 @@
 
 class BusPeriods
 {
+    using Time = chr::Time;
+    using Dur = chr::Duration;
 public:
     constexpr static BusPeriods* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
@@ -72,10 +74,10 @@ public:
     void parseSamples() noexcept
     {
         assert(strlen(mLines.front()->data()) == 5);
-        chr::Time begin { mLines.front()->data() };
+        Time begin { mLines.front()->data() };
         assert(strlen(mLines.back()->data()) > 6);
-        chr::Time end { mLines.back()->data() };
-        for (chr::Duration d { mSP }; begin + d <= end; d += mSP)
+        Time end { mLines.back()->data() };
+        for (Dur d { mSP }; begin + d <= end; d += mSP)
         {
             mSamples.pushBack(0);
         }
@@ -85,7 +87,7 @@ public:
             {
                 continue;
             }
-            mSamples[(chr::Time { l.data() } - begin).getDuration() / mSP] = atoi(l.data() + 6);
+            mSamples[(Time { l.data() } - begin).getDuration() / mSP] = atoi(l.data() + 6);
         }
         // io::print(ostream, mSamples);
         // fputc('\n', ostream);
@@ -124,6 +126,17 @@ public:
                 // assert(s[i] == 1);
                 period = i;
                 break;
+            }
+        }
+        if (period == 0)
+        {
+            return period;
+        }
+        for (unsigned i { period }; i < s.size(); i += period)
+        {
+            if (s[i] == 0)
+            {
+                assert(0 && "Alternating periods");
             }
         }
         return period;

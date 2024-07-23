@@ -15,6 +15,8 @@
 
 class BusSchedule
 {
+    using Time = chr::Time;
+    using Dur = chr::Duration;
 public:
     constexpr BusSchedule() noexcept = delete;
     constexpr ~BusSchedule() noexcept = default;
@@ -47,8 +49,8 @@ public:
             }
             return nullptr;
         }
-        chr::Time begin { chr::Time { argv[3] } };
-        chr::Time end { chr::Time { argv[4] } };
+        Time begin { Time { argv[3] } };
+        Time end { Time { argv[4] } };
         // NOLINTEND
         if (begin >= end)
         {
@@ -77,7 +79,7 @@ public:
     {
         io::print(stream, mBeginTime);
         fputc('\n', stream);
-        for (chr::Duration d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
+        for (Dur d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
             for (auto&& p : mPeriods)
@@ -97,13 +99,13 @@ public:
     }
 private:
     unsigned mNumofBuses;
-    chr::Time mBeginTime, mEndTime;
+    Time mBeginTime, mEndTime;
     unsigned mSamplingPeriod;
-    ObjectPool<Node<chr::Duration>, BS_POOL_SIZE> mPool;
-    LinkedList<chr::Duration> mPeriods;
+    ObjectPool<Node<Dur>, BS_POOL_SIZE> mPool;
+    LinkedList<Dur> mPeriods;
 
     // Private constructor
-    constexpr BusSchedule(unsigned numOfBuses, chr::Time begin, chr::Time end, unsigned samplingPeriod) noexcept :
+    constexpr BusSchedule(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },
@@ -117,7 +119,7 @@ private:
             unsigned maxNumber { 60 };
             unsigned minNumber { 1 };
             unsigned randNum { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
-            mPeriods.pushBack(chr::Duration { randNum });
+            mPeriods.pushBack(Dur { randNum });
         }
         io::print(stdout, mPeriods);
         fputc('\n', stdout);
