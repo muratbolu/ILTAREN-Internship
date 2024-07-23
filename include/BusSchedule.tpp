@@ -130,7 +130,8 @@ private:
             {
                 randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
             }
-            mPeriods.pushBack({ Dur { randNum1 }, Dur { randNum2 } });
+            mPeriods.pushBack({ Dur { 1 }, Dur { 3 } });
+            mPeriods.pushBack({ Dur { 2 }, Dur { 2 } });
         }
         io::print(stdout, mPeriods);
         fputc('\n', stdout);

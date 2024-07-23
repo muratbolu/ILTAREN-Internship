@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
@@ -95,18 +96,27 @@ public:
 
     void extractPeriods() noexcept
     {
-        StaticStack<unsigned, MAX_SAMPLES> mFreqs;
+        StaticStack<std::pair<unsigned, unsigned>, MAX_SAMPLES> mFreqs;
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
-            unsigned t { extractLowestPeriod(samples) };
-            if (t == 0)
+            std::pair<unsigned, unsigned> t { extractLowestPeriod(samples) };
+            if (t.first == 0)
             {
                 break;
             }
-            mFreqs.pushBack(t * mSP);
-            for (unsigned i { t }; i < samples.size(); i += t)
+            mFreqs.pushBack({ t.first * mSP, t.second * mSP });
+            unsigned i { t.first };
+            for (; i + t.second < samples.size(); i += t.first + t.second)
             {
+                assert(samples[i] > 0);
+                --samples[i];
+                assert(samples[i + t.second] > 0);
+                --samples[i + t.second];
+            }
+            if (i < samples.size())
+            {
+                assert(samples[i] > 0);
                 --samples[i];
             }
         }
@@ -115,10 +125,34 @@ public:
         fputc('\n', ostream);
     }
 
-    [[nodiscard]] constexpr static unsigned extractLowestPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    [[nodiscard]] constexpr static StaticStack<unsigned, MAX_SAMPLES> shiftIndices(const StaticStack<unsigned, MAX_SAMPLES>& s, unsigned n) noexcept
+    {
+        StaticStack<unsigned, MAX_SAMPLES> shifted;
+        for (unsigned i { n }; i < s.size(); ++i)
+        {
+            shifted.pushBack(s[i]);
+        }
+        return shifted;
+    }
+
+    [[nodiscard]] constexpr static unsigned getLowestIndex(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    {
+        for (unsigned i { 1 }; i < s.size(); ++i)
+        {
+            if (s[i] > 0)
+            {
+                // Some inputs may be duplicated.
+                // assert(s[i] == 1);
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    [[nodiscard]] constexpr static std::pair<unsigned, unsigned> extractLowestPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
         unsigned period { 0 };
-        for (unsigned i { 0 }; i < s.size(); ++i)
+        for (unsigned i { 1 }; i < s.size(); ++i)
         {
             if (s[i] > 0)
             {
@@ -130,16 +164,22 @@ public:
         }
         if (period == 0)
         {
-            return period;
+            return { period, period };
         }
         for (unsigned i { period }; i < s.size(); i += period)
         {
             if (s[i] == 0)
             {
-                assert(0 && "Alternating periods");
+                std::pair<unsigned, unsigned> p { extractLowestPeriod(shiftIndices(s, period)) };
+                if (p.first != 0 && p.first == p.second)
+                {
+                    return p;
+                }
+                unsigned p2 { getLowestIndex(shiftIndices(s, period)) };
+                return { period, p2 };
             }
         }
-        return period;
+        return { period, period };
     }
 
     void extendSamplesToPowOfTwo() noexcept
@@ -175,7 +215,7 @@ public:
         // fputc('\n', ostream);
     }
 
-    [[nodiscard]] constexpr StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) const noexcept
+    [[nodiscard]] constexpr static StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) noexcept
     {
         unsigned n { p.size() };
         if (n == 1)
