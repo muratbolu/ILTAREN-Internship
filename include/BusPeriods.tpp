@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
@@ -99,7 +100,7 @@ public:
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
-            unsigned t { extractLowestPeriod(samples) };
+            unsigned t { extractConstantPeriod(samples) };
             if (t == 0)
             {
                 break;
@@ -115,32 +116,72 @@ public:
         fputc('\n', ostream);
     }
 
-    [[nodiscard]] constexpr static unsigned extractLowestPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    [[nodiscard]] static unsigned extractConstantPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
-        unsigned period { 0 };
-        for (unsigned i { 0 }; i < s.size(); ++i)
+        for (unsigned i { 1 }; i < s.size() / 2; ++i)
+        {
+            unsigned period { 0 };
+            for (unsigned j { i }; j < s.size() / 2; ++j)
+            {
+                if (s[j] > 0)
+                {
+                    period = j;
+                    break;
+                }
+            }
+            if (period == 0)
+            {
+                return 0;
+            }
+            bool isValid { true };
+            for (unsigned j { period }; j < s.size(); j += period)
+            {
+                if (s[j] == 0)
+                {
+                    isValid = false;
+                }
+            }
+            if (isValid)
+            {
+                return period;
+            }
+        }
+        return 0;
+    }
+
+    /*
+    [[nodiscard]] constexpr static StaticStack<unsigned, MAX_SAMPLES> shiftIndex(const StaticStack<unsigned, MAX_SAMPLES>& s, unsigned n) noexcept
+    {
+        StaticStack<unsigned, MAX_SAMPLES> shifted;
+        for (unsigned i { n }; i < s.size(); ++i)
+        {
+            shifted.pushBack(s[i]);
+        }
+        return shifted;
+    }
+
+    [[nodiscard]] constexpr static std::pair<unsigned, unsigned> extractAlternatingPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    {
+        unsigned period1 { 0 };
+        for (unsigned i { 1 }; i < s.size(); ++i)
         {
             if (s[i] > 0)
             {
                 // Some inputs may be duplicated.
                 // assert(s[i] == 1);
-                period = i;
+                period1 = i;
                 break;
             }
         }
-        if (period == 0)
+        if (period1 == 0)
         {
-            return period;
+            return { 0, 0 };
         }
-        for (unsigned i { period }; i < s.size(); i += period)
-        {
-            if (s[i] == 0)
-            {
-                assert(0 && "Alternating periods");
-            }
-        }
-        return period;
+        io::print(stdout, shiftIndex(s, period1));
+        fprintf(stdout, "found period: %d\n", extractConstantPeriod(shiftIndex(s, period1)));
+        return { period1, period1 };
     }
+    */
 
     void extendSamplesToPowOfTwo() noexcept
     {
