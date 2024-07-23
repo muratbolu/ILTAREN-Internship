@@ -12,10 +12,13 @@
 #include <complex>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
 #define MAX_SAMPLES 2000
+
+#define IS_POW_TWO(x) (((x) & ((x) - 1)) == 0)
 
 class BusPeriods
 {
@@ -31,21 +34,29 @@ public:
             }
             return nullptr;
         }
-        return new BusPeriods { samplingPeriod };
+        FILE* fr = fopen(argv[1], "r");   // NOLINT
+        if (fr == nullptr)
+        {
+            perror("Could not open file");
+            return nullptr;
+        }
+        return new BusPeriods { fr, stdout, samplingPeriod };
     }
 
-    void parseArrivals(FILE* istream, FILE* ostream) noexcept
+    void getSamples() noexcept
     {
         // Assume that EOF is not zero in the implementation
-        for (int c { 0 }; c != EOF;)
+        for (;;)
         {
             mLines.pushBack(StaticStack<char, MAX_LINE_LEN> {});
             StaticStack<char, MAX_LINE_LEN>* back { mLines.back() };
+            int c { EOF };
             for (;;)
             {
                 c = fgetc(istream);
                 if (c == EOF || c == '\n')
                 {
+                    back->pushBack('\0');
                     break;
                 }
                 back->pushBack(static_cast<char>(c));
@@ -53,94 +64,55 @@ public:
             if (c == EOF)
             {
                 mLines.popBack();
+                break;
             }
         }
-        // The output start from the smallest sampling period.
-        // For example, if begin is 12:00 and SP=10, samples
-        // start from 12:10.
+    }
+
+    void parseSamples() noexcept
+    {
+        assert(strlen(mLines.front()->data()) == 5);
         chr::Time begin { mLines.front()->data() };
+        assert(strlen(mLines.back()->data()) > 6);
         chr::Time end { mLines.back()->data() };
-        for (chr::Duration d { mSamplingPeriod }; begin + d <= end; d += mSamplingPeriod)
+        for (chr::Duration d { mSP }; begin + d <= end; d += mSP)
         {
             mSamples.pushBack(0);
         }
-        for (unsigned i { 0 }; i < mLines.size(); ++i)
+        for (auto&& l : mLines)
         {
-            mSamples[(chr::Time { mLines[i]->data() } - begin).getDuration() / mSamplingPeriod] = atoi(mLines[i]->data() + 6);
+            if (strlen(l.data()) < 7)
+            {
+                continue;
+            }
+            mSamples[(chr::Time { l.data() } - begin).getDuration() / mSP] = atoi(l.data() + 6);
         }
         io::print(ostream, mSamples);
         fputc('\n', ostream);
+    }
+
+    void extractPeriods() noexcept
+    {
+        StaticStack<unsigned, MAX_SAMPLES> mFreqs;
+        StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
-            mFreqs.pushBack(extractHighestFreq(mSamples) * mSamplingPeriod);
-            if (mFreqs.back() == 0)
+            unsigned t { extractLowestPeriod(samples) };
+            if (t == 0)
             {
-                mFreqs.popBack();
                 break;
+            }
+            mFreqs.pushBack(t * mSP);
+            for (unsigned i { t }; i < samples.size(); i += t)
+            {
+                --samples[i];
             }
         }
         io::print(ostream, mFreqs);
         fputc('\n', ostream);
-        // TODO: separate the synthesizer and analyzer programs
-        /*
-        while (((mSamples.size()) & (mSamples.size() - 1)) != 0)
-        {
-            mSamples.pushBack(0);
-        }
-        io::print(ostream, mSamples);
-        fputc('\n', ostream);
-        for (unsigned i { 0 }; i < mSamples.size(); ++i)
-        {
-            mComplexSamples.pushBack(std::complex<float> { static_cast<float>(mSamples[i]), 0 });
-        }
-        io::print(ostream, mComplexSamples);
-        fputc('\n', ostream);
-        mFourierTransform = fft(mComplexSamples);
-        io::print(ostream, mFourierTransform);
-        fputc('\n', ostream);
-        for (unsigned i { 0 }; i < mFourierTransform.size(); ++i)
-        {
-            mAbsFT.pushBack(std::abs(mFourierTransform[i]));
-        }
-        io::print(ostream, mAbsFT);
-        fputc('\n', ostream);
-        */
     }
 
-    /*
-    constexpr static StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) noexcept
-    {
-        if (p.size() == 1)
-        {
-            return p;
-        }
-        std::complex<float> omega { 1, static_cast<float>(2 * PI / p.size()) };
-        StaticStack<std::complex<float>, MAX_SAMPLES> pe;
-        StaticStack<std::complex<float>, MAX_SAMPLES> po;
-        for (unsigned i { 0 }; i + 1 < p.size(); i += 2)
-        {
-            pe.pushBack(p[i]);
-            po.pushBack(p[i + 1]);
-        }
-
-        StaticStack<std::complex<float>, MAX_SAMPLES> ye { fft(pe) };
-        StaticStack<std::complex<float>, MAX_SAMPLES> yo { fft(po) };
-
-        StaticStack<std::complex<float>, MAX_SAMPLES> y;
-        for (unsigned i { 0 }; i < p.size(); ++i)
-        {
-            y.pushBack(std::complex<float> { 0, 0 });
-        }
-        for (unsigned i { 0 }; i < p.size() / 2; ++i)
-        {
-            std::complex<float> omegaJ { std::pow(omega, i) };
-            y[i] = ye[i] + omegaJ * yo[i];
-            y[i + p.size() / 2] = ye[i] - omegaJ * yo[i];
-        }
-        return y;
-    }
-    */
-    constexpr unsigned extractHighestFreq(StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    [[nodiscard]] constexpr static unsigned extractLowestPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
         unsigned period { 0 };
         for (unsigned i { 0 }; i < s.size(); ++i)
@@ -152,32 +124,101 @@ public:
                 break;
             }
         }
-        if (period == 0)
-        {
-            return 0;
-        }
-        for (unsigned i { period }; i < s.size(); i += period)
-        {
-            --s[i];
-        }
         return period;
     }
+
+    void extendSamplesToPowOfTwo() noexcept
+    {
+        while (!IS_POW_TWO(mSamples.size()))
+        {
+            mSamples.pushBack(0);
+        }
+        io::print(ostream, mSamples);
+        fputc('\n', ostream);
+    }
+
+    void fastFourierTransform() noexcept
+    {
+        for (unsigned i { 0 }; i < mSamples.size(); ++i)
+        {
+            mComplexSamples.pushBack(std::complex<float> { static_cast<float>(mSamples[i]), 0 });
+        }
+        io::print(ostream, mComplexSamples);
+        fputc('\n', ostream);
+        fputc('\n', ostream);
+
+        mFourierTransform = fft(mComplexSamples);
+        io::print(ostream, mFourierTransform);
+        fputc('\n', ostream);
+        fputc('\n', ostream);
+
+        for (unsigned i { 0 }; i < mFourierTransform.size(); ++i)
+        {
+            mAbsFT.pushBack(std::abs(mFourierTransform[i]));
+        }
+        io::print(ostream, mAbsFT);
+        fputc('\n', ostream);
+    }
+
+    [[nodiscard]] constexpr StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) const noexcept
+    {
+        unsigned n { p.size() };
+        if (n == 1)
+        {
+            return p;
+        }
+        StaticStack<std::complex<float>, MAX_SAMPLES> pe;
+        StaticStack<std::complex<float>, MAX_SAMPLES> po;
+
+        assert(IS_POW_TWO(n));
+        for (unsigned i { 0 }; i + 1 < n; i += 2)
+        {
+            assert(i % 2 == 0);
+            pe.pushBack(p[i]);
+            po.pushBack(p[i + 1]);
+        }
+        assert(pe.size() == po.size());
+
+        StaticStack<std::complex<float>, MAX_SAMPLES> ye { fft(pe) };
+        StaticStack<std::complex<float>, MAX_SAMPLES> yo { fft(po) };
+
+        StaticStack<std::complex<float>, MAX_SAMPLES> y;
+        for (unsigned i { 0 }; i < n; ++i)
+        {
+            y.pushBack(std::complex<float> { 0, 0 });
+        }
+        const float pi = std::acosf(-1.0);
+        const std::complex<float> i(0.0, 1.0);
+        std::complex<float> omega { std::exp(2 * pi * i / std::complex<float> { static_cast<float>(n), 0 }) };
+        for (unsigned j { 0 }; j < n / 2; ++j)
+        {
+            const std::complex<float> omegaJ { std::pow(omega, j) };
+            y[j] = ye[j] + omegaJ * yo[j];
+            y[j + n / 2] = ye[j] - omegaJ * yo[j];
+        }
+        return y;
+    }
 private:
-    unsigned mSamplingPeriod;
+    // Input and output files
+    FILE *istream, *ostream;
+    // Sampling period
+    unsigned mSP;
 
     ObjectPool<Node<StaticStack<char, MAX_LINE_LEN>>, BP_POOL_SIZE> mLinePool;
+    // Input lines
     LinkedList<StaticStack<char, MAX_LINE_LEN>> mLines;
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
-    StaticStack<unsigned, MAX_SAMPLES> mFreqs;
 
-    // StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
-    // StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
-    // StaticStack<float, MAX_SAMPLES> mAbsFT;
+    StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
+    StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
+    StaticStack<float, MAX_SAMPLES> mAbsFT;
 
     // Private constructor
-    constexpr BusPeriods(unsigned samplingPeriod) noexcept :
-        mSamplingPeriod { samplingPeriod }
+    constexpr BusPeriods(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
+        istream { is },
+        ostream { os },
+        mSP { samplingPeriod }
     {
         mLines.pool() = &mLinePool;
     }

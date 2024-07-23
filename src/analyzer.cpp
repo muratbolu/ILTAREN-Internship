@@ -1,6 +1,5 @@
 #include "BusPeriods.tpp"
 
-#include <cstdio>
 #include <cstdlib>
 
 constexpr static unsigned samplingPeriod { 10 };
@@ -12,12 +11,10 @@ int main(int argc, char* argv[])
     {
         return EXIT_FAILURE;
     }
-    FILE* fr = fopen(argv[1], "r");   // NOLINT
-    if (fr == nullptr)
-    {
-        perror("Could not open file");
-        return EXIT_FAILURE;
-    }
-    bp->parseArrivals(fr, stdout);
+    bp->getSamples();
+    bp->parseSamples();
+    bp->extractPeriods();
+    bp->extendSamplesToPowOfTwo();
+    bp->fastFourierTransform();
     return 0;
 }
