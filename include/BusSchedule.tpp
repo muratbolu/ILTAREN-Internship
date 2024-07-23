@@ -83,14 +83,16 @@ public:
         for (Dur d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
-            for (auto&& p : mPeriods)
+            for (auto& p : mPeriods)
             {
-                if (p.first.getDuration() == p.second.getDuration())
+                unsigned sum { (p.first.getDuration() + p.second.getDuration()) };
+                if ((d.getDuration() % sum) == 0U)
                 {
-                    if ((d.getDuration() % p.first.getDuration()) == 0U)
-                    {
-                        ++num;
-                    }
+                    ++num;
+                }
+                else if (((d.getDuration() + p.second.getDuration()) % sum) == 0U)
+                {
+                    ++num;
                 }
             }
             if (num > 0)
@@ -122,8 +124,13 @@ private:
         {
             unsigned maxNumber { 60 };
             unsigned minNumber { 1 };
-            unsigned randNum { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
-            mPeriods.pushBack({ Dur { randNum }, Dur { randNum } });
+            unsigned randNum1 { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
+            unsigned randNum2 { randNum1 };
+            if (std::rand() % 2)
+            {
+                randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
+            }
+            mPeriods.pushBack({ Dur { randNum1 }, Dur { randNum2 } });
         }
         io::print(stdout, mPeriods);
         fputc('\n', stdout);
