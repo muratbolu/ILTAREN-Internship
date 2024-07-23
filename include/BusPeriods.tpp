@@ -94,6 +94,7 @@ public:
         // fputc('\n', ostream);
     }
 
+    /*
     void extractPeriods() noexcept
     {
         StaticStack<unsigned, MAX_SAMPLES> mFreqs;
@@ -149,7 +150,6 @@ public:
         return 0;
     }
 
-    /*
     [[nodiscard]] constexpr static StaticStack<unsigned, MAX_SAMPLES> shiftIndex(const StaticStack<unsigned, MAX_SAMPLES>& s, unsigned n) noexcept
     {
         StaticStack<unsigned, MAX_SAMPLES> shifted;
@@ -189,8 +189,8 @@ public:
         {
             mSamples.pushBack(0);
         }
-        // io::print(ostream, mSamples);
-        // fputc('\n', ostream);
+        io::print(ostream, mSamples);
+        fputc('\n', ostream);
     }
 
     void fastFourierTransform() noexcept
@@ -212,8 +212,8 @@ public:
         {
             mAbsFT.pushBack(std::abs(mFourierTransform[i]));
         }
-        // io::print(ostream, mAbsFT);
-        // fputc('\n', ostream);
+        io::print(ostream, mAbsFT);
+        fputc('\n', ostream);
     }
 
     [[nodiscard]] constexpr StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) const noexcept

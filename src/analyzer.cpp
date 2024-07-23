@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
     }
     bp->getSamples();
     bp->parseSamples();
-    bp->extractPeriods();
-    // bp->extendSamplesToPowOfTwo();
-    // bp->fastFourierTransform();
+    // bp->extractPeriods();
+    bp->extendSamplesToPowOfTwo();
+    bp->fastFourierTransform();
     return 0;
 }
