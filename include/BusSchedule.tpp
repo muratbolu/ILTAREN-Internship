@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #define BS_POOL_SIZE 500
 
@@ -110,9 +111,15 @@ private:
     {
         // Assign periods
         mPeriods.pool() = &mPool;
+        std::srand(std::time(nullptr));
         for (unsigned i { 0 }; i < mNumofBuses; ++i)
         {
-            mPeriods.pushBack(chr::Duration { 20 + 10 * i });
+            unsigned maxNumber { 60 };
+            unsigned minNumber { 1 };
+            unsigned randNum { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
+            mPeriods.pushBack(chr::Duration { randNum });
         }
+        io::print(stdout, mPeriods);
+        fputc('\n', stdout);
     }
 };

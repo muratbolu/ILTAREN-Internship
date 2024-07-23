@@ -87,8 +87,8 @@ public:
             }
             mSamples[(chr::Time { l.data() } - begin).getDuration() / mSP] = atoi(l.data() + 6);
         }
-        io::print(ostream, mSamples);
-        fputc('\n', ostream);
+        // io::print(ostream, mSamples);
+        // fputc('\n', ostream);
     }
 
     void extractPeriods() noexcept
@@ -108,6 +108,7 @@ public:
                 --samples[i];
             }
         }
+        fprintf(ostream, "Length: %d\n", mFreqs.size());
         io::print(ostream, mFreqs);
         fputc('\n', ostream);
     }
@@ -133,8 +134,8 @@ public:
         {
             mSamples.pushBack(0);
         }
-        io::print(ostream, mSamples);
-        fputc('\n', ostream);
+        // io::print(ostream, mSamples);
+        // fputc('\n', ostream);
     }
 
     void fastFourierTransform() noexcept
@@ -143,21 +144,21 @@ public:
         {
             mComplexSamples.pushBack(std::complex<float> { static_cast<float>(mSamples[i]), 0 });
         }
-        io::print(ostream, mComplexSamples);
-        fputc('\n', ostream);
-        fputc('\n', ostream);
+        // io::print(ostream, mComplexSamples);
+        // fputc('\n', ostream);
+        // fputc('\n', ostream);
 
         mFourierTransform = fft(mComplexSamples);
-        io::print(ostream, mFourierTransform);
-        fputc('\n', ostream);
-        fputc('\n', ostream);
+        // io::print(ostream, mFourierTransform);
+        // fputc('\n', ostream);
+        // fputc('\n', ostream);
 
         for (unsigned i { 0 }; i < mFourierTransform.size(); ++i)
         {
             mAbsFT.pushBack(std::abs(mFourierTransform[i]));
         }
-        io::print(ostream, mAbsFT);
-        fputc('\n', ostream);
+        // io::print(ostream, mAbsFT);
+        // fputc('\n', ostream);
     }
 
     [[nodiscard]] constexpr StaticStack<std::complex<float>, MAX_SAMPLES> fft(const StaticStack<std::complex<float>, MAX_SAMPLES>& p) const noexcept

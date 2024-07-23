@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-constexpr static unsigned samplingPeriod { 10 };
+constexpr static unsigned samplingPeriod { 1 };
 
 int main(int argc, char* argv[])
 {
