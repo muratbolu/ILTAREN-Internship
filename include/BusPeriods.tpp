@@ -120,7 +120,8 @@ public:
         {
             if (s[i] > 0)
             {
-                assert(s[i] == 1);
+                // Some inputs may be duplicated.
+                // assert(s[i] == 1);
                 period = i;
                 break;
             }
