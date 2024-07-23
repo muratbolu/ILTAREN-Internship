@@ -27,7 +27,7 @@ public:
         if (argc != 5)
         {
             int rc = fputs("Provide exactly four arguments: output file, number"
-                           "of buses, begin time, end time.\n",
+                           " of buses, begin time, end time.\n",
                            stderr);
             if (rc == EOF)
             {

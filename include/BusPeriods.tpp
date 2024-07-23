@@ -20,8 +20,17 @@
 class BusPeriods
 {
 public:
-    constexpr static BusPeriods* create(unsigned samplingPeriod) noexcept
+    constexpr static BusPeriods* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
+        if (argc != 2)
+        {
+            int rc = fputs("Provide exactly one argument: input file.\n", stderr);
+            if (rc == EOF)
+            {
+                perror("Invalid argument number");
+            }
+            return nullptr;
+        }
         return new BusPeriods { samplingPeriod };
     }
 
