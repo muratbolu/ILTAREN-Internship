@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <utility>
 
 #define BS_POOL_SIZE 500
 
@@ -84,9 +85,12 @@ public:
             unsigned num { 0 };
             for (auto&& p : mPeriods)
             {
-                if ((d.getDuration() % p.getDuration()) == 0U)
+                if (p.first.getDuration() == p.second.getDuration())
                 {
-                    ++num;
+                    if ((d.getDuration() % p.first.getDuration()) == 0U)
+                    {
+                        ++num;
+                    }
                 }
             }
             if (num > 0)
@@ -101,8 +105,8 @@ private:
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
     unsigned mSamplingPeriod;
-    ObjectPool<Node<Dur>, BS_POOL_SIZE> mPool;
-    LinkedList<Dur> mPeriods;
+    ObjectPool<Node<std::pair<Dur, Dur>>, BS_POOL_SIZE> mPool;
+    LinkedList<std::pair<Dur, Dur>> mPeriods;
 
     // Private constructor
     constexpr BusSchedule(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
@@ -119,7 +123,7 @@ private:
             unsigned maxNumber { 60 };
             unsigned minNumber { 1 };
             unsigned randNum { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
-            mPeriods.pushBack(Dur { randNum });
+            mPeriods.pushBack({ Dur { randNum }, Dur { randNum } });
         }
         io::print(stdout, mPeriods);
         fputc('\n', stdout);

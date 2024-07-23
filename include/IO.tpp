@@ -9,6 +9,7 @@
 
 #include <complex>
 #include <cstdio>
+#include <utility>
 
 namespace io
 {
@@ -40,6 +41,16 @@ void print(FILE* stream, const chr::Time& t) noexcept
 void print(FILE* stream, const chr::Duration& d) noexcept
 {
     fprintf(stream, "%u", d.getDuration());
+}
+
+template<typename T1, typename T2>
+void print(FILE* stream, const std::pair<T1, T2>& p) noexcept
+{
+    fputc('(', stream);
+    io::print(stream, p.first);
+    fputs(", ", stream);
+    io::print(stream, p.second);
+    fputc(')', stream);
 }
 
 void print(FILE* stream, const std::complex<float>& c) noexcept
