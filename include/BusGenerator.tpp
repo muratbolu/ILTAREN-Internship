@@ -14,19 +14,19 @@
 
 #define BS_POOL_SIZE 500
 
-class BusSchedule
+class BusGenerator
 {
     using Time = chr::Time;
     using Dur = chr::Duration;
 public:
-    constexpr BusSchedule() noexcept = delete;
-    constexpr ~BusSchedule() noexcept = default;
-    constexpr BusSchedule(const BusSchedule&) noexcept = delete;
-    constexpr BusSchedule(BusSchedule&&) noexcept = default;
-    constexpr BusSchedule& operator=(const BusSchedule&) noexcept = delete;
-    constexpr BusSchedule& operator=(BusSchedule&&) noexcept = default;
+    constexpr BusGenerator() noexcept = delete;
+    constexpr ~BusGenerator() noexcept = default;
+    constexpr BusGenerator(const BusGenerator&) noexcept = delete;
+    constexpr BusGenerator(BusGenerator&&) noexcept = default;
+    constexpr BusGenerator& operator=(const BusGenerator&) noexcept = delete;
+    constexpr BusGenerator& operator=(BusGenerator&&) noexcept = default;
 
-    constexpr static BusSchedule* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusGenerator* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -62,7 +62,7 @@ public:
             }
             return nullptr;
         }
-        return new BusSchedule { numOfBuses, begin, end, samplingPeriod };
+        return new BusGenerator { numOfBuses, begin, end, samplingPeriod };
     }
 
     void printSchedule(FILE* stream) const noexcept
@@ -112,7 +112,7 @@ private:
     LinkedList<std::pair<Dur, Dur>> mPeriods;
 
     // Private constructor
-    BusSchedule(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
+    BusGenerator(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },

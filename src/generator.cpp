@@ -1,4 +1,4 @@
-#include "BusSchedule.tpp"
+#include "BusGenerator.tpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -7,7 +7,7 @@ constexpr static unsigned samplingPeriod { 1 };
 
 int main(int argc, char* argv[])
 {
-    BusSchedule* bs { BusSchedule::create(argc, argv, samplingPeriod) };
+    BusGenerator* bs { BusGenerator::create(argc, argv, samplingPeriod) };
     if (bs == nullptr)
     {
         return EXIT_FAILURE;

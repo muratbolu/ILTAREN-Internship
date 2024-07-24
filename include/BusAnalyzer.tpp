@@ -23,12 +23,12 @@
 
 #define IS_POW_TWO(x) (((x) & ((x) - 1)) == 0)
 
-class BusPeriods
+class BusAnalyzer
 {
     using Time = chr::Time;
     using Dur = chr::Duration;
 public:
-    constexpr static BusPeriods* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusAnalyzer* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 2)
         {
@@ -45,7 +45,7 @@ public:
             perror("Could not open file");
             return nullptr;
         }
-        return new BusPeriods { fr, stdout, samplingPeriod };
+        return new BusAnalyzer { fr, stdout, samplingPeriod };
     }
 
     void getSamples() noexcept
@@ -318,7 +318,7 @@ private:
     // StaticStack<float, MAX_SAMPLES> mAbsFT;
 
     // Private constructor
-    constexpr BusPeriods(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
+    constexpr BusAnalyzer(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
         istream { is },
         ostream { os },
         mSP { samplingPeriod }

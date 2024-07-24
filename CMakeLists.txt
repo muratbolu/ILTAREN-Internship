@@ -42,6 +42,7 @@ set(TEST_SOURCES
     test/NodeTest.cpp
     test/LinkedListTest.cpp
     test/MaybeTest.cpp
+    test/BusTest.cpp
 )
 
 # Statically link Google Test

@@ -26,6 +26,7 @@ public:
         assert((std::holds_alternative<AlternatingPeriod>(mPeriod)));
     }
 
+    constexpr ~Bus() noexcept = default;
     constexpr Bus(const Bus&) noexcept = default;
     constexpr Bus(Bus&&) noexcept = default;
     constexpr Bus& operator=(const Bus&) noexcept = default;
@@ -33,39 +34,39 @@ public:
 
     [[nodiscard]] constexpr unsigned getFirst() const noexcept
     {
-        if (const auto* p { std::get_if<ConstantPeriod>(&mPeriod) })
+        if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *p;
+            return *c;
         }
-        else if (const auto* p { std::get_if<AlternatingPeriod>(&mPeriod) })
+        if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return p->first;
+            return a->first;
         }
         return 0;
     }
 
     [[nodiscard]] constexpr unsigned getSecond() const noexcept
     {
-        if (const auto* p { std::get_if<ConstantPeriod>(&mPeriod) })
+        if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *p;
+            return *c;
         }
-        else if (const auto* p { std::get_if<AlternatingPeriod>(&mPeriod) })
+        if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return p->second;
+            return a->second;
         }
         return 0;
     }
 
     [[nodiscard]] constexpr unsigned sum() const noexcept
     {
-        if (const auto* p { std::get_if<ConstantPeriod>(&mPeriod) })
+        if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *p + *p;
+            return *c + *c;
         }
-        else if (const auto* p { std::get_if<AlternatingPeriod>(&mPeriod) })
+        if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return p->first + p->second;
+            return a->first + a->second;
         }
         return 0;
     }
@@ -77,23 +78,23 @@ public:
 
     [[nodiscard]] constexpr bool isValid() const noexcept
     {
-        if (const auto* p { std::get_if<ConstantPeriod>(&mPeriod) })
+        if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *p != 0;
+            return *c != 0;
         }
         return true;
     }
 
     constexpr inline Bus& operator*=(unsigned i) noexcept
     {
-        if (auto* p { std::get_if<ConstantPeriod>(&mPeriod) })
+        if (auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            *p *= i;
+            *c *= i;
         }
-        else if (auto* p { std::get_if<AlternatingPeriod>(&mPeriod) })
+        else if (auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            p->first *= i;
-            p->second *= i;
+            a->first *= i;
+            a->second *= i;
         }
         return *this;
     }
