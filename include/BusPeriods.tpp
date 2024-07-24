@@ -94,60 +94,28 @@ public:
         // fputc('\n', ostream);
     }
 
-    /*
     void extractPeriods() noexcept
     {
         StaticStack<unsigned, MAX_SAMPLES> mFreqs;
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
-            unsigned t { extractConstantPeriod(samples) };
-            if (t == 0)
+            // t.first := offset, t.second = period
+            std::pair<unsigned, unsigned> t { extractPeriods(samples) };
+            if (t.second == 0)
             {
                 break;
             }
-            mFreqs.pushBack(t * mSP);
-            for (unsigned i { t }; i < samples.size(); i += t)
+            mFreqs.pushBack(t.second * mSP);
+            for (unsigned i { t.first + t.second }; i < samples.size(); i += t.second)
             {
+                assert(samples[i] > 0);
                 --samples[i];
             }
         }
         fprintf(ostream, "Length: %d\n", mFreqs.size());
         io::print(ostream, mFreqs);
         fputc('\n', ostream);
-    }
-
-    [[nodiscard]] static unsigned extractConstantPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
-    {
-        for (unsigned i { 1 }; i < s.size() / 2; ++i)
-        {
-            unsigned period { 0 };
-            for (unsigned j { i }; j < s.size() / 2; ++j)
-            {
-                if (s[j] > 0)
-                {
-                    period = j;
-                    break;
-                }
-            }
-            if (period == 0)
-            {
-                return 0;
-            }
-            bool isValid { true };
-            for (unsigned j { period }; j < s.size(); j += period)
-            {
-                if (s[j] == 0)
-                {
-                    isValid = false;
-                }
-            }
-            if (isValid)
-            {
-                return period;
-            }
-        }
-        return 0;
     }
 
     [[nodiscard]] constexpr static StaticStack<unsigned, MAX_SAMPLES> shiftIndex(const StaticStack<unsigned, MAX_SAMPLES>& s, unsigned n) noexcept
@@ -160,6 +128,34 @@ public:
         return shifted;
     }
 
+    [[nodiscard]] static std::pair<unsigned, unsigned> extractPeriods(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    {
+        unsigned period { 0 };
+        for (unsigned j { 1 }; j < s.size() / 2; ++j)
+        {
+            if (s[j] > 0)
+            {
+                period = j;
+                break;
+            }
+        }
+        if (period == 0)
+        {
+            return { 0, 0 };
+        }
+        for (unsigned j { period }; j < s.size(); j += period)
+        {
+            if (s[j] == 0)
+            {
+                fprintf(stdout, "Alternating period: %d\n", period);
+                // TODO: find the period instead of 0 in the next line
+                return { period, 0 };
+            }
+        }
+        return { 0, period };
+    }
+
+    /*
     [[nodiscard]] constexpr static std::pair<unsigned, unsigned> extractAlternatingPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
         unsigned period1 { 0 };
@@ -178,11 +174,12 @@ public:
             return { 0, 0 };
         }
         io::print(stdout, shiftIndex(s, period1));
-        fprintf(stdout, "found period: %d\n", extractConstantPeriod(shiftIndex(s, period1)));
+        fprintf(stdout, "found period: %d\n", extractPeriods(shiftIndex(s, period1)));
         return { period1, period1 };
     }
     */
 
+    /*
     void extendSamplesToPowOfTwo() noexcept
     {
         while (!IS_POW_TWO(mSamples.size()))
@@ -254,6 +251,7 @@ public:
         }
         return y;
     }
+    */
 private:
     // Input and output files
     FILE *istream, *ostream;
@@ -266,9 +264,9 @@ private:
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
 
-    StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
-    StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
-    StaticStack<float, MAX_SAMPLES> mAbsFT;
+    // StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
+    // StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
+    // StaticStack<float, MAX_SAMPLES> mAbsFT;
 
     // Private constructor
     constexpr BusPeriods(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
