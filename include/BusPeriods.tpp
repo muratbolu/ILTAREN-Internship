@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Bus.tpp"
 #include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
@@ -14,6 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <utility>
+#include <variant>
 
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
@@ -96,45 +98,37 @@ public:
 
     void extractPeriods() noexcept
     {
-        StaticStack<std::pair<unsigned, unsigned>, MAX_SAMPLES> mFreqs;
+        StaticStack<Bus, MAX_SAMPLES> mFreqs;
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
             // t.first := offset, t.second = period
-            std::pair<unsigned, unsigned> t { extractPeriod(samples) };
-            if (t.second < t.first)
-            {
-                fputs("Check failed\n", stdout);
-                io::print(stdout, t.first);
-                fputc('\n', stdout);
-                io::print(stdout, t.second);
-                fputc('\n', stdout);
-                break;
-            }
-            if (t.second == 0)
+            Bus b { extractPeriod(samples) };
+            if (!b.isValid())
             {
                 break;
             }
-            if (t.first == t.second)
+            if (!b.isAlternating())
             {
                 bool isValid { true };
                 for (auto&& f : mFreqs)
                 {
-                    if (f.first + f.second == t.first)
+                    if (f.sum() == b.getFirst())
                     {
                         isValid = false;
+                        break;
                     }
                 }
                 if (isValid)
                 {
-                    mFreqs.pushBack({ t.first * mSP, t.first * mSP });
+                    mFreqs.pushBack(b * mSP);
                 }
             }
             else
             {
-                mFreqs.pushBack({ t.first * mSP, (t.second - t.first) * mSP });
+                mFreqs.pushBack(b * mSP);
             }
-            for (unsigned i { t.first }; i < samples.size(); i += t.second)
+            for (unsigned i { b.getFirst() }; i < samples.size(); i += b.getFirst())
             {
                 if (i == 0)
                 {
@@ -142,6 +136,12 @@ public:
                 }
                 assert(samples[i] > 0);
                 --samples[i];
+                i += b.getSecond();
+                if (i < samples.size())
+                {
+                    assert(samples[i] > 0);
+                    --samples[i];
+                }
             }
         }
         fprintf(ostream, "Length: %d\n", mFreqs.size());
@@ -159,14 +159,14 @@ public:
         return shifted;
     }
 
-    [[nodiscard]] static std::pair<unsigned, unsigned> extractPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    [[nodiscard]] static Bus extractPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
         // i := period
         // j := offset
         for (unsigned i { 1 }; i <= s.size() / 2; ++i)
         {
             unsigned offset { 0 };
-            for (unsigned j { 1 }; j <= s.size() / 2; ++j)
+            for (unsigned j { 1 }; j <= i; ++j)
             {
                 if (s[j] > 0)
                 {
@@ -176,7 +176,7 @@ public:
             }
             if (offset == 0)
             {
-                return { 0, 0 };
+                continue;
             }
             bool isValid { true };
             for (unsigned j { offset }; j < s.size(); j += i)
@@ -189,10 +189,19 @@ public:
             }
             if (isValid)
             {
-                return { offset, i };
+                // TODO: refactor
+                if (offset == i)
+                {
+                    return { i };
+                }
+                else
+                {
+                    assert(i >= offset);
+                    return { offset, i - offset };
+                }
             }
         }
-        return { 0, 0 };
+        return { 0 };
     }
 
     /*

@@ -112,7 +112,7 @@ private:
     LinkedList<std::pair<Dur, Dur>> mPeriods;
 
     // Private constructor
-    constexpr BusSchedule(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
+    BusSchedule(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },

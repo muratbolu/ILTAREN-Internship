@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Bus.tpp"
 #include "Chr.tpp"
 #include "LinkedList.tpp"
 #include "NodeIter.tpp"
@@ -55,6 +56,18 @@ void print(FILE* stream, const std::pair<T1, T2>& p) noexcept
 void print(FILE* stream, const std::complex<float>& c) noexcept
 {
     fprintf(stream, "(%.2f,%.2f)", c.real(), c.imag());
+}
+
+void print(FILE* stream, const Bus& b) noexcept
+{
+    if (b.isAlternating())
+    {
+        fprintf(stream, "(%d, %d)", b.getFirst(), b.getSecond());
+    }
+    else
+    {
+        fprintf(stream, "%d", b.getFirst());
+    }
 }
 
 template<typename T, unsigned N>
