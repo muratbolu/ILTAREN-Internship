@@ -106,6 +106,7 @@ public:
 private:
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
+    Dur mTotalDuration;
     unsigned mSamplingPeriod;
     ObjectPool<Node<std::pair<Dur, Dur>>, BS_POOL_SIZE> mPool;
     LinkedList<std::pair<Dur, Dur>> mPeriods;
@@ -115,12 +116,13 @@ private:
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },
+        mTotalDuration { end - begin },
         mSamplingPeriod { samplingPeriod }
     {
         // Assign periods
         mPeriods.pool() = &mPool;
         std::srand(std::time(nullptr));
-        for (unsigned i { 0 }; i < mNumofBuses; ++i)
+        for (unsigned i { 0 }; i < mNumofBuses;)
         {
             unsigned maxNumber { 60 };
             unsigned minNumber { 1 };
@@ -130,7 +132,27 @@ private:
             {
                 randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
             }
-            mPeriods.pushBack({ Dur { 3 }, Dur { 5 } });
+            bool isValid { true };
+            if (randNum1 == randNum2 && randNum1 + randNum2 > mTotalDuration.getDuration())
+            {
+                isValid = false;
+            }
+            if (randNum1 != randNum2 && 2 * (randNum1 + randNum2) > mTotalDuration.getDuration())
+            {
+                isValid = false;
+            }
+            for (auto&& p : mPeriods)
+            {
+                if (p.first + p.second == randNum1 || p.first + p.second == randNum2 || p.first + p.second == randNum1 + randNum2)
+                {
+                    isValid = false;
+                }
+            }
+            if (isValid)
+            {
+                mPeriods.pushBack({ Dur { randNum1 }, Dur { randNum2 } });
+                ++i;
+            }
         }
         io::print(stdout, mPeriods);
         fputc('\n', stdout);

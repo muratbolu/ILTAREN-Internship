@@ -96,19 +96,42 @@ public:
 
     void extractPeriods() noexcept
     {
-        StaticStack<unsigned, MAX_SAMPLES> mFreqs;
+        StaticStack<std::pair<unsigned, unsigned>, MAX_SAMPLES> mFreqs;
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
             // t.first := offset, t.second = period
-            std::pair<unsigned, unsigned> t { extractPeriods(samples) };
+            std::pair<unsigned, unsigned> t { extractPeriod(samples) };
+            assert(t.second >= t.first);
             if (t.second == 0)
             {
                 break;
             }
-            mFreqs.pushBack(t.second * mSP);
-            for (unsigned i { t.first + t.second }; i < samples.size(); i += t.second)
+            if (t.first == t.second)
             {
+                bool isValid { true };
+                for (auto&& f : mFreqs)
+                {
+                    if (f.first + f.second == t.first)
+                    {
+                        isValid = false;
+                    }
+                }
+                if (isValid)
+                {
+                    mFreqs.pushBack({ t.first * mSP, t.first * mSP });
+                }
+            }
+            else
+            {
+                mFreqs.pushBack({ t.first * mSP, (t.second - t.first) * mSP });
+            }
+            for (unsigned i { t.first }; i < samples.size(); i += t.second)
+            {
+                if (i == 0)
+                {
+                    continue;
+                }
                 assert(samples[i] > 0);
                 --samples[i];
             }
@@ -128,31 +151,40 @@ public:
         return shifted;
     }
 
-    [[nodiscard]] static std::pair<unsigned, unsigned> extractPeriods(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
+    [[nodiscard]] static std::pair<unsigned, unsigned> extractPeriod(const StaticStack<unsigned, MAX_SAMPLES>& s) noexcept
     {
-        unsigned period { 0 };
-        for (unsigned j { 1 }; j < s.size() / 2; ++j)
+        // i := period
+        // j := offset
+        for (unsigned i { 1 }; i <= s.size() / 2; ++i)
         {
-            if (s[j] > 0)
+            unsigned offset { 0 };
+            for (unsigned j { 1 }; j <= s.size() / 2; ++j)
             {
-                period = j;
-                break;
+                if (s[j] > 0)
+                {
+                    offset = j;
+                    break;
+                }
+            }
+            if (offset == 0)
+            {
+                return { 0, 0 };
+            }
+            bool isValid { true };
+            for (unsigned j { offset }; j < s.size(); j += i)
+            {
+                if (s[j] == 0)
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid)
+            {
+                return { offset, i };
             }
         }
-        if (period == 0)
-        {
-            return { 0, 0 };
-        }
-        for (unsigned j { period }; j < s.size(); j += period)
-        {
-            if (s[j] == 0)
-            {
-                fprintf(stdout, "Alternating period: %d\n", period);
-                // TODO: find the period instead of 0 in the next line
-                return { period, 0 };
-            }
-        }
-        return { 0, period };
+        return { 0, 0 };
     }
 
     /*
