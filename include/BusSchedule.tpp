@@ -133,6 +133,7 @@ private:
                 randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
             }
             bool isValid { true };
+            /*
             if (randNum1 == randNum2 && randNum1 + randNum2 > mTotalDuration.getDuration())
             {
                 isValid = false;
@@ -153,6 +154,7 @@ private:
                     }
                 }
             }
+            */
             if (isValid)
             {
                 mPeriods.pushBack({ Dur { randNum1 }, Dur { randNum2 } });
