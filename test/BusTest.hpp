@@ -10,4 +10,7 @@ class BusTest : public testing::Test
 {
 protected:
     BusTest() noexcept = default;
+    Bus b1;
+    Bus b2 { 5 };
+    Bus b3 { 3, 8 };
 };
