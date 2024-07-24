@@ -102,7 +102,15 @@ public:
         {
             // t.first := offset, t.second = period
             std::pair<unsigned, unsigned> t { extractPeriod(samples) };
-            assert(t.second >= t.first);
+            if (t.second < t.first)
+            {
+                fputs("Check failed\n", stdout);
+                io::print(stdout, t.first);
+                fputc('\n', stdout);
+                io::print(stdout, t.second);
+                fputc('\n', stdout);
+                break;
+            }
             if (t.second == 0)
             {
                 break;

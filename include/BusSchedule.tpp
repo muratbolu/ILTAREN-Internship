@@ -137,15 +137,20 @@ private:
             {
                 isValid = false;
             }
-            if (randNum1 != randNum2 && 2 * (randNum1 + randNum2) > mTotalDuration.getDuration())
+            else if (randNum1 != randNum2 && 2 * (randNum1 + randNum2) > mTotalDuration.getDuration())
             {
                 isValid = false;
             }
-            for (auto&& p : mPeriods)
+            else
             {
-                if (p.first + p.second == randNum1 || p.first + p.second == randNum2 || p.first + p.second == randNum1 + randNum2)
+                for (auto&& p : mPeriods)
                 {
-                    isValid = false;
+                    if (p.first == randNum1 || p.first == randNum2 || p.second == randNum1 || p.second == randNum2 ||
+                        p.first + p.second == randNum1 || p.first + p.second == randNum2 || p.first + p.second == randNum1 + randNum2)
+                    {
+                        isValid = false;
+                        break;
+                    }
                 }
             }
             if (isValid)
