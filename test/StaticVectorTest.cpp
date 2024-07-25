@@ -79,11 +79,26 @@ TEST_F(StaticVectorTest, Iterate2)
             it1 = 1;
         }
     }
-    for (unsigned i = 0; i < vec2.size(); ++i)
+    for (auto&& i : vec2)
     {
-        for (unsigned j = 0; j < vec2[i].size(); ++j)
+        for (unsigned j : i)
         {
-            EXPECT_EQ(vec2[i][j], 1);
+            EXPECT_EQ(j, 1);
+        }
+    }
+}
+
+TEST_F(StaticVectorTest, Iterate3)
+{
+    for (StaticVector<unsigned, 4>& it2 : vec2)
+    {
+        it2.fill(5);
+    }
+    for (auto&& i : vec2)
+    {
+        for (unsigned j : i)
+        {
+            EXPECT_EQ(j, 5);
         }
     }
 }

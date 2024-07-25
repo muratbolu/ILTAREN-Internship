@@ -43,7 +43,7 @@ TEST_F(MaybeTest, CustomCtor)
 TEST_F(MaybeTest, CustomDtor)
 {
     ObjectPool<Node<int>, 5> pool;
-    LinkedList<int> ll1;
+    LinkedList<int> ll1 { &pool };
     ll1.pool() = &pool;
     {
         Maybe<LinkedList<int>> m1 { just(std::move(ll1)) };

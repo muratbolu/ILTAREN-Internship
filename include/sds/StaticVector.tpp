@@ -124,6 +124,6 @@ public:
         return true;
     }
 private:
-    T mData[N] { T {} };
+    T mData[N];
     unsigned mSize { N };
 };

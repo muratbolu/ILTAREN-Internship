@@ -4,7 +4,7 @@
 
 constexpr static unsigned samplingPeriod { 1 };
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
     BusAnalyzer* bp { BusAnalyzer::create(argc, argv, samplingPeriod) };
     if (bp == nullptr)

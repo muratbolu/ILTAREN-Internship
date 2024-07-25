@@ -11,7 +11,7 @@ public:
     using AlternatingPeriod = std::pair<unsigned, unsigned>;
     using Period = std::variant<ConstantPeriod, AlternatingPeriod>;
 
-    constexpr Bus(unsigned i = 0) noexcept :
+    constexpr explicit Bus(unsigned i = 0) noexcept :
         mPeriod { i }
     {
         assert(std::holds_alternative<ConstantPeriod>(mPeriod));

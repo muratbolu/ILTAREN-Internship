@@ -59,7 +59,7 @@ public:
     constexpr Traveler& operator=(const Traveler&) noexcept = delete;
     constexpr Traveler& operator=(Traveler&&) noexcept = delete;
 
-    Traveler(int argc, char* argv[]) noexcept
+    Traveler(int argc, const char* argv[]) noexcept
     {
         if (argc != 5)
         {
@@ -83,7 +83,7 @@ public:
     }
 
     // returns false if something goes wrong but we don't use it
-    static bool getInput(char arg[]) noexcept
+    static bool getInput(const char arg[]) noexcept
     {
         FILE* fp = fopen(arg, "r");
         if (fp == nullptr)
@@ -204,13 +204,13 @@ public:
     {
         for (unsigned i { 0 }; i < 81; ++i)
         {
-            fprintf(stream, "%02d", i + 1);
+            fprintf(stream, "%02u", i + 1);
             fputc(SEP, stream);
             fprintf(stream, "%s", mCityNames[i].data());
             fputc(SEP, stream);
             for (unsigned j { 0 }; j < 81; ++j)
             {
-                fprintf(stream, "%d", mat[i][j]);
+                fprintf(stream, "%u", mat[i][j]);
                 if (j != 80)
                 {
                     fputc(SEP, stream);
@@ -291,7 +291,7 @@ public:
                 assert(Y > 0);
                 Traveler::mX = static_cast<unsigned>(X);
                 Traveler::mY = static_cast<unsigned>(Y);
-                // printf("%d:  t.x: %d, t.y: %d\n", i, t.x, t.y);
+                // printf("%u:  t.x: %u, t.y: %u\n", i, t.x, t.y);
                 Traveler::filterByRange(Traveler::mFilteredAdjacencyMatrix, Traveler::mAdjacencyMatrix);
                 if (Traveler::stackContains(Traveler::mFilteredAdjacencyMatrix, Traveler::mBestMats))
                 {
@@ -310,7 +310,7 @@ public:
                         Traveler::printRoute(stdout);
                         currMax = Traveler::mBestState.visitedCount;
                         Traveler::mBestMats.pushBack(Traveler::mFilteredAdjacencyMatrix);
-                        printf("x: %d, y: %d\n\n", Traveler::mX, Traveler::mY);
+                        printf("x: %u, y: %u\n\n", Traveler::mX, Traveler::mY);
                         if (currMax == 81)
                         {
                             return;
@@ -371,7 +371,7 @@ public:
             {
                 notChanged = 0;
                 mBestState = currState;
-                // printf("mBestState.citiesStack.size(): %d\n", mBestState.citiesStack.size());
+                // printf("mBestState.citiesStack.size(): %u\n", mBestState.citiesStack.size());
             }
 
             // StaticStack<unsigned, 81> validCities;
@@ -476,7 +476,7 @@ public:
 
     static void printRoute(FILE* stream) noexcept
     {
-        fprintf(stream, "Length: %d\n", countValid(mBestState.citiesStack));
+        fprintf(stream, "Length: %u\n", countValid(mBestState.citiesStack));
         fputs("[", stream);
         for (unsigned i { 0 }; i < mBestState.citiesStack.size(); ++i)
         {
@@ -487,7 +487,7 @@ public:
             fprintf(stream, "%s", static_cast<char*>(toNames(mBestState.citiesStack[i]).data()));
         }
         fputs("]\n", stream);
-        // fprintf(stream, "Max mCurrStack usage: %d\n", mCurrStack.mMaxIndex);
+        // fprintf(stream, "Max mCurrStack usage: %u\n", mCurrStack.mMaxIndex);
     }
 
     // Filled in by parseInput()

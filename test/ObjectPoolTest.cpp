@@ -8,9 +8,9 @@ TEST_F(ObjectPoolTest, Initialization)
 
 TEST_F(ObjectPoolTest, Allocation)
 {
-    int* ptr1 = p1.allocate();
+    const int* ptr1 = p1.allocate();
     EXPECT_TRUE(ptr1 != nullptr);
-    int* ptr2 = p1.allocate();
+    const int* ptr2 = p1.allocate();
     EXPECT_TRUE(ptr2 != nullptr);
 
     EXPECT_TRUE(ptr1 != ptr2);
@@ -18,12 +18,12 @@ TEST_F(ObjectPoolTest, Allocation)
 
 TEST_F(ObjectPoolTest, TooManyAllocations)
 {
-    int* ptr1 = p1.allocate();
+    const int* ptr1 = p1.allocate();
     ASSERT_TRUE(ptr1 != nullptr);
-    int* ptr2 = p1.allocate();
+    const int* ptr2 = p1.allocate();
     ASSERT_TRUE(ptr2 != nullptr);
 
-    int* ptr3 = p1.allocate();
+    const int* ptr3 = p1.allocate();
     EXPECT_TRUE(ptr3 == nullptr);
 }
 
@@ -60,9 +60,9 @@ TEST_F(ObjectPoolTest, VacantDeallocation)
 TEST_F(ObjectPoolTest, AllocateAndDeallocate)
 {
     int* ptr1 = p1.allocate();
-    int* ptr2 = p1.allocate();
+    const int* ptr2 = p1.allocate();
     p1.deallocate(ptr1);
-    int* ptr3 = p1.allocate();
+    const int* ptr3 = p1.allocate();
     EXPECT_EQ(ptr1, ptr3);
 }
 

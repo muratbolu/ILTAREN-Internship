@@ -8,7 +8,7 @@ template<typename T>
 class ContIter : public IIter<T>
 {
 public:
-    constexpr ContIter(T* ptr) noexcept :
+    constexpr explicit ContIter(T* ptr) noexcept :
         mPtr { ptr }
     {
     }

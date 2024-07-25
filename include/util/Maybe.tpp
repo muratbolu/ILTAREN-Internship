@@ -47,7 +47,7 @@ private:
 
     bool mExists;
 
-    constexpr Maybe(T&& data) noexcept :
+    constexpr explicit Maybe(T&& data) noexcept :
         value { std::forward<T>(data) },
         mExists { true }
     {

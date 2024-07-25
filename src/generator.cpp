@@ -5,7 +5,7 @@
 
 constexpr static unsigned samplingPeriod { 1 };
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
     BusGenerator* bs { BusGenerator::create(argc, argv, samplingPeriod) };
     if (bs == nullptr)

@@ -12,10 +12,10 @@ protected:
         *it1 = 5;
     }
 
-    int p1;
+    int p1 { -1 };
     ContIter<int> it1 { &p1 };
     ContIter<int> it2 { &p1 };
 
-    int p2[4];
+    int p2[4] { -1, -1, -1, -1 };
     ContIter<int> it3 { p2 };
 };

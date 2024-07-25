@@ -4,14 +4,11 @@
 #include "sds/IObjectPool.tpp"
 #include "sds/Node.tpp"
 
-
 template<typename T>
 class LinkedList
 {
 public:
-    constexpr LinkedList() noexcept = default;
-
-    constexpr LinkedList(IObjectPool<Node<T>>* pool) noexcept :
+    constexpr explicit LinkedList(IObjectPool<Node<T>>* pool) noexcept :
         mNodePool { pool }
     {
     }

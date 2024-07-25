@@ -15,7 +15,7 @@ public:
     constexpr Node& operator=(const Node&) noexcept = default;
     constexpr Node& operator=(Node&&) noexcept = default;
 
-    constexpr Node(const T& data) noexcept :
+    constexpr explicit Node(const T& data) noexcept :
         mData { data }
     {
     }

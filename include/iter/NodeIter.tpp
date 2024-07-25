@@ -9,7 +9,7 @@ template<typename T>
 class NodeIter : public IIter<T>
 {
 public:
-    constexpr NodeIter(Node<T>* ptr) noexcept :
+    constexpr explicit NodeIter(Node<T>* ptr) noexcept :
         mPtr { ptr }
     {
     }

@@ -9,11 +9,11 @@
 class LinkedListTest : public testing::Test
 {
 protected:
-    LinkedListTest() noexcept
+    LinkedListTest() noexcept :
+        ll1 { &pool },
+        ll2 { &pool },
+        ll3 { &pool2 }
     {
-        ll1.pool() = &pool;
-        ll2.pool() = &pool;
-        ll3.pool() = &pool2;
     }
 
     ObjectPool<Node<int>, 5> pool;

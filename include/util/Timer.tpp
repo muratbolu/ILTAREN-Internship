@@ -11,7 +11,7 @@ class Duration
 public:
     constexpr Duration() noexcept = default;
 
-    constexpr Duration(unsigned dur) noexcept :
+    constexpr explicit Duration(unsigned dur) noexcept :
         mDur { dur }
     {
     }
@@ -19,6 +19,12 @@ public:
     [[nodiscard]] constexpr unsigned getDuration() const noexcept
     {
         return mDur;
+    }
+
+    constexpr Duration& operator+=(unsigned dur) noexcept
+    {
+        add(dur);
+        return *this;
     }
 
     constexpr Duration& operator+=(const Duration& dur) noexcept
@@ -39,6 +45,11 @@ public:
     constexpr auto operator<=>(const Duration&) const noexcept = default;
 private:
     unsigned mDur { 0 };
+
+    constexpr void add(unsigned dur) noexcept
+    {
+        mDur += dur;
+    }
 
     constexpr void add(const Duration& dur) noexcept
     {
@@ -86,7 +97,7 @@ public:
 
     constexpr friend Duration operator-(const Time& lhs, const Time& rhs) noexcept
     {
-        return { 60 * (lhs.mHour - rhs.mHour) + lhs.mMinute - rhs.mMinute };
+        return Duration { 60 * (lhs.mHour - rhs.mHour) + lhs.mMinute - rhs.mMinute };
     }
 
     // operator!= is automatically generated

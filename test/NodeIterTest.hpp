@@ -9,9 +9,9 @@
 class NodeIterTest : public testing::Test
 {
 protected:
-    NodeIterTest() noexcept
+    NodeIterTest() noexcept :
+        ll { &pool }
     {
-        ll.pool() = &pool;
     }
 
     ObjectPool<Node<int>, 4> pool;

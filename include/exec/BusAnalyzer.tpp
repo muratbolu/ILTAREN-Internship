@@ -28,7 +28,7 @@ class BusAnalyzer
     using Time = timer::Time;
     using Dur = timer::Duration;
 public:
-    constexpr static BusAnalyzer* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusAnalyzer* create(int argc, const char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 2)
         {
@@ -192,7 +192,7 @@ public:
                 // TODO: refactor
                 if (offset == i)
                 {
-                    return { i };
+                    return Bus { i };
                 }
                 else
                 {
@@ -201,7 +201,7 @@ public:
                 }
             }
         }
-        return { 0 };
+        return Bus { 0 };
     }
 
     /*
@@ -321,8 +321,8 @@ private:
     constexpr BusAnalyzer(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
         istream { is },
         ostream { os },
-        mSP { samplingPeriod }
+        mSP { samplingPeriod },
+        mLines { &mLinePool }
     {
-        mLines.pool() = &mLinePool;
     }
 };

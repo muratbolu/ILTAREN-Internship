@@ -61,6 +61,7 @@ gtest_discover_tests(tests)
 # Cppcheck
 set(CPPCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cppcheck/suppressions.txt")
 set(CPPCHECK_OUTPUT_FILE "${CMAKE_SOURCE_DIR}/cppcheck/output.txt")
+set(CPPCHECK_CHECKERS_FILE "${CMAKE_SOURCE_DIR}/cppcheck/checkers.txt")
 set(CPPCHECK_SOURCES
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
@@ -73,7 +74,7 @@ add_custom_target(run_cppcheck
             --std=c++20
             --suppressions-list=${CPPCHECK_SUPPRESSIONS_FILE}
             --output-file=${CPPCHECK_OUTPUT_FILE}
-            --suppress=missingInclude*
+            --checkers-report=${CPPCHECK_CHECKERS_FILE}
             ${CPPCHECK_SOURCES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running cppcheck..."

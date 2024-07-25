@@ -5,4 +5,5 @@ out/
 
 data/buses.txt
 cppcheck/output.txt
+cppcheck/checkers.txt
 

@@ -141,8 +141,7 @@ TEST_F(LinkedListTest, BigPool)
 TEST_F(LinkedListTest, DeallocateList)
 {
     {
-        LinkedList<int> ll4;
-        ll4.pool() = &pool;
+        LinkedList<int> ll4 { &pool };
         ASSERT_TRUE(ll4.pushBack(12));
         ASSERT_TRUE(ll4.pushBack(15));
         ASSERT_TRUE(ll4.pushBack(18));

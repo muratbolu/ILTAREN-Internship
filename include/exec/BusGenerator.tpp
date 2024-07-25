@@ -26,7 +26,7 @@ public:
     constexpr BusGenerator& operator=(const BusGenerator&) noexcept = delete;
     constexpr BusGenerator& operator=(BusGenerator&&) noexcept = default;
 
-    constexpr static BusGenerator* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusGenerator* create(int argc, const char* argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -67,11 +67,13 @@ public:
 
     void printSchedule(FILE* stream) const noexcept
     {
-        fprintf(stream, "Buses: %d\n", mNumofBuses);
+        fputs("Buses: ", stream);
+        io::print(stream, mNumofBuses);
+        fputc('\n', stream);
         io::print(stream, mPeriods);
-        fprintf(stream, "begin: ");
+        fputs("begin: ", stream);
         io::print(stream, mBeginTime);
-        fprintf(stream, "  end: ");
+        fputs("  end: ", stream);
         io::print(stream, mEndTime);
     }
 
@@ -98,7 +100,7 @@ public:
             if (num > 0)
             {
                 io::print(stream, mBeginTime + d);
-                fprintf(stream, " %d", num);
+                io::print(stream, num);
                 fputc('\n', stream);
             }
         }
@@ -117,10 +119,10 @@ private:
         mBeginTime { begin },
         mEndTime { end },
         mTotalDuration { end - begin },
-        mSamplingPeriod { samplingPeriod }
+        mSamplingPeriod { samplingPeriod },
+        mPeriods { &mPool }
     {
         // Assign periods
-        mPeriods.pool() = &mPool;
         std::srand(std::time(nullptr));
         for (unsigned i { 0 }; i < mNumofBuses;)
         {

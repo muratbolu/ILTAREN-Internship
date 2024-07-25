@@ -1,1 +1,5 @@
-*:googletest/*
+missingInclude:*
+missingIncludeSystem:*
+useStlAlgorithm:* // I didn't use standard library
+unusedFunction:*
+checkersReport:*
