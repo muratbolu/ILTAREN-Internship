@@ -19,17 +19,17 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 endif()
 
+# Include all headers for all targets
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 # City traveler executable
 add_executable (traveler src/traveler.cpp)
-target_include_directories(traveler PRIVATE include)
 
 # Bus schedule generator executable
 add_executable (generator src/generator.cpp)
-target_include_directories(generator PRIVATE include)
 
 # Bus schedule analyzer executable
 add_executable (analyzer src/analyzer.cpp)
-target_include_directories(analyzer PRIVATE include)
 
 # ----- TESTS -----
 
@@ -53,7 +53,6 @@ include_directories(${CMAKE_SOURCE_DIR}/googletest/include)
 # Test executable
 add_executable (tests src/tests.cpp ${TEST_SOURCES})
 target_link_libraries(tests gtest)
-target_include_directories(tests PRIVATE include)
 target_include_directories(tests PRIVATE test)
 
 include(GoogleTest)

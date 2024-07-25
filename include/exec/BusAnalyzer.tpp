@@ -17,7 +17,6 @@
 #include <utility>
 #include <variant>
 
-
 #define MAX_LINE_LEN 64
 #define BP_POOL_SIZE 400
 #define MAX_SAMPLES 2000
