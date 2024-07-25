@@ -16,7 +16,7 @@ protected:
     {
     }
 
-    ObjectPool<Node<int>, 5> pool;
+    ObjectPool<Node<int>, 6> pool;
     LinkedList<int> ll1;
     LinkedList<int> ll2;
     ObjectPool<Node<long>, 1000> pool2;   // 8 KB

@@ -71,7 +71,8 @@ TEST_F(LinkedListTest, Push)
     EXPECT_TRUE(ll1.pushBack(18));
     EXPECT_TRUE(ll1.pushBack(21));
     EXPECT_TRUE(ll1.pushBack(24));
-    EXPECT_FALSE(ll1.pushBack(27));
+    EXPECT_TRUE(ll1.pushBack(27));
+    EXPECT_FALSE(ll1.pushBack(30));
 }
 
 TEST_F(LinkedListTest, PushLvalue)
@@ -95,7 +96,9 @@ TEST_F(LinkedListTest, Size)
     ll1.pushBack(24);
     EXPECT_EQ(ll1.size(), 5);
     ll1.pushBack(27);
-    EXPECT_EQ(ll1.size(), 5);
+    EXPECT_EQ(ll1.size(), 6);
+    ll1.pushBack(30);
+    EXPECT_EQ(ll1.size(), 6);
 }
 
 TEST_F(LinkedListTest, Pop)
@@ -124,8 +127,9 @@ TEST_F(LinkedListTest, ExhaustPool)
     ASSERT_TRUE(ll1.pushBack(18));
     ASSERT_TRUE(ll2.pushBack(21));
     ASSERT_TRUE(ll2.pushBack(24));
-    EXPECT_FALSE(ll1.pushBack(27));
-    EXPECT_FALSE(ll2.pushBack(30));
+    ASSERT_TRUE(ll2.pushBack(27));
+    EXPECT_FALSE(ll1.pushBack(30));
+    EXPECT_FALSE(ll2.pushBack(33));
     ASSERT_EQ(*ll1.popBack(), 18);
     EXPECT_TRUE(ll2.pushBack(33));
 }
@@ -243,4 +247,53 @@ TEST_F(LinkedListTest, Print)
     ASSERT_TRUE(ll1.pushBack(15));
     ASSERT_TRUE(ll1.pushBack(18));
     // TODO: figure out a way to test print
+}
+
+TEST_F(LinkedListTest, Equality1)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(12));
+    ASSERT_TRUE(ll2.pushBack(15));
+    EXPECT_EQ(ll1, ll2);
+}
+
+TEST_F(LinkedListTest, Equality2)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(12));
+    EXPECT_FALSE(ll1 == ll2);
+}
+
+TEST_F(LinkedListTest, Equality3)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(12));
+    ASSERT_TRUE(ll2.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(18));
+    EXPECT_FALSE(ll1 == ll2);
+}
+
+TEST_F(LinkedListTest, Equality4)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll1.pushBack(18));
+    ASSERT_TRUE(ll2.pushBack(12));
+    ASSERT_TRUE(ll2.pushBack(15));
+    EXPECT_FALSE(ll1 == ll2);
+}
+
+TEST_F(LinkedListTest, Equality5)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(12));
+    ASSERT_TRUE(ll2.pushBack(15));
+    ASSERT_TRUE(ll2.pushBack(12));
+    EXPECT_FALSE(ll1 == ll2);
 }

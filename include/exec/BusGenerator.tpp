@@ -4,6 +4,7 @@
 #include "sds/LinkedList.tpp"
 #include "sds/Node.tpp"
 #include "sds/ObjectPool.tpp"
+#include "util/Bus.tpp"
 #include "util/Timer.tpp"
 
 #include <cstdio>
@@ -26,7 +27,7 @@ public:
     constexpr BusGenerator& operator=(const BusGenerator&) noexcept = delete;
     constexpr BusGenerator& operator=(BusGenerator&&) noexcept = default;
 
-    constexpr static BusGenerator* create(int argc, const char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusGenerator* create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -95,12 +96,12 @@ public:
             unsigned num { 0 };
             for (auto& p : mPeriods)
             {
-                unsigned sum { (p.first.getDuration() + p.second.getDuration()) };
+                unsigned sum { (p.getFirst() + p.getSecond()) };
                 if ((d.getDuration() % sum) == 0U)
                 {
                     ++num;
                 }
-                else if (((d.getDuration() + p.second.getDuration()) % sum) == 0U)
+                else if (((d.getDuration() + p.getSecond()) % sum) == 0U)
                 {
                     ++num;
                 }
@@ -115,14 +116,19 @@ public:
         }
         fflush(input);
     }
+
+    [[nodiscard]] constexpr const LinkedList<Bus>* getPeriods() const noexcept
+    {
+        return &mPeriods;
+    }
 private:
     FILE* input { nullptr };
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
     Dur mTotalDuration;
     unsigned mSamplingPeriod;
-    ObjectPool<Node<std::pair<Dur, Dur>>, BS_POOL_SIZE> mPool;
-    LinkedList<std::pair<Dur, Dur>> mPeriods;
+    ObjectPool<Node<Bus>, BS_POOL_SIZE> mPool;
+    LinkedList<Bus> mPeriods;
 
     // Private constructor
     BusGenerator(FILE* fw, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
@@ -171,11 +177,18 @@ private:
             */
             if (isValid)
             {
-                mPeriods.pushBack({ Dur { randNum1 }, Dur { randNum2 } });
+                if (randNum1 == randNum2)
+                {
+                    mPeriods.pushBack(Bus { randNum1 });
+                }
+                else
+                {
+                    mPeriods.pushBack(Bus { randNum1, randNum2 });
+                }
                 ++i;
             }
         }
-        io::print(stdout, mPeriods);
-        fputc('\n', stdout);
+        // io::print(stdout, mPeriods);
+        // fputc('\n', stdout);
     }
 };

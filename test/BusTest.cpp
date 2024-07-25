@@ -1,12 +1,10 @@
 #include "BusTest.hpp"
 
-#include "exec/BusAnalyzer.tpp"
-#include "exec/BusGenerator.tpp"
+#include "io/IO.tpp"
 #include "util/Bus.tpp"
 
+#include <cstdio>
 #include <gtest/gtest.h>
-
-constexpr static unsigned samplingPeriod { 1 };
 
 TEST_F(BusTest, Initialization)
 {
@@ -63,20 +61,11 @@ TEST_F(BusTest, Equality)
     EXPECT_FALSE((b1 == Bus { 3, 8 }));
 }
 
-TEST_F(BusTest, SimpleCase)
+TEST_F(BusTest, OneBus6HoursCase)
 {
-    const char* fileName { "./temp.txt" };
-    const char* argv1[] = { nullptr, fileName, "1", "12:00", "13:00" };
-    BusGenerator* bg { BusGenerator::create(5, argv1, samplingPeriod) };
-    ASSERT_TRUE(bg != nullptr);
-
-    bg->printArrivals();
-
-    const char* argv2[] = { nullptr, fileName };
-    BusAnalyzer* ba { BusAnalyzer::create(2, argv2, samplingPeriod) };
-    ASSERT_TRUE(ba != nullptr);
-
-    ba->getSamples();
-    ba->parseSamples();
-    ba->extractPeriods();
+    ll1 = generateInput("1", "12:00", "18:00");
+    ASSERT_TRUE(ll1 != nullptr);
+    ll2 = analyzeInput();
+    ASSERT_TRUE(ll2 != nullptr);
+    EXPECT_EQ(*ll1, *ll2);
 }

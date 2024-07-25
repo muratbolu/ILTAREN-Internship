@@ -28,7 +28,7 @@ class BusAnalyzer
     using Time = timer::Time;
     using Dur = timer::Duration;
 public:
-    constexpr static BusAnalyzer* create(int argc, const char* argv[], unsigned samplingPeriod) noexcept
+    constexpr static BusAnalyzer* create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 2)
         {
@@ -98,7 +98,6 @@ public:
 
     void extractPeriods() noexcept
     {
-        StaticStack<Bus, MAX_SAMPLES> mFreqs;
         StaticStack<unsigned, MAX_SAMPLES> samples { mSamples };
         for (;;)
         {
@@ -144,9 +143,9 @@ public:
                 }
             }
         }
-        fprintf(ostream, "Length: %d\n", mFreqs.size());
-        io::print(ostream, mFreqs);
-        fputc('\n', ostream);
+        // fprintf(ostream, "Length: %d\n", mFreqs.size());
+        // io::print(ostream, mFreqs);
+        // fputc('\n', ostream);
     }
 
     [[nodiscard]] constexpr static StaticStack<unsigned, MAX_SAMPLES> shiftIndex(const StaticStack<unsigned, MAX_SAMPLES>& s, unsigned n) noexcept
@@ -301,6 +300,11 @@ public:
         return y;
     }
     */
+
+    [[nodiscard]] constexpr const LinkedList<Bus>* getPeriods() const noexcept
+    {
+        return &mFreqs;
+    }
 private:
     // Input and output files
     FILE *istream, *ostream;
@@ -313,6 +317,9 @@ private:
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
 
+    ObjectPool<Node<Bus>, BP_POOL_SIZE> mFreqPool;
+    LinkedList<Bus> mFreqs;
+
     // StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
     // StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
     // StaticStack<float, MAX_SAMPLES> mAbsFT;
@@ -322,7 +329,8 @@ private:
         istream { is },
         ostream { os },
         mSP { samplingPeriod },
-        mLines { &mLinePool }
+        mLines { &mLinePool },
+        mFreqs { &mFreqPool }
     {
     }
 };

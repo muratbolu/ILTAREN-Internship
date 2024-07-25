@@ -276,6 +276,24 @@ public:
 
         return result;
     }
+
+    // tests for strict equality.
+    // operator!= is automatically generated
+    constexpr friend bool operator==(const LinkedList<T>& lhs, const LinkedList<T>& rhs) noexcept
+    {
+        if (lhs.size() != rhs.size())
+        {
+            return false;
+        }
+        for (NodeIter<T> itl { lhs.begin() }, itr { rhs.begin() }; itl != lhs.end() && itr != rhs.end(); ++itl, ++itr)
+        {
+            if (*itl != *itr)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 private:
     Node<T>* mHead { nullptr };
     Node<T>* mTail { nullptr };
