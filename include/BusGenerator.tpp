@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
+#include "Timer.tpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -16,8 +16,8 @@
 
 class BusGenerator
 {
-    using Time = chr::Time;
-    using Dur = chr::Duration;
+    using Time = timer::Time;
+    using Dur = timer::Duration;
 public:
     constexpr BusGenerator() noexcept = delete;
     constexpr ~BusGenerator() noexcept = default;

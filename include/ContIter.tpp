@@ -76,23 +76,23 @@ public:
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
+    constexpr friend bool operator==(const ContIter& lhs, const ContIter& rhs) noexcept
     {
         return lhs.mPtr == rhs.mPtr;
     }
 
-    constexpr inline bool operator==(const T* rhs) const noexcept
+    constexpr bool operator==(const T* rhs) const noexcept
     {
         return mPtr == rhs;
     }
 
     // operators <, <=, >, >=  are automatically generated
-    constexpr friend inline auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
+    constexpr friend auto operator<=>(const ContIter& lhs, const ContIter& rhs) noexcept
     {
         return lhs.mPtr <=> rhs.mPtr;
     }
 
-    constexpr inline auto operator<=>(const T* rhs) const noexcept
+    constexpr auto operator<=>(const T* rhs) const noexcept
     {
         return mPtr <=> rhs;
     }

@@ -81,7 +81,7 @@ public:
 
     // operator!= is automatically generated
     template<unsigned U>
-    constexpr friend inline bool operator==(const StaticStack<T, N>& lhs, const StaticStack<T, U>& rhs) noexcept
+    constexpr friend bool operator==(const StaticStack<T, N>& lhs, const StaticStack<T, U>& rhs) noexcept
     {
         if (lhs.mCurrIndex != rhs.mCurrIndex)
         {

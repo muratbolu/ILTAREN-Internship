@@ -5,7 +5,7 @@ class IIter
 {
 public:
     constexpr IIter() noexcept = default;
-    virtual constexpr inline ~IIter() noexcept = default;
+    virtual constexpr ~IIter() noexcept = default;
     constexpr IIter(const IIter&) noexcept = default;
     constexpr IIter(IIter&&) noexcept = default;
     constexpr IIter& operator=(const IIter&) noexcept = default;

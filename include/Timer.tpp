@@ -4,7 +4,7 @@
 #include <compare>
 #include <cstdint>
 
-namespace chr
+namespace timer
 {
 class Duration
 {
@@ -21,22 +21,22 @@ public:
         return mDur;
     }
 
-    constexpr inline Duration& operator+=(const Duration& dur) noexcept
+    constexpr Duration& operator+=(const Duration& dur) noexcept
     {
         add(dur);
         return *this;
     }
 
-    constexpr friend inline Duration operator+(Duration lhs, const Duration& rhs) noexcept
+    constexpr friend Duration operator+(Duration lhs, const Duration& rhs) noexcept
     {
         lhs += rhs;
         return lhs;
     }
 
     // operator!= is automatically generated
-    constexpr inline bool operator==(const Duration&) const noexcept = default;
+    constexpr bool operator==(const Duration&) const noexcept = default;
     // operators <, <=, >, >=  are automatically generated
-    constexpr inline auto operator<=>(const Duration&) const noexcept = default;
+    constexpr auto operator<=>(const Duration&) const noexcept = default;
 private:
     unsigned mDur { 0 };
 
@@ -72,28 +72,28 @@ public:
         return mMinute;
     }
 
-    constexpr inline Time& operator+=(const Duration& dur) noexcept
+    constexpr Time& operator+=(const Duration& dur) noexcept
     {
         add(dur);
         return *this;
     }
 
-    constexpr friend inline Time operator+(Time t, const Duration& dur) noexcept
+    constexpr friend Time operator+(Time t, const Duration& dur) noexcept
     {
         t += dur;
         return t;
     }
 
-    constexpr friend inline Duration operator-(const Time& lhs, const Time& rhs) noexcept
+    constexpr friend Duration operator-(const Time& lhs, const Time& rhs) noexcept
     {
         return { 60 * (lhs.mHour - rhs.mHour) + lhs.mMinute - rhs.mMinute };
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const Time& lhs, const Time& rhs) noexcept = default;
+    constexpr friend bool operator==(const Time& lhs, const Time& rhs) noexcept = default;
 
     // operators <, <=, >, >=  are automatically generated
-    constexpr friend inline auto operator<=>(const Time& lhs, const Time& rhs) noexcept
+    constexpr friend auto operator<=>(const Time& lhs, const Time& rhs) noexcept
     {
         if (lhs.overflow)
         {
@@ -133,4 +133,4 @@ private:
         }
     }
 };
-}   // namespace chr
+}   // namespace timer

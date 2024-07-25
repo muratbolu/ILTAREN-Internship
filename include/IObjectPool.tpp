@@ -5,7 +5,7 @@ class IObjectPool
 {
 public:
     constexpr IObjectPool() noexcept = default;
-    virtual constexpr inline ~IObjectPool() noexcept = default;
+    virtual constexpr ~IObjectPool() noexcept = default;
     constexpr IObjectPool(const IObjectPool&) noexcept = default;
     constexpr IObjectPool(IObjectPool&&) noexcept = default;
     constexpr IObjectPool& operator=(const IObjectPool&) noexcept = default;

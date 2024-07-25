@@ -112,7 +112,7 @@ public:
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const StaticVector& lhs, const StaticVector& rhs) noexcept
+    constexpr friend bool operator==(const StaticVector& lhs, const StaticVector& rhs) noexcept
     {
         for (unsigned i { 0 }; i < N; ++i)
         {

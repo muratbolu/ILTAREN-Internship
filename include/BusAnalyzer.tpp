@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Bus.tpp"
-#include "Chr.tpp"
 #include "IO.tpp"
 #include "LinkedList.tpp"
 #include "Node.tpp"
 #include "ObjectPool.tpp"
 #include "StaticStack.tpp"
+#include "Timer.tpp"
 
 #include <cassert>
 #include <cmath>
@@ -25,8 +25,8 @@
 
 class BusAnalyzer
 {
-    using Time = chr::Time;
-    using Dur = chr::Duration;
+    using Time = timer::Time;
+    using Dur = timer::Duration;
 public:
     constexpr static BusAnalyzer* create(int argc, char* argv[], unsigned samplingPeriod) noexcept
     {

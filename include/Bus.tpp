@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    constexpr inline Bus& operator*=(unsigned i) noexcept
+    constexpr Bus& operator*=(unsigned i) noexcept
     {
         if (auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
@@ -99,14 +99,14 @@ public:
         return *this;
     }
 
-    constexpr friend inline Bus operator*(Bus t, unsigned i) noexcept
+    constexpr friend Bus operator*(Bus t, unsigned i) noexcept
     {
         t *= i;
         return t;
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const Bus&, const Bus&) noexcept = default;
+    constexpr friend bool operator==(const Bus&, const Bus&) noexcept = default;
 private:
     Period mPeriod;
 };

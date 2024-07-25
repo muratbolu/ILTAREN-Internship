@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Bus.tpp"
-#include "Chr.tpp"
 #include "LinkedList.tpp"
 #include "NodeIter.tpp"
 #include "StaticStack.tpp"
 #include "StaticVector.tpp"
+#include "Timer.tpp"
 
 #include <complex>
 #include <cstdio>
@@ -33,12 +33,12 @@ void print(FILE* stream, float i) noexcept
     fprintf(stream, "%.2f", i);
 }
 
-void print(FILE* stream, const chr::Time& t) noexcept
+void print(FILE* stream, const timer::Time& t) noexcept
 {
     fprintf(stream, "%02hhu:%02hhu", t.getHour(), t.getMinute());
 }
 
-void print(FILE* stream, const chr::Duration& d) noexcept
+void print(FILE* stream, const timer::Duration& d) noexcept
 {
     fprintf(stream, "%u", d.getDuration());
 }

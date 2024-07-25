@@ -51,7 +51,7 @@ public:
     }
 
     // operator!= is automatically generated
-    constexpr friend inline bool operator==(const Node& lhs, const Node& rhs) noexcept
+    constexpr friend bool operator==(const Node& lhs, const Node& rhs) noexcept
     {
         return (lhs.mData == rhs.mData) && (lhs.mNext == rhs.mNext) && (lhs.mPrev == rhs.mPrev);
     }
