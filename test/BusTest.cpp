@@ -61,11 +61,62 @@ TEST_F(BusTest, Equality)
     EXPECT_FALSE((b1 == Bus { 3, 8 }));
 }
 
-TEST_F(BusTest, OneBus6HoursCase)
+TEST_F(BusTest, OneBusSixHoursCase)
 {
     ll1 = generateInput("1", "12:00", "18:00");
     ASSERT_TRUE(ll1 != nullptr);
     ll2 = analyzeInput();
     ASSERT_TRUE(ll2 != nullptr);
+    ll1->sort();
+    ll2->sort();
     EXPECT_EQ(*ll1, *ll2);
+    io::print(stdout, *ll1);
+    fputc('\n', stdout);
+    io::print(stdout, *ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, TwoBusesThreeHoursCase)
+{
+    ll1 = generateInput("2", "20:00", "23:00");
+    ASSERT_TRUE(ll1 != nullptr);
+    ll2 = analyzeInput();
+    ASSERT_TRUE(ll2 != nullptr);
+    ll1->sort();
+    ll2->sort();
+    EXPECT_EQ(*ll1, *ll2);
+    io::print(stdout, *ll1);
+    fputc('\n', stdout);
+    io::print(stdout, *ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, TwoBusesOneHourCase)
+{
+    ll1 = generateInput("2", "00:00", "01:00");
+    ASSERT_TRUE(ll1 != nullptr);
+    ll2 = analyzeInput();
+    ASSERT_TRUE(ll2 != nullptr);
+    ll1->sort();
+    ll2->sort();
+    EXPECT_EQ(*ll1, *ll2);
+    io::print(stdout, *ll1);
+    fputc('\n', stdout);
+    io::print(stdout, *ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, FiveBusesFiveHourCase)
+{
+    ll1 = generateInput("5", "10:00", "15:00");
+    ASSERT_TRUE(ll1 != nullptr);
+    ll2 = analyzeInput();
+    ASSERT_TRUE(ll2 != nullptr);
+    ll1->sort();
+    ll2->sort();
+    EXPECT_EQ(*ll1, *ll2);
+    io::print(stdout, *ll1);
+    fputc('\n', stdout);
+    io::print(stdout, *ll2);
+    fputc('\n', stdout);
 }

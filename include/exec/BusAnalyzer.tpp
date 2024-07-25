@@ -301,7 +301,7 @@ public:
     }
     */
 
-    [[nodiscard]] constexpr const LinkedList<Bus>* getPeriods() const noexcept
+    [[nodiscard]] constexpr LinkedList<Bus>* getPeriods() noexcept
     {
         return &mFreqs;
     }

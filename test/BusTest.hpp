@@ -15,8 +15,7 @@ class BusTest : public testing::Test
 protected:
     BusTest() noexcept = default;
 
-    constexpr static const LinkedList<Bus>* generateInput(const char* const numOfBuses, const char* const beginTime,
-                                                          const char* const endTime) noexcept
+    constexpr static LinkedList<Bus>* generateInput(const char* const numOfBuses, const char* const beginTime, const char* const endTime) noexcept
     {
         const char* const argv1[] = { nullptr, fileName, numOfBuses, beginTime, endTime };
         BusGenerator* bg { BusGenerator::create(5, argv1, samplingPeriod) };
@@ -28,7 +27,7 @@ protected:
         return bg->getPeriods();
     }
 
-    constexpr static const LinkedList<Bus>* analyzeInput() noexcept
+    constexpr static LinkedList<Bus>* analyzeInput() noexcept
     {
         constexpr const char* const argv2[] = { nullptr, fileName };
         BusAnalyzer* ba { BusAnalyzer::create(2, argv2, samplingPeriod) };
@@ -45,6 +44,6 @@ protected:
     Bus b1;
     Bus b2 { 5 };
     Bus b3 { 3, 8 };
-    const LinkedList<Bus>* ll1 { nullptr };
-    const LinkedList<Bus>* ll2 { nullptr };
+    LinkedList<Bus>* ll1 { nullptr };
+    LinkedList<Bus>* ll2 { nullptr };
 };

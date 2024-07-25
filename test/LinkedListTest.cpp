@@ -297,3 +297,63 @@ TEST_F(LinkedListTest, Equality5)
     ASSERT_TRUE(ll2.pushBack(12));
     EXPECT_FALSE(ll1 == ll2);
 }
+
+TEST_F(LinkedListTest, Sort1)
+{
+    ASSERT_TRUE(ll1.pushBack(12));
+    ll1.sort();
+    ASSERT_EQ(ll1.size(), 1);
+    EXPECT_EQ(*ll1[0], 12);
+}
+
+TEST_F(LinkedListTest, Sort2)
+{
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll1.pushBack(12));
+    ll1.sort();
+    ASSERT_EQ(ll1.size(), 2);
+    EXPECT_EQ(*ll1[0], 12);
+    EXPECT_EQ(*ll1[1], 15);
+    EXPECT_EQ(*ll1.front(), 12);
+    EXPECT_EQ(*ll1.back(), 15);
+}
+
+TEST_F(LinkedListTest, Sort3)
+{
+    ASSERT_TRUE(ll1.pushBack(15));
+    ASSERT_TRUE(ll1.pushBack(12));
+    ASSERT_TRUE(ll1.pushBack(17));
+    ASSERT_TRUE(ll1.pushBack(10));
+    ll1.sort();
+    ASSERT_EQ(ll1.size(), 4);
+    EXPECT_EQ(*ll1[0], 10);
+    EXPECT_EQ(*ll1[1], 12);
+    EXPECT_EQ(*ll1[2], 15);
+    EXPECT_EQ(*ll1[3], 17);
+    EXPECT_EQ(*ll1.front(), 10);
+    EXPECT_EQ(*ll1.back(), 17);
+}
+
+TEST_F(LinkedListTest, Sort4)
+{
+    ASSERT_TRUE(ll1.pushBack(4));
+    ASSERT_TRUE(ll1.pushBack(8));
+    ASSERT_TRUE(ll1.pushBack(10));
+    ASSERT_TRUE(ll1.pushBack(6));
+    ASSERT_TRUE(ll1.pushBack(2));
+    ASSERT_TRUE(ll1.pushBack(12));
+    ll1.sort();
+    ASSERT_EQ(ll1.size(), 6);
+    EXPECT_EQ(*ll1[0], 2);
+    EXPECT_EQ(*ll1[1], 4);
+    EXPECT_EQ(*ll1[2], 6);
+    EXPECT_EQ(*ll1[3], 8);
+    EXPECT_EQ(*ll1[4], 10);
+    EXPECT_EQ(*ll1[5], 12);
+    EXPECT_EQ(*ll1.front(), 2);
+    EXPECT_EQ(*ll1.back(), 12);
+    for (unsigned i { 0 }; i < ll1.size(); ++i)
+    {
+        EXPECT_EQ(*ll1[i], (i + 1) * 2);
+    }
+}

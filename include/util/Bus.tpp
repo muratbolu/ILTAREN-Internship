@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <compare>
 #include <utility>
 #include <variant>
 
@@ -107,6 +108,9 @@ public:
 
     // operator!= is automatically generated
     constexpr friend bool operator==(const Bus&, const Bus&) noexcept = default;
+
+    // operators <, <=, >, >=  are automatically generated
+    constexpr friend auto operator<=>(const Bus& lhs, const Bus& rhs) noexcept = default;
 private:
     Period mPeriod;
 };

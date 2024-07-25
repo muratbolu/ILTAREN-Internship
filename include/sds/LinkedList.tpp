@@ -294,6 +294,86 @@ public:
         }
         return true;
     }
+
+    constexpr static void swap(Node<T>* n1, Node<T>* n2) noexcept
+    {
+        auto swapAdj = [](Node<T>* l, Node<T>* r)
+        {
+            l->next() = r->next();
+            r->prev() = l->prev();
+            l->prev() = r;
+            r->next() = l;
+            if (l->next() != nullptr)
+            {
+                l->next()->prev() = l;
+            }
+            if (r->prev() != nullptr)
+            {
+                r->prev()->next() = r;
+            }
+        };
+        if (n1->next() == n2)
+        {
+            swapAdj(n1, n2);
+        }
+        else if (n2->next() == n1)
+        {
+            swapAdj(n2, n1);
+        }
+        else
+        {
+            Node<T>* n1Next = n1->next();
+            Node<T>* n1Prev = n1->prev();
+            n1->next() = n2->next();
+            n1->prev() = n2->prev();
+            n2->next() = n1Next;
+            n2->prev() = n1Prev;
+
+            if (n1->next() != nullptr)
+            {
+                n1->next()->prev() = n1;
+            }
+            if (n1->prev() != nullptr)
+            {
+                n1->prev()->next() = n1;
+            }
+            if (n2->next() != nullptr)
+            {
+                n2->next()->prev() = n2;
+            }
+            if (n2->prev() != nullptr)
+            {
+                n2->prev()->next() = n2;
+            }
+        }
+    }
+
+    constexpr void sort() noexcept
+    {
+        if (mHead == nullptr)
+        {
+            return;
+        }
+        if (mSize <= 1)
+        {
+            return;
+        }
+        for (Node<T>* curr = mHead; curr != nullptr; curr = curr->next())
+        {
+            for (Node<T>* insert = curr; insert != nullptr && insert->prev() != nullptr && insert->data() < insert->prev()->data();)
+            {
+                if (insert == mTail)
+                {
+                    mTail = insert->prev();
+                }
+                swap(insert, insert->prev());
+                if (insert->next() == mHead)
+                {
+                    mHead = insert;
+                }
+            }
+        }
+    }
 private:
     Node<T>* mHead { nullptr };
     Node<T>* mTail { nullptr };
