@@ -40,6 +40,12 @@ public:
             return nullptr;
         }
         // NOLINTBEGIN
+        FILE* fw = fopen(argv[1], "w");
+        if (fw == nullptr)
+        {
+            perror("Could not open file");
+            return nullptr;
+        }
         unsigned numOfBuses { static_cast<unsigned>(atoi(argv[2])) };
         if (strlen(argv[3]) != 5 || strlen(argv[4]) != 5)
         {
@@ -48,6 +54,7 @@ public:
             {
                 perror("Invalid timestamps");
             }
+            fclose(fw);
             return nullptr;
         }
         Time begin { Time { argv[3] } };
@@ -60,28 +67,29 @@ public:
             {
                 perror("Invalid timestamps");
             }
+            fclose(fw);
             return nullptr;
         }
-        return new BusGenerator { numOfBuses, begin, end, samplingPeriod };
+        return new BusGenerator { fw, numOfBuses, begin, end, samplingPeriod };
     }
 
-    void printSchedule(FILE* stream) const noexcept
+    void printSchedule() const noexcept
     {
-        fputs("Buses: ", stream);
-        io::print(stream, mNumofBuses);
-        fputc('\n', stream);
-        io::print(stream, mPeriods);
-        fputs("begin: ", stream);
-        io::print(stream, mBeginTime);
-        fputs("  end: ", stream);
-        io::print(stream, mEndTime);
+        fputs("Buses: ", input);
+        io::print(input, mNumofBuses);
+        fputc('\n', input);
+        io::print(input, mPeriods);
+        fputs("begin: ", input);
+        io::print(input, mBeginTime);
+        fputs("  end: ", input);
+        io::print(input, mEndTime);
     }
 
     // TODO: given the output of this func, deduce the periods of BusSchedulees
-    void printArrivals(FILE* stream) const noexcept
+    void printArrivals() const noexcept
     {
-        io::print(stream, mBeginTime);
-        fputc('\n', stream);
+        io::print(input, mBeginTime);
+        fputc('\n', input);
         for (Dur d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
@@ -99,13 +107,16 @@ public:
             }
             if (num > 0)
             {
-                io::print(stream, mBeginTime + d);
-                io::print(stream, num);
-                fputc('\n', stream);
+                io::print(input, mBeginTime + d);
+                fputc(' ', input);
+                io::print(input, num);
+                fputc('\n', input);
             }
         }
+        fflush(input);
     }
 private:
+    FILE* input { nullptr };
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
     Dur mTotalDuration;
@@ -114,7 +125,8 @@ private:
     LinkedList<std::pair<Dur, Dur>> mPeriods;
 
     // Private constructor
-    BusGenerator(unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
+    BusGenerator(FILE* fw, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
+        input { fw },
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },
