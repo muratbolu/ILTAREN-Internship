@@ -58,6 +58,28 @@ target_include_directories(tests PRIVATE test)
 include(GoogleTest)
 gtest_discover_tests(tests)
 
+# Cppcheck
+set(CPPCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cppcheck/suppressions.txt")
+set(CPPCHECK_OUTPUT_FILE "${CMAKE_SOURCE_DIR}/cppcheck/output.txt")
+set(CPPCHECK_SOURCES
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/test
+)
+add_custom_target(run_cppcheck
+    COMMAND cppcheck
+            --enable=all
+            --check-level=exhaustive
+            --std=c++20
+            --suppressions-list=${CPPCHECK_SUPPRESSIONS_FILE}
+            --output-file=${CPPCHECK_OUTPUT_FILE}
+            --suppress=missingInclude*
+            ${CPPCHECK_SOURCES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running cppcheck..."
+)
+add_dependencies(tests run_cppcheck)
+
 # Address sanitizer causes the Google Test to not execute at all?
 # if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 #     add_compile_definitions(_DISABLE_VECTOR_ANNOTATION) # Apparently needed because of a bug?
