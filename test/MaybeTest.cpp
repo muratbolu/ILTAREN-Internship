@@ -1,9 +1,9 @@
 #include "MaybeTest.hpp"
 
-#include "LinkedList.tpp"
-#include "Maybe.tpp"
-#include "Node.tpp"
-#include "ObjectPool.tpp"
+#include "sds/LinkedList.tpp"
+#include "sds/Node.tpp"
+#include "sds/ObjectPool.tpp"
+#include "util/Maybe.tpp"
 
 #include <gtest/gtest.h>
 #include <memory>

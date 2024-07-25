@@ -1,7 +1,7 @@
 #pragma once
 
-#include "StaticStack.tpp"
-#include "StaticVector.tpp"
+#include "sds/StaticStack.tpp"
+#include "sds/StaticVector.tpp"
 
 #include <cassert>
 #include <climits>

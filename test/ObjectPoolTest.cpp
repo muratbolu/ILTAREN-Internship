@@ -1,5 +1,7 @@
 #include "ObjectPoolTest.hpp"
 
+#include <gtest/gtest.h>
+
 TEST_F(ObjectPoolTest, Initialization)
 {
 }

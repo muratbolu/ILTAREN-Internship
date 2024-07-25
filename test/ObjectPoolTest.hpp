@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ObjectPool.tpp"
-#include "StaticVector.tpp"
+#include "sds/ObjectPool.tpp"
+#include "sds/StaticVector.tpp"
 
 #include <gtest/gtest.h>
 

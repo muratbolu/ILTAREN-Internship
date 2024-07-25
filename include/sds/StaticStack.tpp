@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ContIter.tpp"
-#include "StaticVector.tpp"
+#include "iter/ContIter.tpp"
+#include "sds/StaticVector.tpp"
 
 template<typename T, unsigned N>
 class StaticStack : public StaticVector<T, N>

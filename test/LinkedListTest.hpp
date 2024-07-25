@@ -1,8 +1,8 @@
 #pragma once
 
-#include "LinkedList.tpp"
-#include "Node.tpp"
-#include "ObjectPool.tpp"
+#include "sds/LinkedList.tpp"
+#include "sds/Node.tpp"
+#include "sds/ObjectPool.tpp"
 
 #include <gtest/gtest.h>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Bus.tpp"
-#include "BusAnalyzer.tpp"
-#include "BusGenerator.tpp"
+#include "exec/BusAnalyzer.tpp"
+#include "exec/BusGenerator.tpp"
+#include "util/Bus.tpp"
 
 #include <gtest/gtest.h>
 

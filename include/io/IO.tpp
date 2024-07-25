@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Bus.tpp"
-#include "LinkedList.tpp"
-#include "NodeIter.tpp"
-#include "StaticStack.tpp"
-#include "StaticVector.tpp"
-#include "Timer.tpp"
+#include "iter/NodeIter.tpp"
+#include "sds/LinkedList.tpp"
+#include "sds/StaticStack.tpp"
+#include "sds/StaticVector.tpp"
+#include "util/Bus.tpp"
+#include "util/Timer.tpp"
 
 #include <complex>
 #include <cstdio>

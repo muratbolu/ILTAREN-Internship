@@ -1,10 +1,10 @@
 #pragma once
 
-#include "IO.tpp"
-#include "LinkedList.tpp"
-#include "Node.tpp"
-#include "ObjectPool.tpp"
-#include "Timer.tpp"
+#include "io/IO.tpp"
+#include "sds/LinkedList.tpp"
+#include "sds/Node.tpp"
+#include "sds/ObjectPool.tpp"
+#include "util/Timer.tpp"
 
 #include <cstdio>
 #include <cstdlib>

@@ -1,5 +1,10 @@
 #include "StaticVectorTest.hpp"
 
+#include "iter/ContIter.tpp"
+#include "sds/StaticVector.tpp"
+
+#include <gtest/gtest.h>
+
 TEST_F(StaticVectorTest, Initialization)
 {
     EXPECT_EQ(vec1.size(), 3);

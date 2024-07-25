@@ -1,5 +1,9 @@
 #include "ContIterTest.hpp"
 
+#include "iter/ContIter.tpp"
+
+#include <gtest/gtest.h>
+
 TEST_F(ContIterTest, Initialization)
 {
     EXPECT_EQ(it1, it2);

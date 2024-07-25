@@ -1,8 +1,9 @@
 #pragma once
 
-#include "IObjectPool.tpp"
-#include "Node.tpp"
-#include "NodeIter.tpp"
+#include "iter/NodeIter.tpp"
+#include "sds/IObjectPool.tpp"
+#include "sds/Node.tpp"
+
 
 template<typename T>
 class LinkedList

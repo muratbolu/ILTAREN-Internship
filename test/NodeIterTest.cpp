@@ -1,5 +1,9 @@
 #include "NodeIterTest.hpp"
 
+#include "iter/NodeIter.tpp"
+
+#include <gtest/gtest.h>
+
 TEST_F(NodeIterTest, Initialization)
 {
     ASSERT_TRUE(ll.pushBack(1));

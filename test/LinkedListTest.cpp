@@ -1,5 +1,8 @@
 #include "LinkedListTest.hpp"
 
+#include "sds/LinkedList.tpp"
+
+#include <gtest/gtest.h>
 #include <utility>
 
 TEST_F(LinkedListTest, Initialization)

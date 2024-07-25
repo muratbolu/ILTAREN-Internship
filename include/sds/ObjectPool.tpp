@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IObjectPool.tpp"
-#include "StaticVector.tpp"
+#include "sds/IObjectPool.tpp"
+#include "sds/StaticVector.tpp"
 
 template<typename T, unsigned N>
 class ObjectPool : public IObjectPool<T>

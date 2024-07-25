@@ -1,5 +1,9 @@
 #include "NodeTest.hpp"
 
+#include "sds/Node.tpp"
+
+#include <gtest/gtest.h>
+
 TEST_F(NodeTest, Initialization)
 {
     EXPECT_EQ(n1.data(), 0);
