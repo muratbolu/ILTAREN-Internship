@@ -148,14 +148,21 @@ private:
         std::srand(std::time(nullptr));
         for (unsigned i { 0 }; i < mNumofBuses;)
         {
-            unsigned maxNumber { 60 };
-            unsigned minNumber { 1 };
-            unsigned randNum1 { static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber };
+            constexpr unsigned maxNumber { 60 };
+            constexpr unsigned minNumber { 1 };
+
+            // Pick a random number between 1 and 60.
+            unsigned randNum1 { std::rand() % (maxNumber + 1 - minNumber) + minNumber };
+            // Set the second number to be the same as first.
             unsigned randNum2 { randNum1 };
+
+            // %50 chance to have an alternating period.
             if (std::rand() % 2)
             {
-                randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
+                // Change the second number to be a different number.
+                randNum2 = std::rand() % (maxNumber + 1 - minNumber) + minNumber;
             }
+
             bool isValid { true };
             if (randNum1 == randNum2 && randNum1 + randNum2 > mTotalDuration.getDuration())
             {
@@ -165,19 +172,6 @@ private:
             {
                 isValid = false;
             }
-            /*
-            else
-            {
-                for (auto&& p : mPeriods)
-                {
-                    if (randNum1 + randNum2 == p.getFirst() + p.getSecond())
-                    {
-                        isValid = false;
-                        break;
-                    }
-                }
-            }
-            */
             if (isValid)
             {
                 if (randNum1 == randNum2)

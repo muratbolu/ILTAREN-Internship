@@ -205,7 +205,7 @@ public:
                         }
                         assert(i >= j);
                         assert(i - j != j);
-                        return { j, i - j };
+                        return Bus { j, i - j };
                     }
                 }
             }

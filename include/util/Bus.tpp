@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Timer.tpp"
+
 #include <cassert>
 #include <compare>
 #include <utility>
@@ -8,21 +10,36 @@
 class Bus
 {
 public:
-    using ConstantPeriod = unsigned;
-    using AlternatingPeriod = std::pair<unsigned, unsigned>;
+    using ConstantPeriod = timer::Duration;
+    using AlternatingPeriod = std::pair<ConstantPeriod, ConstantPeriod>;
     using Period = std::variant<ConstantPeriod, AlternatingPeriod>;
 
     constexpr explicit Bus(unsigned i = 0) noexcept :
-        mPeriod { i }
+        mPeriod { ConstantPeriod { i } }
     {
         assert(std::holds_alternative<ConstantPeriod>(mPeriod));
     }
 
     constexpr Bus(unsigned i, unsigned j) noexcept :
-        mPeriod { std::make_pair(i, j) }
+        mPeriod { std::make_pair(ConstantPeriod { i }, ConstantPeriod { j }) }
     {
         assert(i != 0);
         assert(j != 0);
+        assert(i != j);
+        assert((std::holds_alternative<AlternatingPeriod>(mPeriod)));
+    }
+
+    constexpr explicit Bus(ConstantPeriod i) noexcept :
+        mPeriod { i }
+    {
+        assert(std::holds_alternative<ConstantPeriod>(mPeriod));
+    }
+
+    constexpr Bus(ConstantPeriod i, ConstantPeriod j) noexcept :
+        mPeriod { std::make_pair(i, j) }
+    {
+        assert(i.getDuration() != 0);
+        assert(j.getDuration() != 0);
         assert(i != j);
         assert((std::holds_alternative<AlternatingPeriod>(mPeriod)));
     }
@@ -37,11 +54,11 @@ public:
     {
         if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *c;
+            return c->getDuration();
         }
         if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return a->first;
+            return a->first.getDuration();
         }
         return 0;
     }
@@ -50,11 +67,11 @@ public:
     {
         if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *c;
+            return c->getDuration();
         }
         if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return a->second;
+            return a->second.getDuration();
         }
         return 0;
     }
@@ -63,25 +80,25 @@ public:
     {
         if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *c + *c;
+            return c->getDuration() + c->getDuration();
         }
         if (const auto* a { std::get_if<AlternatingPeriod>(&mPeriod) })
         {
-            return a->first + a->second;
+            return a->first.getDuration() + a->second.getDuration();
         }
         return 0;
     }
 
     [[nodiscard]] constexpr bool isAlternating() const noexcept
     {
-        return std::holds_alternative<std::pair<unsigned, unsigned>>(mPeriod);
+        return std::holds_alternative<std::pair<ConstantPeriod, ConstantPeriod>>(mPeriod);
     }
 
     [[nodiscard]] constexpr bool isValid() const noexcept
     {
         if (const auto* c { std::get_if<ConstantPeriod>(&mPeriod) })
         {
-            return *c != 0;
+            return *c != ConstantPeriod { 0 };
         }
         return true;
     }

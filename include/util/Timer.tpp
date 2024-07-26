@@ -39,6 +39,24 @@ public:
         return lhs;
     }
 
+    constexpr Duration& operator*=(unsigned dur) noexcept
+    {
+        multiply(dur);
+        return *this;
+    }
+
+    constexpr Duration& operator*=(const Duration& dur) noexcept
+    {
+        multiply(dur);
+        return *this;
+    }
+
+    constexpr friend Duration operator*(Duration lhs, const Duration& rhs) noexcept
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+
     // operator!= is automatically generated
     constexpr bool operator==(const Duration&) const noexcept = default;
     // operators <, <=, >, >=  are automatically generated
@@ -54,6 +72,16 @@ private:
     constexpr void add(const Duration& dur) noexcept
     {
         mDur += dur.mDur;
+    }
+
+    constexpr void multiply(unsigned dur) noexcept
+    {
+        mDur *= dur;
+    }
+
+    constexpr void multiply(const Duration& dur) noexcept
+    {
+        mDur *= dur.mDur;
     }
 };
 
