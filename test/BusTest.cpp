@@ -1,10 +1,15 @@
 #include "BusTest.hpp"
 
+#include "exec/BusAnalyzer.tpp"
+#include "exec/BusGenerator.tpp"
 #include "io/IO.tpp"
+#include "sds/LinkedList.tpp"
+#include "sds/StaticStack.tpp"
 #include "util/Bus.tpp"
 
 #include <cstdio>
 #include <gtest/gtest.h>
+#include <optional>
 
 TEST_F(BusTest, Initialization)
 {
@@ -63,90 +68,120 @@ TEST_F(BusTest, Equality)
 
 TEST_F(BusTest, OneBusSixHourCase)
 {
-    ll1 = generateInput("1", "12:00", "18:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("1", "12:00", "18:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }
 
 TEST_F(BusTest, TwoBusesThreeHourCase)
 {
-    ll1 = generateInput("2", "20:00", "23:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("2", "20:00", "23:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }
 
 TEST_F(BusTest, TwoBusesOneHourCase)
 {
-    ll1 = generateInput("2", "00:00", "01:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("2", "00:00", "01:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }
 
 TEST_F(BusTest, FiveBusesFiveHourCase)
 {
-    ll1 = generateInput("5", "10:00", "15:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("5", "10:00", "15:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }
 
 TEST_F(BusTest, TenBusesTwoHourCase)
 {
-    ll1 = generateInput("10", "11:00", "13:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("10", "11:00", "13:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }
 
 TEST_F(BusTest, TwentyBusesOneHourCase)
 {
-    ll1 = generateInput("20", "11:00", "12:00");
-    ASSERT_TRUE(ll1 != nullptr);
-    ll2 = analyzeInput();
-    ASSERT_TRUE(ll2 != nullptr);
-    ll1->sort();
-    ll2->sort();
-    EXPECT_EQ(*ll1, *ll2);
-    io::print(stdout, *ll1);
+    std::optional<BusGenerator> bg { getGenerator("20", "11:00", "12:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
     fputc('\n', stdout);
-    io::print(stdout, *ll2);
+    io::print(stdout, ll2);
     fputc('\n', stdout);
 }

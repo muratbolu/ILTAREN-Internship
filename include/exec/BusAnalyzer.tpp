@@ -1,9 +1,6 @@
 #pragma once
 
 #include "io/IO.tpp"
-#include "sds/LinkedList.tpp"
-#include "sds/Node.tpp"
-#include "sds/ObjectPool.tpp"
 #include "sds/StaticStack.tpp"
 #include "util/Bus.tpp"
 #include "util/Timer.tpp"
@@ -14,11 +11,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 #include <utility>
-#include <variant>
 
 #define MAX_LINE_LEN 64
-#define BP_POOL_SIZE 400
+
+#ifndef BUS_POOL_SIZE
+#define BUS_POOL_SIZE 500
+#endif
+
 #define MAX_SAMPLES 2000
 
 #define IS_POW_TWO(x) (((x) & ((x) - 1)) == 0)
@@ -28,7 +29,14 @@ class BusAnalyzer
     using Time = timer::Time;
     using Dur = timer::Duration;
 public:
-    constexpr static BusAnalyzer* create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
+    constexpr BusAnalyzer() noexcept = delete;
+    constexpr ~BusAnalyzer() noexcept = default;
+    constexpr BusAnalyzer(const BusAnalyzer&) noexcept = delete;
+    constexpr BusAnalyzer(BusAnalyzer&&) noexcept = default;
+    constexpr BusAnalyzer& operator=(const BusAnalyzer&) noexcept = delete;
+    constexpr BusAnalyzer& operator=(BusAnalyzer&&) noexcept = default;
+
+    constexpr static std::optional<BusAnalyzer> create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 2)
         {
@@ -37,15 +45,15 @@ public:
             {
                 perror("Invalid argument number");
             }
-            return nullptr;
+            return std::nullopt;
         }
         FILE* fr = fopen(argv[1], "r");   // NOLINT
         if (fr == nullptr)
         {
             perror("Could not open file");
-            return nullptr;
+            return std::nullopt;
         }
-        return new BusAnalyzer { fr, stdout, samplingPeriod };
+        return std::make_optional<BusAnalyzer>({ fr, stdout, samplingPeriod });
     }
 
     void getSamples() noexcept
@@ -54,17 +62,17 @@ public:
         for (;;)
         {
             mLines.pushBack(StaticStack<char, MAX_LINE_LEN> {});
-            StaticStack<char, MAX_LINE_LEN>* back { mLines.back() };
+            StaticStack<char, MAX_LINE_LEN>& back { mLines.back() };
             int c { EOF };
             for (;;)
             {
                 c = fgetc(istream);
                 if (c == EOF || c == '\n')
                 {
-                    back->pushBack('\0');
+                    back.pushBack('\0');
                     break;
                 }
-                back->pushBack(static_cast<char>(c));
+                back.pushBack(static_cast<char>(c));
             }
             if (c == EOF)
             {
@@ -76,10 +84,10 @@ public:
 
     void parseSamples() noexcept
     {
-        assert(strlen(mLines.front()->data()) == 5);
-        Time begin { mLines.front()->data() };
-        assert(strlen(mLines.back()->data()) > 6);
-        Time end { mLines.back()->data() };
+        assert(strlen(mLines.front().data()) == 5);
+        Time begin { mLines.front().data() };
+        assert(strlen(mLines.back().data()) > 6);
+        Time end { mLines.back().data() };
         for (Dur d { mSP }; begin + d <= end; d += mSP)
         {
             mSamples.pushBack(0);
@@ -107,28 +115,7 @@ public:
             {
                 break;
             }
-            if (!b.isAlternating())
-            {
-                bool isValid { true };
-                for (auto&& f : mFreqs)
-                {
-                    /*
-                    if (f.sum() == b.getFirst())
-                    {
-                        isValid = false;
-                        break;
-                    }
-                    */
-                }
-                if (isValid)
-                {
-                    mFreqs.pushBack(b * mSP);
-                }
-            }
-            else
-            {
-                mFreqs.pushBack(b * mSP);
-            }
+            mFreqs.pushBack(b * mSP);
             for (unsigned i { b.getFirst() }; i < samples.size(); i += b.getFirst())
             {
                 if (i == 0)
@@ -311,9 +298,9 @@ public:
     }
     */
 
-    [[nodiscard]] constexpr LinkedList<Bus>* getPeriods() noexcept
+    [[nodiscard]] constexpr StaticStack<Bus, BUS_POOL_SIZE>& getPeriods() noexcept
     {
-        return &mFreqs;
+        return mFreqs;
     }
 private:
     // Input and output files
@@ -321,14 +308,12 @@ private:
     // Sampling period
     unsigned mSP;
 
-    ObjectPool<Node<StaticStack<char, MAX_LINE_LEN>>, BP_POOL_SIZE> mLinePool;
     // Input lines
-    LinkedList<StaticStack<char, MAX_LINE_LEN>> mLines;
+    StaticStack<StaticStack<char, MAX_LINE_LEN>, BUS_POOL_SIZE> mLines;
 
     StaticStack<unsigned, MAX_SAMPLES> mSamples;
 
-    ObjectPool<Node<Bus>, BP_POOL_SIZE> mFreqPool;
-    LinkedList<Bus> mFreqs;
+    StaticStack<Bus, BUS_POOL_SIZE> mFreqs;
 
     // StaticStack<std::complex<float>, MAX_SAMPLES> mComplexSamples;
     // StaticStack<std::complex<float>, MAX_SAMPLES> mFourierTransform;
@@ -338,9 +323,7 @@ private:
     constexpr BusAnalyzer(FILE* is, FILE* os, unsigned samplingPeriod) noexcept :
         istream { is },
         ostream { os },
-        mSP { samplingPeriod },
-        mLines { &mLinePool },
-        mFreqs { &mFreqPool }
+        mSP { samplingPeriod }
     {
     }
 };

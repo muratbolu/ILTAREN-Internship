@@ -1,16 +1,17 @@
 #include "exec/BusGenerator.tpp"
 
 #include <cstdlib>
+#include <optional>
 
 constexpr static unsigned samplingPeriod { 1 };
 
 int main(int argc, const char* argv[])
 {
-    BusGenerator* bs { BusGenerator::create(argc, argv, samplingPeriod) };
-    if (bs == nullptr)
+    std::optional<BusGenerator> bg { BusGenerator::create(argc, argv, samplingPeriod) };
+    if (!bg.has_value())
     {
         return EXIT_FAILURE;
     }
-    bs->printArrivals();
+    bg->printArrivals();
     return 0;
 }

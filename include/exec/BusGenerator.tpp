@@ -1,9 +1,11 @@
 #pragma once
 
+#include "exec/BusGenerator.tpp"
 #include "io/IO.tpp"
 #include "sds/LinkedList.tpp"
 #include "sds/Node.tpp"
 #include "sds/ObjectPool.tpp"
+#include "sds/StaticStack.tpp"
 #include "util/Bus.tpp"
 #include "util/Timer.tpp"
 
@@ -11,9 +13,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <utility>
+#include <optional>
 
-#define BS_POOL_SIZE 500
+#ifndef BUS_POOL_SIZE
+#define BUS_POOL_SIZE 500
+#endif
 
 class BusGenerator
 {
@@ -27,7 +31,7 @@ public:
     constexpr BusGenerator& operator=(const BusGenerator&) noexcept = delete;
     constexpr BusGenerator& operator=(BusGenerator&&) noexcept = default;
 
-    constexpr static BusGenerator* create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
+    constexpr static std::optional<BusGenerator> create(int argc, const char* const argv[], unsigned samplingPeriod) noexcept
     {
         if (argc != 5)
         {
@@ -38,14 +42,14 @@ public:
             {
                 perror("Invalid argument number");
             }
-            return nullptr;
+            return std::nullopt;
         }
         // NOLINTBEGIN
         FILE* fw = fopen(argv[1], "w");
         if (fw == nullptr)
         {
             perror("Could not open file");
-            return nullptr;
+            return std::nullopt;
         }
         unsigned numOfBuses { static_cast<unsigned>(atoi(argv[2])) };
         if (strlen(argv[3]) != 5 || strlen(argv[4]) != 5)
@@ -56,7 +60,7 @@ public:
                 perror("Invalid timestamps");
             }
             fclose(fw);
-            return nullptr;
+            return std::nullopt;
         }
         Time begin { Time { argv[3] } };
         Time end { Time { argv[4] } };
@@ -69,9 +73,9 @@ public:
                 perror("Invalid timestamps");
             }
             fclose(fw);
-            return nullptr;
+            return std::nullopt;
         }
-        return new BusGenerator { fw, numOfBuses, begin, end, samplingPeriod };
+        return std::make_optional<BusGenerator>(BusGenerator { fw, numOfBuses, begin, end, samplingPeriod });
     }
 
     void printSchedule(FILE* os = stdout) noexcept
@@ -91,7 +95,7 @@ public:
     }
 
     // TODO: given the output of this func, deduce the periods of BusSchedulees
-    void printArrivals() const noexcept
+    void printArrivals() noexcept
     {
         io::print(ostream, mBeginTime);
         fputc('\n', ostream);
@@ -121,9 +125,9 @@ public:
         fflush(ostream);
     }
 
-    [[nodiscard]] constexpr LinkedList<Bus>* getPeriods() noexcept
+    [[nodiscard]] constexpr StaticStack<Bus, BUS_POOL_SIZE>& getPeriods() noexcept
     {
-        return &mPeriods;
+        return mPeriods;
     }
 private:
     FILE* ostream { nullptr };
@@ -131,8 +135,7 @@ private:
     Time mBeginTime, mEndTime;
     Dur mTotalDuration;
     unsigned mSamplingPeriod;
-    ObjectPool<Node<Bus>, BS_POOL_SIZE> mPool;
-    LinkedList<Bus> mPeriods;
+    StaticStack<Bus, BUS_POOL_SIZE> mPeriods;
 
     // Private constructor
     BusGenerator(FILE* fw, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
@@ -141,8 +144,7 @@ private:
         mBeginTime { begin },
         mEndTime { end },
         mTotalDuration { end - begin },
-        mSamplingPeriod { samplingPeriod },
-        mPeriods { &mPool }
+        mSamplingPeriod { samplingPeriod }
     {
         // Assign periods
         std::srand(std::time(nullptr));

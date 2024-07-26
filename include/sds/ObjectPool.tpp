@@ -13,9 +13,9 @@ public:
     }
 
     constexpr ~ObjectPool() noexcept override = default;
-    constexpr ObjectPool(const ObjectPool&) noexcept = default;
+    constexpr ObjectPool(const ObjectPool&) noexcept = delete;
     constexpr ObjectPool(ObjectPool&&) noexcept = default;
-    constexpr ObjectPool& operator=(const ObjectPool&) noexcept = default;
+    constexpr ObjectPool& operator=(const ObjectPool&) noexcept = delete;
     constexpr ObjectPool& operator=(ObjectPool&&) noexcept = default;
 
     constexpr T* allocate() noexcept override

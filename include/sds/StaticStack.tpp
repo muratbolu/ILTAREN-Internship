@@ -108,6 +108,23 @@ public:
         return this->at(--mCurrIndex);
     }
 
+    constexpr void sort() noexcept
+    {
+        if (mCurrIndex <= 1)
+        {
+            return;
+        }
+        for (unsigned i { 0 }; i < mCurrIndex; ++i)
+        {
+            for (unsigned j { i }; j > 0 && this->at(j - 1) > this->at(j); --j)
+            {
+                T temp { this->at(j - 1) };
+                this->at(j - 1) = this->at(j);
+                this->at(j) = temp;
+            }
+        }
+    }
+
     unsigned mMaxIndex { 0 };
 private:
     unsigned mCurrIndex { 0 };

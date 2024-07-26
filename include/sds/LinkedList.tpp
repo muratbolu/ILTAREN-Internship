@@ -58,6 +58,7 @@ public:
         return *this;
     }
 
+    // Totally buggy and results in double delete.
     constexpr LinkedList& operator=(LinkedList&& obj) noexcept
     {
         deleteAll(mHead);
