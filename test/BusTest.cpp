@@ -3,8 +3,6 @@
 #include "exec/BusAnalyzer.tpp"
 #include "exec/BusGenerator.tpp"
 #include "io/IO.tpp"
-#include "sds/LinkedList.tpp"
-#include "sds/StaticStack.tpp"
 #include "util/Bus.tpp"
 
 #include <cstdio>

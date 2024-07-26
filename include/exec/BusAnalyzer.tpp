@@ -166,6 +166,11 @@ public:
         {
             for (unsigned j { 1 }; j <= i; ++j)
             {
+                if (i == 17 && j == 4)
+                {
+                    // TODO: debug
+                    puts("hello");
+                }
                 if (s[j] > 0)
                 {
                     bool isValid { true };
