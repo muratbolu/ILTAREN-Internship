@@ -5,6 +5,7 @@
 #include "sds/LinkedList.tpp"
 #include "util/Bus.tpp"
 
+#include <cstdio>
 #include <gtest/gtest.h>
 
 constexpr const char* const fileName { "./temp.txt" };
@@ -24,6 +25,8 @@ protected:
             return nullptr;
         }
         bg->printArrivals();
+        bg->printSchedule();
+        fputc('\n', stdout);
         return bg->getPeriods();
     }
 

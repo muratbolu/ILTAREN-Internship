@@ -112,11 +112,13 @@ public:
                 bool isValid { true };
                 for (auto&& f : mFreqs)
                 {
+                    /*
                     if (f.sum() == b.getFirst())
                     {
                         isValid = false;
                         break;
                     }
+                    */
                 }
                 if (isValid)
                 {
@@ -138,7 +140,18 @@ public:
                 i += b.getSecond();
                 if (i < samples.size())
                 {
-                    assert(samples[i] > 0);
+                    if (samples[i] == 0)
+                    {
+                        io::print(stdout, samples);
+                        fputc('\n', stdout);
+                        io::print(stdout, i);
+                        fputc('\n', stdout);
+                        io::print(stdout, b);
+                        fputc('\n', stdout);
+                        io::print(stdout, mFreqs);
+                        fputc('\n', stdout);
+                        assert(0 && "samples[i] > 0 failed");
+                    }
                     --samples[i];
                 }
             }
@@ -164,39 +177,36 @@ public:
         // j := offset
         for (unsigned i { 1 }; i <= s.size() / 2; ++i)
         {
-            unsigned offset { 0 };
             for (unsigned j { 1 }; j <= i; ++j)
             {
                 if (s[j] > 0)
                 {
-                    offset = j;
-                    break;
-                }
-            }
-            if (offset == 0)
-            {
-                continue;
-            }
-            bool isValid { true };
-            for (unsigned j { offset }; j < s.size(); j += i)
-            {
-                if (s[j] == 0)
-                {
-                    isValid = false;
-                    break;
-                }
-            }
-            if (isValid)
-            {
-                // TODO: refactor
-                if (offset == i)
-                {
-                    return Bus { i };
-                }
-                else
-                {
-                    assert(i >= offset);
-                    return { offset, i - offset };
+                    bool isValid { true };
+                    for (unsigned k { j }; k < s.size(); k += j)
+                    {
+                        if (s[k] == 0)
+                        {
+                            isValid = false;
+                            break;
+                        }
+                        k += i - j;
+                        if (k < s.size() && s[k] == 0)
+                        {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    if (isValid)
+                    {
+                        // TODO: refactor
+                        if (j == i)
+                        {
+                            return Bus { i };
+                        }
+                        assert(i >= j);
+                        assert(i - j != j);
+                        return { j, i - j };
+                    }
                 }
             }
         }

@@ -74,23 +74,27 @@ public:
         return new BusGenerator { fw, numOfBuses, begin, end, samplingPeriod };
     }
 
-    void printSchedule() const noexcept
+    void printSchedule(FILE* os = stdout) noexcept
     {
-        fputs("Buses: ", input);
-        io::print(input, mNumofBuses);
-        fputc('\n', input);
-        io::print(input, mPeriods);
-        fputs("begin: ", input);
-        io::print(input, mBeginTime);
-        fputs("  end: ", input);
-        io::print(input, mEndTime);
+        fputs("Buses: ", os);
+        io::print(os, mNumofBuses);
+        fputc('\n', os);
+        mPeriods.sort();
+        io::print(os, mPeriods);
+        fputc('\n', os);
+        fputs("begin: ", os);
+        io::print(os, mBeginTime);
+        fputc('\n', os);
+        fputs("  end: ", os);
+        io::print(os, mEndTime);
+        fputc('\n', os);
     }
 
     // TODO: given the output of this func, deduce the periods of BusSchedulees
     void printArrivals() const noexcept
     {
-        io::print(input, mBeginTime);
-        fputc('\n', input);
+        io::print(ostream, mBeginTime);
+        fputc('\n', ostream);
         for (Dur d { mSamplingPeriod }; mBeginTime + d <= mEndTime; d += mSamplingPeriod)
         {
             unsigned num { 0 };
@@ -108,13 +112,13 @@ public:
             }
             if (num > 0)
             {
-                io::print(input, mBeginTime + d);
-                fputc(' ', input);
-                io::print(input, num);
-                fputc('\n', input);
+                io::print(ostream, mBeginTime + d);
+                fputc(' ', ostream);
+                io::print(ostream, num);
+                fputc('\n', ostream);
             }
         }
-        fflush(input);
+        fflush(ostream);
     }
 
     [[nodiscard]] constexpr LinkedList<Bus>* getPeriods() noexcept
@@ -122,7 +126,7 @@ public:
         return &mPeriods;
     }
 private:
-    FILE* input { nullptr };
+    FILE* ostream { nullptr };
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
     Dur mTotalDuration;
@@ -132,7 +136,7 @@ private:
 
     // Private constructor
     BusGenerator(FILE* fw, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
-        input { fw },
+        ostream { fw },
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },
@@ -153,7 +157,6 @@ private:
                 randNum2 = static_cast<unsigned>(std::rand()) % (maxNumber + 1 - minNumber) + minNumber;
             }
             bool isValid { true };
-            /*
             if (randNum1 == randNum2 && randNum1 + randNum2 > mTotalDuration.getDuration())
             {
                 isValid = false;
@@ -162,12 +165,12 @@ private:
             {
                 isValid = false;
             }
+            /*
             else
             {
                 for (auto&& p : mPeriods)
                 {
-                    if (p.first == randNum1 || p.first == randNum2 || p.second == randNum1 || p.second == randNum2 ||
-                        p.first + p.second == randNum1 || p.first + p.second == randNum2 || p.first + p.second == randNum1 + randNum2)
+                    if (randNum1 + randNum2 == p.getFirst() + p.getSecond())
                     {
                         isValid = false;
                         break;
