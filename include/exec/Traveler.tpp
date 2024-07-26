@@ -92,9 +92,9 @@ public:
             return false;
         }
 
-        for (int c { EOF }; char& i : mBuffer)
+        for (char& i : mBuffer)
         {
-            c = fgetc(fp);
+            int c = fgetc(fp);
             if (c == EOF)
             {
                 break;

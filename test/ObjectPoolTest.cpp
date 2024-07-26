@@ -60,10 +60,12 @@ TEST_F(ObjectPoolTest, VacantDeallocation)
 TEST_F(ObjectPoolTest, AllocateAndDeallocate)
 {
     int* ptr1 = p1.allocate();
-    const int* ptr2 = p1.allocate();
+    int* ptr2 = p1.allocate();
+    *ptr2 = 5;
     p1.deallocate(ptr1);
     const int* ptr3 = p1.allocate();
     EXPECT_EQ(ptr1, ptr3);
+    EXPECT_EQ(*ptr2, 5);
 }
 
 TEST_F(ObjectPoolTest, AllocateAll)
