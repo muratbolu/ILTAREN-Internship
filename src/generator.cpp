@@ -13,5 +13,6 @@ int main(int argc, const char* argv[])
         return EXIT_FAILURE;
     }
     bg->printArrivals();
+    bg->printInfo();
     return 0;
 }

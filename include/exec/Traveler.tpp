@@ -61,31 +61,43 @@ public:
 
     Traveler(int argc, const char* argv[]) noexcept
     {
-        if (argc != 5)
+        if (argc < 2)
         {
-            int rc = fputs("Provide exactly four arguments: input file, start city "
-                           "code, X, and Y.\n",
+            int rc = fputs("Provide at least one argument: input file.\n"
+                           "Providing one argument tries to find the longest route "
+                           "starting from Ankara with the lowest X + Y^2 value.\n"
+                           "Providing four arguments: input file, starting city code, X, and Y;"
+                           "tries to find the longest route with the given constaints.",
                            stderr);
             if (rc == EOF)
             {
                 perror("Invalid argument number");
             }
         }
-        else
+        // NOLINTBEGIN
+        else if (argc == 2)
+        {
+            mStartCity = 5;   // Ankara (with zero-indexing)
+            getInput(argv[1]);
+            parseInput();
+            searchBestPath();
+        }
+        else if (argc == 5)
         {
             mStartCity = static_cast<unsigned>(atoi(argv[2]) - 1);
             mX = static_cast<unsigned>(atoi(argv[3]));
             mY = static_cast<unsigned>(atoi(argv[4]));
             getInput(argv[1]);
             parseInput();
-            searchBestPath();
+            travel();
         }
+        // NOLINTEND
     }
 
     // returns false if something goes wrong but we don't use it
     static bool getInput(const char arg[]) noexcept
     {
-        FILE* fp = fopen(arg, "r");
+        FILE* fp = fopen(arg, "r");   // NOLINT
         if (fp == nullptr)
         {
             perror("Could not open file");
@@ -101,7 +113,7 @@ public:
             }
             i = static_cast<char>(c);
         }
-
+        // NOLINTBEGIN
         if (ferror(fp))
         {
             perror("I/O error while reading file");
@@ -120,6 +132,7 @@ public:
         puts("No error and didn't reach EOF");
         fclose(fp);
         return false;
+        // NOLINTEND
     }
 
     // Assumes that the input is well-formed.
@@ -149,7 +162,7 @@ public:
                 break;
             }
 
-            switch (state)
+            switch (state)   // NOLINT
             {
             case SKIP_CODE : {
                 if (c == SEP)
@@ -197,6 +210,22 @@ public:
                 break;
             }
             }
+        }
+    }
+
+    // Zero-indexing for cities, 0 => ADANA, etc.
+    static void travel() noexcept
+    {
+        filterByRange(mFilteredAdjacencyMatrix, mAdjacencyMatrix);
+        visitableCities(mStartCity);   // writes to mBest
+        if (validator(mBestState.citiesStack))
+        {
+            printRoute(stdout);
+            printf("x: %u, y: %u\n\n", mX, mY);
+        }
+        else
+        {
+            puts("Invalid route");
         }
     }
 
@@ -272,9 +301,9 @@ public:
 #define I (i)
 #define J (j)
 #define Y (J)               // j = y
-#define FUNC(x) (2 * (x))   // f(x) = x^2
+#define FUNC(x) (2 * (x))   // f(x) = x^2 // NOLINT
 #define X (I - FUNC(Y))     // i = x + f(y)
-#define LIM 5000
+#define LIM 5000            // NOLINT
 
         static StaticStack<unsigned int, 81> cs;
         cs.pushBack(Traveler::mStartCity);
@@ -297,11 +326,7 @@ public:
                 {
                     continue;
                 }
-                if (Traveler::dfs(startState) < 81)
-                {
-                    continue;
-                }
-                Traveler::travel();
+                Traveler::visitableCities(Traveler::mStartCity);
                 if (Traveler::validator(Traveler::mBestState.citiesStack))
                 {
                     static unsigned currMax { 0 };
@@ -323,12 +348,6 @@ public:
                 }
             }
         }
-    }
-
-    // Zero-indexing for cities, 0 => ADANA, etc.
-    static void travel() noexcept
-    {
-        visitableCities(mStartCity);   // writes to mBest
     }
 
     /* Tries to find the longest path by brute force, caching previously
@@ -447,6 +466,7 @@ public:
         return reachable;
     }
 
+    // Returns true if the route is valid.
     [[nodiscard]] constexpr static bool validator(const StaticStack<unsigned, 81>& cs) noexcept
     {
         for (unsigned i { 0 }; i + 1 < cs.size(); ++i)

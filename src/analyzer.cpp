@@ -15,7 +15,6 @@ int main(int argc, const char* argv[])
     ba->getSamples();
     ba->parseSamples();
     ba->extractPeriods();
-    // bp->extendSamplesToPowOfTwo();
-    // bp->fastFourierTransform();
+    ba->printResult();
     return 0;
 }

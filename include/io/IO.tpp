@@ -62,11 +62,11 @@ void print(FILE* stream, const Bus& b) noexcept
 {
     if (b.isAlternating())
     {
-        fprintf(stream, "(%d, %d)", b.getFirst(), b.getSecond());
+        fprintf(stream, "Alternating periods: (%d, %d)", b.getFirst(), b.getSecond());
     }
     else
     {
-        fprintf(stream, "%d", b.getFirst());
+        fprintf(stream, "Constant period: %d", b.getFirst());
     }
 }
 

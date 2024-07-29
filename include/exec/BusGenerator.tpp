@@ -1,10 +1,6 @@
 #pragma once
 
-#include "exec/BusGenerator.tpp"
 #include "io/IO.tpp"
-#include "sds/LinkedList.tpp"
-#include "sds/Node.tpp"
-#include "sds/ObjectPool.tpp"
 #include "sds/StaticStack.tpp"
 #include "util/Bus.tpp"
 #include "util/Timer.tpp"
@@ -75,7 +71,8 @@ public:
             fclose(fw);
             return std::nullopt;
         }
-        return std::make_optional<BusGenerator>(BusGenerator { fw, numOfBuses, begin, end, samplingPeriod });
+        // Output to fw, info to stdout
+        return std::make_optional<BusGenerator>(BusGenerator { fw, stdout, numOfBuses, begin, end, samplingPeriod });
     }
 
     void printSchedule(FILE* os = stdout) noexcept
@@ -129,8 +126,18 @@ public:
     {
         return mPeriods;
     }
+
+    // Sorts mPeriods, not const!
+    void printInfo() noexcept
+    {
+        // sort from low to high
+        mPeriods.sort();
+        fprintf(infostream, "Number of periods generated: %d\n", mPeriods.size());
+        io::print(infostream, mPeriods);
+        fputc('\n', infostream);
+    }
 private:
-    FILE* ostream { nullptr };
+    FILE *ostream, *infostream;
     unsigned mNumofBuses;
     Time mBeginTime, mEndTime;
     Dur mTotalDuration;
@@ -138,8 +145,9 @@ private:
     StaticStack<Bus, BUS_POOL_SIZE> mPeriods;
 
     // Private constructor
-    BusGenerator(FILE* fw, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
+    BusGenerator(FILE* fw, FILE* fi, unsigned numOfBuses, Time begin, Time end, unsigned samplingPeriod) noexcept :
         ostream { fw },
+        infostream { fi },
         mNumofBuses { numOfBuses },
         mBeginTime { begin },
         mEndTime { end },
@@ -187,7 +195,5 @@ private:
                 ++i;
             }
         }
-        // io::print(stdout, mPeriods);
-        // fputc('\n', stdout);
     }
 };
