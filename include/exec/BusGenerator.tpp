@@ -147,8 +147,7 @@ private:
         mSamplingPeriod { samplingPeriod }
     {
         // Assign periods
-        // std::srand(std::time(nullptr));
-        std::srand(0);
+        std::srand(std::time(nullptr));
         for (unsigned i { 0 }; i < mNumofBuses;)
         {
             constexpr unsigned maxNumber { 60 };

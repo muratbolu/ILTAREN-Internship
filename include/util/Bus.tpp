@@ -127,7 +127,40 @@ public:
     constexpr friend bool operator==(const Bus&, const Bus&) noexcept = default;
 
     // operators <, <=, >, >=  are automatically generated
-    constexpr friend auto operator<=>(const Bus& lhs, const Bus& rhs) noexcept = default;
+    constexpr friend auto operator<=>(const Bus& lhs, const Bus& rhs) noexcept
+    {
+        unsigned lhsValue { lhs.sum() };
+        unsigned rhsValue { rhs.sum() };
+        if (!lhs.isAlternating())
+        {
+            lhsValue /= 2;
+        }
+        if (!rhs.isAlternating())
+        {
+            rhsValue /= 2;
+        }
+        // TODO: refactor, too ugly
+        if (lhsValue == rhsValue)
+        {
+            if (lhs.isAlternating() && rhs.isAlternating())
+            {
+                return lhs.getFirst() <=> rhs.getFirst();
+            }
+            if (!lhs.isAlternating() && rhs.isAlternating())
+            {
+                return std::strong_ordering::less;
+            }
+            if (lhs.isAlternating() && !rhs.isAlternating())
+            {
+                return std::strong_ordering::greater;
+            }
+            if (!lhs.isAlternating() && !rhs.isAlternating())
+            {
+                return std::strong_ordering::equal;
+            }
+        }
+        return lhsValue <=> rhsValue;
+    }
 private:
     Period mPeriod;
 };

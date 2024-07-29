@@ -164,9 +164,69 @@ TEST_F(BusTest, TenBusesTwoHourCase)
     fputc('\n', stdout);
 }
 
-TEST_F(BusTest, TwentyBusesOneHourCase)
+TEST_F(BusTest, TwentyBusesHalfHourCase)
 {
-    std::optional<BusGenerator> bg { getGenerator("20", "11:00", "12:00") };
+    std::optional<BusGenerator> bg { getGenerator("20", "11:00", "11:30") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
+    fputc('\n', stdout);
+    io::print(stdout, ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, FifteenBusesOneHourCase)
+{
+    std::optional<BusGenerator> bg { getGenerator("15", "11:00", "12:00") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
+    fputc('\n', stdout);
+    io::print(stdout, ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, TenBusesFortyFiveMinCase)
+{
+    std::optional<BusGenerator> bg { getGenerator("10", "12:00", "12:45") };
+    ASSERT_TRUE(bg.has_value());
+    BusStack ll1 { getInput(bg.value()) };
+
+    std::optional<BusAnalyzer> ba { getAnalyzer() };
+    ASSERT_TRUE(ba.has_value());
+    BusStack ll2 { getAnalysis(ba.value()) };
+
+    ll1.sort();
+    ll2.sort();
+    EXPECT_EQ(ll1, ll2);
+
+    io::print(stdout, ll1);
+    fputc('\n', stdout);
+    io::print(stdout, ll2);
+    fputc('\n', stdout);
+}
+
+TEST_F(BusTest, TwentyBusesSixHourCase)
+{
+    std::optional<BusGenerator> bg { getGenerator("20", "12:00", "18:00") };
     ASSERT_TRUE(bg.has_value());
     BusStack ll1 { getInput(bg.value()) };
 
