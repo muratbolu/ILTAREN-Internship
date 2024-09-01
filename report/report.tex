@@ -1,12 +1,123 @@
-\documentclass{article}
+\documentclass[12pt,a4paper]{article}
+\usepackage{fullpage}
+\usepackage{amsfonts, amsmath, pifont}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{float}
 
-\usepackage{lipsum}
+\usepackage{tkz-euclide}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.13}
+
+\usepackage{inconsolata}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=myStyle}
+
+% mathpazo must be above fontspec because we change the main font
+\usepackage{mathpazo}
+\usepackage{fontspec}
+\usepackage{inconsolata}
+\setmainfont{texgyrepagella}[
+Extension      =.otf,
+UprightFont    =*-regular,
+BoldFont       =*-bold,
+ItalicFont     =*-italic,
+BoldItalicFont =*-bolditalic,
+]
+\setmonofont{inconsolata}
+% Next two lines change \xi because it's really ugly in mathpazo!
+\DeclareSymbolFont{CMletters}{OML}{cmm}{m}{it}
+\DeclareMathSymbol{\xi}{\mathord}{CMletters}{"18}
 
 \title{Internship Report}
 \author{Murat Bolu}
 
 \begin{document}
 \maketitle
-Hello, World!
-\lipsum
+
+My internship at TÜBİTAK BİLGEM İLTAREN was from 1--29 July 2024 at the Ümitköy
+campus. My department was system administration software, and I completed the
+tasks in C++. My progress was monitored primarily by Emre Balcı and Murat
+Özdemiray.
+
+\section{File Organization}
+
+\section{Static Data Structures}
+
+I started the internship writing statically allocated data structures from
+scratch. Even though the C++ standard library provides some statically allocated
+data structures like \texttt{std::array}, my mentor requested I write them by
+myself and avoid using the standard library. Statically-allocated data
+structures are preferred in low-level applications for several reasons. First,
+they do not use \texttt{malloc} or \texttt{new}. These methods require an
+operating system or an equivalent program that will provide the necessary
+memory. These kinds of memory managers are not present in embedded applications
+and must be avoided. Second, they do not utilize the stack. While the stack may
+feel like an infinite memory source, stack overflow poses a significant risk for
+such applications. Statically allocated data structures allocate their memory at
+once while the program starts, and the stack is not utilized except for small
+memory allocations like \texttt{int}'s and pointers.
+
+\section{Traveling cities problem}
+
+In the first internship task, I was provided an XLS file containing the
+distances between each pair of provinces in Turkey. I exported that XLS file to
+a CSV file and did some very light preprocessing by hand. I removed the first
+two lines containing the title text and junk information. Only 81 lines
+containing the names of the provinces and the distances from that province,
+separated by semicolons, were left. I wrote a parser that imported that text
+file into a data structure in memory. Finally, I had an array of arrays, with
+size 81 times 81, containing the distances as a number.
+
+With this data, my task was to visit as many provinces as possible, given some
+constraints. The distances between provinces were not considered except to apply
+constraints. After the constraints were applied, the problem transformed into
+the longest simple path problem in an undirected, unweighted graph, with the
+goal of visiting most vertices.
+
+The longest simple path problem is finding the longest path in a graph without
+visiting any vertex more than once. It is an NP-Hard problem, and even the
+approximations are computationally complex. The best way to approach this
+problem is through heuristics. I have experimented with several heuristics and
+chosen to implement some of them.
+
+In our graph, all pairs of provinces are connected through an edge. These edges
+have a value corresponding to the distance. Naturally, some of these edges must
+be invalid since the longest simple path in a connected graph is trivial. They
+are invalidated through three constraints. The first is the starting province,
+and the second and the third are X and Y values. X value represents the
+distance, and Y value is the error margin of that distance. For example, if X is
+200 and Y is 50, only edges with values between 150 and 250 are valid.
+
+\section{Bus scheduling problem}
+
+\lstinputlisting[language=C++, caption=\texttt{file.cpp}]{../src/analyzer.cpp}
+
 \end{document}
