@@ -96,7 +96,7 @@ two lines containing the title text and junk information. Only 81 lines
 containing the names of the provinces and the distances from that province,
 separated by semicolons, were left. I wrote a parser that imported that text
 file into a data structure in memory. Finally, I had an array of arrays, with
-size 81 times 81, containing the distances as a number.
+size \(81 \times 81\), containing the distances as a number.
 
 \subsection{Problem description}
 
@@ -116,17 +116,18 @@ In our graph, all pairs of provinces are connected through an edge. These edges
 have a value corresponding to the distance. Naturally, some of these edges must
 be invalid since the longest simple path in a connected graph is trivial. Such
 edges are invalidated through three constraints. The first is the starting
-province, and the second and the third are X and Y values. X value represents
-the distance, and Y value is the error margin of that distance. For example, if
-X is 200 and Y is 50, only edges with values between 150 and 250 are valid.
+province, and the second and the third are \(X\) and \(Y\) values. \(X\) value
+represents the distance, and \(Y\) value is the error margin of that distance.
+For example, if \(X\) is 200 and \(Y\) is 50, only edges with values between 150
+and 250 are valid.
 
 As mentioned, when the constraints are applied, the problem turns into the
 longest simple path in an undirected, unweighted graph, starting from a
 particular vertex. To tackle this problem, I first implemented the brute-force
-algorithm. It tried to solve for the longest route, naively searching in the
-space of routes. I added printing so that when it found a longer route than the
-previous maximum, it printed the length of the route and the route itself. The
-brute-force algorithm wasn't efficient because there were many redundancies
+algorithm. It tried to solve for the longest route, na{\"\i}vely searching in
+the space of routes. I added printing so that when it found a longer route than
+the previous maximum, it printed the length of the route and the route itself.
+The brute-force algorithm wasn't efficient because there were many redundancies
 while searching. I looked for heuristics to improve my search algorithm.
 
 \subsection{Heuristics research}
@@ -135,6 +136,8 @@ I researched longest path heuristics and started reading the ``Solving the
 Longest Simple Path Problem with Heuristic Search'' paper by Yossi Cohen, Roni
 Stern, and Ariel Felner. It gave me some ideas, like caching the previous states
 and utilizing bi-connected components.
+
+\subsubsection{Caching}
 
 I implemented caching within the context of my problem's requirements. The
 algorithm searches the space of states and caches the best state seen so far.
@@ -147,6 +150,8 @@ boolean array. The state is skipped if the former is a subset of the latter. The
 reason is that if the best state contains all of the provinces visited by the
 current state, that branch is explored and can be skipped.
 
+\subsubsection{Bi-connected components}
+
 I tried implementing the bi-connected components heuristic. However, it didn't
 work as well as I expected. Even though I decided to scrap it, I'll explain it
 briefly here. The main idea is that a graph can be divided into bi-connected
@@ -157,19 +162,21 @@ component is the best idea before going to the next component.
 Block-cutpoint-tree can be constructed in linear time, so it isn't
 computationally costly.
 
-I also tried to implement other algorithms, like Kahn's Algorithm for
-topological sorting and Tarjan's Strongly Connected Components Algorithm. These
+\subsubsection{Other attempts}
+
+I also tried to implement other algorithms, like Kahn's algorithm for
+topological sorting and Tarjan's strongly connected components algorithm. These
 didn't work either because we could not consider our graph to be directed. In
 hindsight, it was intuitive that these approaches didn't work. If they worked,
 they would have been working in linear time, directly contradicting the
 NP-Hardness of the problem, assuming \(P \neq\ NP\).
 
-\subsection{Longest route with best X and Y values}
+\subsection{Longest route with best \(X\) and \(Y\) values}
 
-My last task for this problem was finding the longest route with the best X and
-Y values. The best can be defined arbitrarily, and I was requested to minimize
-the \(X + Y^2\) value. I also fixed the starting province to Ankara for this
-task. The algorithm searches starting from the smallest \(X + Y^2\) values,
+My last task for this problem was finding the longest route with the best \(X\)
+and \(Y\) values. The best can be defined arbitrarily, and I was requested to
+minimize the \(X + Y^2\) value. I also fixed the starting province to Ankara for
+this task. The algorithm searches starting from the smallest \(X + Y^2\) values,
 trying to find the longest path starting in Ankara. Since my algorithm takes too
 long to find the longest route, I applied a heuristic for early termination. If
 after a set number of iterations, say, ten thousand, the length of the best
@@ -177,6 +184,10 @@ route does not change, the algorithm exits. Early termination allows the
 algorithm to exit if it cannot find a better route.
 
 \section{Bus scheduling problem}
+
+\subsection{Problem description}
+
+\subsubsection{Generation}
 
 In the second internship task, I had to generate and analyze the data myself.
 Data generation is trivial; it is the timetable of a bus stop. Buses arrive at
@@ -190,6 +201,8 @@ of 5 and 7 minutes, it will arrive at \(5^\text{th}\), \(12^\text{th}\), and
 \(17^\text{th}\) minute marks until the ending time. It should be noted that
 only the number of buses that arrived at a specific time is known.
 
+\subsubsection{Analysis}
+
 The analysis of data is the trickier part. It aims to detangle the buses and
 identify them correctly. The problem would have been significantly more
 straightforward if the buses only had fixed periods. The algorithm would
@@ -201,6 +214,8 @@ alternating periods pose a problem in this case. Even though two alternating
 periods have a proper period, which is their sum, the algorithm cannot work by
 trying to find the highest frequency by observing the first data point. I had to
 have a different approach.
+
+\subsection{Algorithm}
 
 My approach identifies the periods from the smallest to the largest and can
 discern between alternating and constant periods. If the period is alternating,
@@ -219,6 +234,8 @@ only identify some buses for extensive test cases. This issue may be because
 some buses have the same alternating periods, which cannot be detangled
 correctly. I tried to augment my algorithm to detect these cases individually.
 However, I couldn't do it correctly.
+
+\subsection{Fourier Transform approach}
 
 I also tried to utilize some of the techniques I learned in my signal processing
 course at university. I implemented the fast Fourier transform algorithm and
